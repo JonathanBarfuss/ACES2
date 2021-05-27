@@ -79,7 +79,7 @@ namespace ACES.Controllers
         {
             if (ModelState.IsValid)
             {
-                course.InstructorId = int.Parse(Request.Cookies["UserID"]);
+                course.InstructorId = int.Parse(Request.Cookies["InstructorID"]);
                 _context.Add(course);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
