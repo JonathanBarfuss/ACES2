@@ -1,0 +1,7 @@
+{
+    "method": "namedfiles",
+    "namedfiles": [
+        "add.c",
+        "main.c"
+    ]
+}

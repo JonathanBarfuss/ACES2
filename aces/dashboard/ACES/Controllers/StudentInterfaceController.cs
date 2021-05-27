@@ -8,11 +8,19 @@ using Microsoft.EntityFrameworkCore;
 using ACES.Data;
 using ACES.Models;
 using System.Runtime.Serialization;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.IO;
+using Newtonsoft.Json; //Remove
+using System.Runtime.Serialization.Json;
+using System.Text;
+using System.Text.Json;
 
 namespace ACES.Controllers
 {
     public class StudentInterfaceController : Controller
     {
+        private static readonly HttpClient client = new HttpClient(); //TODO
         private readonly ACESContext _context;
 
         public StudentInterfaceController(ACESContext context)
@@ -30,7 +38,7 @@ namespace ACES.Controllers
             foreach (var enrollment in enrollments)
             {
                 List<Course> temp = await _context.Course.Where(x => x.Id == enrollment.CourseId).ToListAsync();
-                foreach (var course in temp)
+                foreach (var course in temp) // should we filter on active enrollement only? Why student needs to download inactive enr course assignment?
                 {
                     coursesList.Add(course);
                 }
@@ -168,5 +176,55 @@ namespace ACES.Controllers
         {
             return _context.Course.Any(e => e.Id == id);
         }
+
+      
+        [HttpGet]
+        public IActionResult DownloadAssignment(int id)
+        { 
+            //TODO: grab url for assign from Assignments table in db
+
+            using (var httpClient = new HttpClient())
+            {               
+
+                var objRequest = new HttpRequestMessage(HttpMethod.Post, "http://localhost:8080");//cs.weber.bradley...
+                
+                string strDirectory = "C:/Users/diliy/source/repos/ACES/aces/assignments/samples/c_asn";
+                objRequest.Content = new StringContent(System.Text.Json.JsonSerializer.Serialize(new PostContent() { directory = strDirectory, email = "joshuaabbott@mail.weber.edu", asn_no = "test_asn" }));
+                using (HttpResponseMessage objResponse = httpClient.SendAsync(objRequest).Result)
+                {
+                    if (objResponse.IsSuccessStatusCode)
+                    {
+                        var deserializedObject = JsonConvert.DeserializeObject<Root>(objResponse.Content.ReadAsStringAsync().Result);
+
+                        var net = new System.Net.WebClient();
+                        var data = net.DownloadData($"http://localhost:8080/{deserializedObject.zipped_directory}");
+                        var content = new System.IO.MemoryStream(data);
+                        var contentType = "APPLICATION/octet-stream";
+                        var fileName = "test_asnprepared.zip";
+                        return File(content, contentType, fileName);
+                    }
+                    else
+                    {
+                        return null;
+                        //TODO: pop-up user message                        
+                    }
+                }
+            }
+
+        }
+
+        
+    }  
+
+    public class Root
+    {
+        public string zipped_directory { get; set; }
+    }
+
+    public class PostContent
+    {
+        public string directory { get; set; }
+        public string email { get; set; }
+        public string asn_no { get; set; }
     }
 }
