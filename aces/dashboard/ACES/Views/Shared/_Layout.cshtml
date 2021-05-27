@@ -7,6 +7,15 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/shared.css" />
 </head>
+@{
+    bool isFaculty = false;
+    if (Context.Request.Cookies.ContainsKey("InstructorID"))
+    {
+        isFaculty = true;
+    }
+
+}
+
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white mb-3">
@@ -18,12 +27,21 @@
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
                     <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Courses" asp-action="Index">Courses</a>
-                        </li>
+                        @if (isFaculty)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Courses" asp-action="Index">Courses</a>
+                            </li>
+                        }
+                        @if (!isFaculty)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="StudentInterface" asp-action="Index">Home</a>
+                            </li>
+                        }
                         @*<li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Settings" asp-action="Index">Settings</a>
-                        </li>*@
+            <a class="nav-link" asp-area="" asp-controller="Settings" asp-action="Index">Settings</a>
+        </li>*@
                     </ul>
                 </div>
             </div>

@@ -23,7 +23,12 @@ namespace ACES.Controllers
         // GET: Courses
         public async Task<IActionResult> Index()
         {
-            var instructorId = int.Parse(Request.Cookies["UserID"]);
+            if (!Request.Cookies.ContainsKey("InstructorID"))
+            {
+                return RedirectToAction("Index", "Login");
+            }
+
+            var instructorId = int.Parse(Request.Cookies["InstructorID"]);
             var courses = await _context.Course.Where(x => x.InstructorId == instructorId).ToListAsync();
 
             // Get more info about courses (total number of assignments and students):

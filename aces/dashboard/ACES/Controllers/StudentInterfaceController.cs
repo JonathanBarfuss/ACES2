@@ -31,8 +31,12 @@ namespace ACES.Controllers
         // GET: StudentInterface
         public async Task<IActionResult> Index()
         {
-            // request.Cookies["UserID"]
-            var studentId = int.Parse(Request.Cookies["UserID"]);
+            if (!Request.Cookies.ContainsKey("StudentID"))
+            {
+                return RedirectToAction("Index", "Login");
+            }
+
+            var studentId = int.Parse(Request.Cookies["StudentID"]);
             var enrollments = await _context.Enrollment.Where(x => x.StudentId == studentId).ToListAsync();
             List<Course> coursesList = new List<Course>();
             foreach (var enrollment in enrollments)

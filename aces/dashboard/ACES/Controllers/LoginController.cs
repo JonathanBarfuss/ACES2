@@ -43,7 +43,11 @@ namespace ACES.Controllers
                 if (hashedPass.ToUpper() == instructor.Password.ToUpper())
                 {
                     // figure out cookies and all that jazz...
-                    Response.Cookies.Append("UserID", instructor.Id.ToString());
+                    if (Request.Cookies.ContainsKey("StudentID"))
+                    {
+                        Response.Cookies.Delete("StudentID");
+                    }
+                    Response.Cookies.Append("InstructorID", instructor.Id.ToString());
                     return RedirectToAction("Index", "Courses", new { instructorId = instructor.Id });
                 }
             } else if (student != null)
@@ -53,7 +57,11 @@ namespace ACES.Controllers
                 if (hashedPass.ToUpper() == student.Password.ToUpper())
                 {
                     // figure out cookies and all that jazz...
-                    Response.Cookies.Append("UserID", student.Id.ToString());
+                    if (Request.Cookies.ContainsKey("InstructorID"))
+                    {
+                        Response.Cookies.Delete("InstructorID");
+                    }
+                    Response.Cookies.Append("StudentID", student.Id.ToString());
                     return RedirectToAction("Index", "StudentInterface");
                 }
             }
