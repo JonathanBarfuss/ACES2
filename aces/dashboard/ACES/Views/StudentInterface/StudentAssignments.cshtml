@@ -22,7 +22,7 @@
                     @Html.DisplayFor(modelItem => item.Name)
                 </td>
                 <td>
-                    <a href="#">Download Assignment</a>
+                    <a asp-action="DownloadAssignment" asp-route-courseId="@item.Id">Download Assignment</a>
                 </td>
             </tr>
         }

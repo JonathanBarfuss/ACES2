@@ -224,6 +224,12 @@ namespace ACES.Controllers
             return RedirectToAction("CourseAssignments", "Courses", new { id = assignment.CourseId });
         }
 
+        public async Task<IActionResult> DownloadAssignment(int courseId)
+        {
+            var assignments = await _context.Assignment.Where(x => x.CourseId == courseId).ToListAsync();
+            return View(assignments);
+        }
+
         private bool AssignmentExists(int id)
         {
             return _context.Assignment.Any(e => e.Id == id);
