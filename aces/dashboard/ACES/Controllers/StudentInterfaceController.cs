@@ -38,11 +38,12 @@ namespace ACES.Controllers
 
             var studentId = int.Parse(Request.Cookies["StudentID"]);
             var enrollments = await _context.Enrollment.Where(x => x.StudentId == studentId).ToListAsync();
+            enrollments = enrollments.Where(x => x.Active == true).ToList();    //filter based on active enrollments
             List<Course> coursesList = new List<Course>();
             foreach (var enrollment in enrollments)
             {
                 List<Course> temp = await _context.Course.Where(x => x.Id == enrollment.CourseId).ToListAsync();
-                foreach (var course in temp) // should we filter on active enrollement only? Why student needs to download inactive enr course assignment?
+                foreach (var course in temp) 
                 {
                     coursesList.Add(course);
                 }
