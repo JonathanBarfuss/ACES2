@@ -32,17 +32,24 @@
                             <li class="nav-item">
                                 <a class="nav-link" asp-area="" asp-controller="Courses" asp-action="Index">Courses</a>
                             </li>
+
                         }
                         @if (!isFaculty)
                         {
                             <li class="nav-item">
                                 <a class="nav-link" asp-area="" asp-controller="StudentInterface" asp-action="Index">Home</a>
                             </li>
+
                         }
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Logout" asp-action="Index">Logout</a>
+                        </li>
                         @*<li class="nav-item">
             <a class="nav-link" asp-area="" asp-controller="Settings" asp-action="Index">Settings</a>
         </li>*@
+
                     </ul>
+
                 </div>
             </div>
         </nav>

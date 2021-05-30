@@ -25,17 +25,34 @@ namespace ACES.Controllers
         public IActionResult AttemptLogin(string username, string password)
         {
             // Get lists of students and instructors
-            var instructors = _context.Instructor.AsNoTracking().ToList();
-            var students = _context.Student.AsNoTracking().ToList();
+            var instructors = _context.Instructor.ToList();
+            var students = _context.Student.ToList();
 
             // Choose student or instructor based on the email
             var instructor = instructors.Where(x => x.Email == username).FirstOrDefault();
-            Models.Student student = null;
-            if (instructor == null)
-                student = students.Where(x => x.Email == username).FirstOrDefault();
+            var student = students.Where(x => x.Email == username).FirstOrDefault();
+            if (instructor != null)
+            {
+                Response.Cookies.Append("InstructorEmail", instructor.Email.ToString());
+            }
+            else if (instructor == null)
+            {
+                
+                if (student != null)
+                {
+                    Response.Cookies.Append("StudentEmail", student.Email.ToString());
+                }
+
+            }
+            else
+            {
+
+                //Put logic here for if user doesn't exist
+
+            }
 
             // Authenticate
-            if(instructor != null)
+            if (instructor != null)
             {
                 //NOTE: CURRENTLY, ALL PRE-ENTERED DATA HAS mypass111 AS THE PASSWORD
                 var hashedPass = Services.Cryptographer.ComputeSha256Hash(password + instructor.Salt);
@@ -46,8 +63,14 @@ namespace ACES.Controllers
                     if (Request.Cookies.ContainsKey("StudentID"))
                     {
                         Response.Cookies.Delete("StudentID");
+                        Response.Cookies.Delete("StudentEmail");
                     }
                     Response.Cookies.Append("InstructorID", instructor.Id.ToString());
+                    if (instructor.IsLoggedIn == 0)
+                    {
+                        instructor.IsLoggedIn = 1;
+                        _context.SaveChanges();
+                    }
                     return RedirectToAction("Index", "Courses", new { instructorId = instructor.Id });
                 }
             } else if (student != null)
@@ -60,8 +83,11 @@ namespace ACES.Controllers
                     if (Request.Cookies.ContainsKey("InstructorID"))
                     {
                         Response.Cookies.Delete("InstructorID");
+                        Response.Cookies.Delete("InstructorEmail");
                     }
                     Response.Cookies.Append("StudentID", student.Id.ToString());
+                    student.IsLoggedIn = 1;
+                    _context.SaveChanges();
                     return RedirectToAction("Index", "StudentInterface");
                 }
             }
