@@ -59,22 +59,22 @@ def generate_watermark(email: str, asn_no: str):
         for i in range(5))
     return sha256(en(asn_no) + en(email) + en(salt)).hexdigest()
 
-def factory_create(directory: str, email: str, asn_no: str) -> str:
+def factory_create(directory: str, email: str, asn_no: str):
     # Check validity of each parameter.
     if not os.path.isdir(directory):
         print("Error: directory does not exist.")
-        return ''
+        return '', '', 0
     if not os.path.exists(directory + "/.acesconfig.json"):
         print("Error: directory does not contain a .acesconfig.json file.")
-        return ''
+        return '', '', 0
     email_regex = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)")
     if not email_regex.match(email):
         print("Error: email argument is not an email address.")
-        return ''
+        return '', '', 0
 
     if not len(asn_no) > 2:
         print("Error: asn_no must be greater than two characters.")
-        return ''
+        return '', '', 0
 
     print("Preparing " + directory + " for " + email + " as " + asn_no)
 
@@ -109,7 +109,7 @@ def factory_create(directory: str, email: str, asn_no: str) -> str:
 
     print("Created zipped folder at " + zipdir)
 
-    return zipdir
+    return zipdir, watermark, total_marks
 
 # Note that main() should only be called if testing this module
 # individually. The actual main point of entry is factory_create(),

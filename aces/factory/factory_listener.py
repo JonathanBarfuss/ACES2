@@ -40,7 +40,7 @@ class S(BaseHTTPRequestHandler):
 
         self._set_response()
         server_json: dict = dict()
-        server_json['zipped_directory'] = af.factory_create(client_json["directory"], \
+        server_json['zipped_directory'], server_json['watermark'], server_json['watermark_count'] = af.factory_create(client_json["directory"], \
             client_json["email"], client_json["asn_no"])
         self.wfile.write(json.dumps(server_json).encode('utf-8'))
 
