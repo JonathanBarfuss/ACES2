@@ -59,7 +59,7 @@ def generate_watermark(email: str, asn_no: str):
         for i in range(5))
     return sha256(en(asn_no) + en(email) + en(salt)).hexdigest()
 
-def factory_create(directory: str, email: str, asn_no: str):
+def factory_create(directory: str, email: str, asn_no: str, existing_watermark: str):
     # Check validity of each parameter.
     if not os.path.isdir(directory):
         print("Error: directory does not exist.")
@@ -78,10 +78,13 @@ def factory_create(directory: str, email: str, asn_no: str):
 
     print("Preparing " + directory + " for " + email + " as " + asn_no)
 
-    # Generate unique watermark code
+    # Generate unique watermark code if none exists (first download)
     global watermark
-    watermark = generate_watermark(email, asn_no)
-    print("Generated watermark: " + watermark)
+    if existing_watermark == '':
+        watermark = generate_watermark(email, asn_no)
+        print("Generated watermark: " + watermark)
+    else:
+        watermark = existing_watermark
 
     # Open directory's .acesconfig.json file
     fconfig = open(directory + "/.acesconfig.json", "r")
