@@ -40,8 +40,8 @@ class S(BaseHTTPRequestHandler):
 
         self._set_response()
         server_json: dict = dict()
-        server_json['zipped_directory'] = af.factory_create(client_json["directory"], \
-            client_json["email"], client_json["asn_no"])
+        server_json['zipped_directory'], server_json['watermark'], server_json['watermark_count'] = af.factory_create(client_json["directory"], \
+            client_json["email"], client_json["asn_no"], client_json["existing_watermark"])
         self.wfile.write(json.dumps(server_json).encode('utf-8'))
 
 def run(server_class=HTTPServer, handler_class=S, port=8080):
