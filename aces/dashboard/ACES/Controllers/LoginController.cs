@@ -66,9 +66,9 @@ namespace ACES.Controllers
                         Response.Cookies.Delete("StudentEmail");
                     }
                     Response.Cookies.Append("InstructorID", instructor.Id.ToString());
-                    if (instructor.IsLoggedIn == 0)
+                    if (instructor.IsLoggedIn == false)
                     {
-                        instructor.IsLoggedIn = 1;
+                        instructor.IsLoggedIn = true;
                         _context.SaveChanges();
                     }
                     return RedirectToAction("Index", "Courses", new { instructorId = instructor.Id });
@@ -86,7 +86,7 @@ namespace ACES.Controllers
                         Response.Cookies.Delete("InstructorEmail");
                     }
                     Response.Cookies.Append("StudentID", student.Id.ToString());
-                    student.IsLoggedIn = 1;
+                    student.IsLoggedIn = true;
                     _context.SaveChanges();
                     return RedirectToAction("Index", "StudentInterface");
                 }

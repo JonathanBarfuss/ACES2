@@ -40,7 +40,7 @@ namespace ACES.Controllers
             if (instructor != null)
             {
 
-                instructor.IsLoggedIn = 0;
+                instructor.IsLoggedIn = false;
                 Response.Cookies.Delete("InstructorID");
                 Response.Cookies.Delete("InstructorEmail");
 
@@ -48,7 +48,7 @@ namespace ACES.Controllers
             else if (student != null)
             {
 
-                student.IsLoggedIn = 0;
+                student.IsLoggedIn = false;
                 Response.Cookies.Delete("StudentID");
                 Response.Cookies.Delete("StudentEmail");
 
