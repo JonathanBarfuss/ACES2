@@ -1,0 +1,39 @@
+﻿@model Signup
+@{
+    Layout = null; // This makes the login not inherit _Layout.cshtml
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ACES Login</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link href="~/css/login.css" rel="stylesheet" />
+</head>
+<body>
+        @using (Html.BeginForm("AttemptSignup", "Signup", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            <div class="wrapper fadeInDown">
+                <div id="formContent">
+                    <div class="fadeIn first" style="padding-top: 25px;">
+                        <h3>Sign-up</h3>
+                    </div>
+                    <form>
+                        <input type="text" name="firstname" placeholder="First Name" />
+                        <input type="text" name="lastname" placeholder="Last Name" />
+                        <input type="text" name="email" placeholder="Email" />
+                        <input type="password" name="password" placeholder="Password" />
+                        <br>
+                        <br />
+                        Are you a professor? @Html.CheckBoxFor(m => m.isProfessor)
+                        <br />
+                        <br />
+                        <input type="submit" value="Sign-up">
+                    </form>
+                </div>
+            </div>
+        }
+</body>
+</html>
