@@ -156,6 +156,18 @@ namespace ACES.Controllers
             return View(course);
         }
 
+        public async Task<IActionResult> AddStudent(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+
+            return View();
+        }
+
+
         // POST: Courses/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]

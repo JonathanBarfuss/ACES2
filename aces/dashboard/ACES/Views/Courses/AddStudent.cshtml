@@ -1,0 +1,29 @@
+﻿@model List<ACES.Models.Course>
+
+@{
+    ViewData["Title"] = "AddStudent";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 style="margin-bottom: 20px">Add Student to Course</h2>
+
+
+<html>
+    <head>
+
+        <link href="~/css/AddStudentStyles.css" rel="stylesheet" />
+
+    </head>
+
+    <body>
+
+        <form>
+            
+            <input type="text" name="email" placeholder="Student Email"/>
+            <input type="submit" value="Add Student">
+
+        </form>
+
+    </body>
+
+</html>

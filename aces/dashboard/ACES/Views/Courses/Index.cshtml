@@ -13,22 +13,22 @@
 <table class="table">
     <thead>
         <tr>
-            <th>Course</th>
-            <th>Total Assignments</th>
-            <th>Total Students</th>
+            <th style="padding-left: 30px">Course</th>
+            <th style="padding-left: 30px">Total Assignments</th>
+            <th style="padding-left: 30px">Total Students</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
 @foreach (var course in Model) {
         <tr>
-            <td>@course.CourseName</td>
-            <td>@course.NumAssignments</td>
-            <td>@course.NumStudents</td>
-            <td>
+            <td style="padding-left: 30px">@course.CourseName</td>
+            <td style="padding-left: 85px">@course.NumAssignments</td>
+            <td style="padding-left: 70px">@course.NumStudents</td>
+            <td style="padding-left: 300px">
+                <a asp-action="AddStudent" asp-route-id="@course.Id">Add Students</a> |
                 <a asp-action="Edit" asp-route-id="@course.Id">Edit</a> |
                 <a asp-action="CourseAssignments" asp-route-id="@course.Id">Assignments</a> |
-                @*<a asp-action="Students" asp-route-id="@course.Id">Students</a> |*@
                 <a asp-action="Delete" asp-route-id="@course.Id">Delete</a>
             </td>
         </tr>

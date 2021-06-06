@@ -41,16 +41,9 @@
                             </li>
 
                         }
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Logout" asp-action="Index">Logout</a>
-                        </li>
-                        @*<li class="nav-item">
-            <a class="nav-link" asp-area="" asp-controller="Settings" asp-action="Index">Settings</a>
-        </li>*@
-
                     </ul>
-
                 </div>
+                <a class="nav-link" asp-area="" asp-controller="Logout" asp-action="Index">Logout</a>
             </div>
         </nav>
     </header>
@@ -61,7 +54,7 @@
     </div>
 
     <footer class="border-top footer text-muted">
-        <div class="container">
+        <div class="container" style="margin-top: 20px; margin-bottom: 20px;">
             &copy; 2020 - ACES - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
