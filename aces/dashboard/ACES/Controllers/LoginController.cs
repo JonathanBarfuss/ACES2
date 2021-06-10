@@ -17,12 +17,13 @@ namespace ACES.Controllers
             _context = context;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string cID)
         {
+            ViewBag.courseID = cID;
             return View();
         }
 
-        public IActionResult AttemptLogin(string username, string password)
+        public IActionResult AttemptLogin(string username, string password, string courseID)
         {
             // Get lists of students and instructors
             var instructors = _context.Instructor.ToList();
@@ -88,6 +89,12 @@ namespace ACES.Controllers
                     Response.Cookies.Append("StudentID", student.Id.ToString());
                     student.IsLoggedIn = true;
                     _context.SaveChanges();
+
+                    if(!String.IsNullOrEmpty(courseID))
+                    {
+                        string tempurl = String.Format("/StudentInterface/StudentAssignments?courseId={0}", courseID);
+                        return Redirect(tempurl);
+                    }
                     return RedirectToAction("Index", "StudentInterface");
                 }
             }
