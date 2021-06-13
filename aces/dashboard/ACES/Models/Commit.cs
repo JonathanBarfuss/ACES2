@@ -14,5 +14,6 @@ namespace ACES.Models
         /// Compared with StudentAssignment.NumWatermarks to see if they have been tampered with.
         /// </summary>
         public int NumWatermarks { get; set; }
+        public string JSONCode { get; set; }
     }
 }

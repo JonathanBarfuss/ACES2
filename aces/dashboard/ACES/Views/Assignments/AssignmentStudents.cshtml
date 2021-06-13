@@ -17,6 +17,7 @@
                 <th>Watermarks</th>
                 <th>Lines Modified (Avg)</th>
                 <th>Hours Between Commits (Avg)</th>
+                <th>JSON results</th>
                 <th></th>
             </tr>
         </thead>
@@ -30,6 +31,7 @@
                 <td>@sAssignment.WatermarksRatio</td>
                 <td>@sAssignment.LinesModifiedAvg</td>
                 <td>@sAssignment.TimeBetweenAvg</td>
+                <td>@sAssignment.JSONCode</td>
                 <td>
                     <a asp-controller="Assignments" asp-action="AssignmentStudentCommits" asp-route-id="@sAssignment.Id">Commits</a>
                 </td>

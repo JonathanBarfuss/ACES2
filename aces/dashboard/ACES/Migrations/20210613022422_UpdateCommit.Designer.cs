@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ACES.Migrations
 {
     [DbContext(typeof(ACESContext))]
-    [Migration("20210531134602_Init-database")]
-    partial class Initdatabase
+    [Migration("20210613022422_UpdateCommit")]
+    partial class UpdateCommit
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -33,6 +33,9 @@ namespace ACES.Migrations
 
                     b.Property<int>("CourseId")
                         .HasColumnType("int");
+
+                    b.Property<string>("JSONCode")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
@@ -57,6 +60,9 @@ namespace ACES.Migrations
 
                     b.Property<DateTime>("DateCommitted")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("JSONCode")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("LinesAdded")
                         .HasColumnType("int");
@@ -130,8 +136,8 @@ namespace ACES.Migrations
                     b.Property<string>("FirstName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("IsLoggedIn")
-                        .HasColumnType("int");
+                    b.Property<bool>("IsLoggedIn")
+                        .HasColumnType("bit");
 
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
@@ -160,8 +166,8 @@ namespace ACES.Migrations
                     b.Property<string>("FirstName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("IsLoggedIn")
-                        .HasColumnType("int");
+                    b.Property<bool>("IsLoggedIn")
+                        .HasColumnType("bit");
 
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");

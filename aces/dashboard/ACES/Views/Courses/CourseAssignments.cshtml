@@ -17,22 +17,24 @@
                 <th>Assignment</th>
                 <th>Repository URL</th>
                 <th>Assignment Code</th>
+                <th>JSON Criteria</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
             @foreach (var assignment in Model.Assignments)
             {
-                <tr>
-                    <td>@assignment.Name</td>
-                    <td>@assignment.RepositoryUrl</td>
-                    <td>@assignment.AssignmentCode</td>
-                    <td>
-                        <a asp-controller="Assignments" asp-action="Edit" asp-route-id="@assignment.Id" asp-route-from="courses">Edit</a> |
-                        <a asp-controller="Assignments" asp-action="AssignmentStudents" asp-route-id="@assignment.Id">Student Submissions</a> |
-                        <a asp-controller="Assignments" asp-action="Delete" asp-route-id="@assignment.Id">Delete</a>
-                    </td>
-                </tr>
+            <tr>
+                <td>@assignment.Name</td>
+                <td>@assignment.RepositoryUrl</td>
+                <td>@assignment.AssignmentCode</td>
+                <td>@assignment.JSONCode</td>
+                <td>
+                    <a asp-controller="Assignments" asp-action="Edit" asp-route-id="@assignment.Id" asp-route-from="courses">Edit</a> |
+                    <a asp-controller="Assignments" asp-action="AssignmentStudents" asp-route-id="@assignment.Id">Student Submissions</a> |
+                    <a asp-controller="Assignments" asp-action="Delete" asp-route-id="@assignment.Id">Delete</a>
+                </td>
+            </tr>
             }
         </tbody>
     </table>
