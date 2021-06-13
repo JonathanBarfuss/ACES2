@@ -63,7 +63,6 @@ namespace ACES.Controllers
                     {
                         watermarkAvg += commits[i].NumWatermarks;
                         linesModifiedAvg += (commits[i].LinesAdded + commits[i].LinesDeleted);
-                        pointsAvg += commits[i].PointsEarned;
                         if ((i - 1) > -1)
                         {
                             timeBetweenAvg += (commits[i].DateCommitted - commits[i - 1].DateCommitted).TotalHours;
@@ -79,7 +78,6 @@ namespace ACES.Controllers
                 sAssignment.WatermarksRatio = watermarkAvg + "/" + sAssignment.NumWatermarks;
                 sAssignment.LinesModifiedAvg = linesModifiedAvg;
                 sAssignment.TimeBetweenAvg = timeBetweenAvg;
-                sAssignment.PointsRatio = pointsAvg + "/" + assignment.PointsPossible;
             }
 
             var vm = new AssignmentStudentsVM()
