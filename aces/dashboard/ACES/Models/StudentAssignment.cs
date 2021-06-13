@@ -18,6 +18,7 @@ namespace ACES.Models
         /// It is compared with Commit.NumWatermarks to see if they have tampered with the code.
         /// </summary>
         public int NumWatermarks { get; set; }
+        public string JSONCode { get; set; }
 
         #region For Views
         [NotMapped]

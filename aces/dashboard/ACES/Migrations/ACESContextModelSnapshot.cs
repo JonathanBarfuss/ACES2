@@ -32,6 +32,9 @@ namespace ACES.Migrations
                     b.Property<int>("CourseId")
                         .HasColumnType("int");
 
+                    b.Property<string>("JSONCode")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
@@ -55,6 +58,9 @@ namespace ACES.Migrations
 
                     b.Property<DateTime>("DateCommitted")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("JSONCode")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("LinesAdded")
                         .HasColumnType("int");
@@ -128,8 +134,8 @@ namespace ACES.Migrations
                     b.Property<string>("FirstName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("IsLoggedIn")
-                        .HasColumnType("int");
+                    b.Property<bool>("IsLoggedIn")
+                        .HasColumnType("bit");
 
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
@@ -158,8 +164,8 @@ namespace ACES.Migrations
                     b.Property<string>("FirstName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("IsLoggedIn")
-                        .HasColumnType("int");
+                    b.Property<bool>("IsLoggedIn")
+                        .HasColumnType("bit");
 
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
@@ -184,6 +190,9 @@ namespace ACES.Migrations
 
                     b.Property<int>("AssignmentId")
                         .HasColumnType("int");
+
+                    b.Property<string>("JSONCode")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("NumWatermarks")
                         .HasColumnType("int");

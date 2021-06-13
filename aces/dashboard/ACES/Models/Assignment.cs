@@ -18,6 +18,9 @@ namespace ACES.Models
         [DisplayName("Assignment Code")]
         public int AssignmentCode { get; set; }
 
+        [DisplayName("JSON Criteria")]
+        public string JSONCode { get; set; }
+
         public int CourseId { get; set; }
 
         [DisplayName("Points Possible")]

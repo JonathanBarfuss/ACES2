@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace ACES.Migrations
 {
-    public partial class InitialCreate : Migration
+    public partial class UpdateWithJSON : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -16,6 +16,7 @@ namespace ACES.Migrations
                     Name = table.Column<string>(nullable: true),
                     RepositoryUrl = table.Column<string>(nullable: true),
                     AssignmentCode = table.Column<int>(nullable: false),
+                    JSONCode = table.Column<string>(nullable: true),
                     CourseId = table.Column<int>(nullable: false),
                     PointsPossible = table.Column<int>(nullable: false)
                 },
@@ -82,7 +83,7 @@ namespace ACES.Migrations
                     Email = table.Column<string>(nullable: true),
                     Password = table.Column<string>(nullable: true),
                     Salt = table.Column<string>(nullable: true),
-                    IsLoggedIn = table.Column<int>(nullable: false)
+                    IsLoggedIn = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -100,7 +101,7 @@ namespace ACES.Migrations
                     Email = table.Column<string>(nullable: true),
                     Password = table.Column<string>(nullable: true),
                     Salt = table.Column<string>(nullable: true),
-                    IsLoggedIn = table.Column<int>(nullable: false)
+                    IsLoggedIn = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
