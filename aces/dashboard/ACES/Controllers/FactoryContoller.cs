@@ -26,20 +26,47 @@ namespace ACES.Controllers
         #endregion
 
         [HttpPost("factory")]
-        public ActionResult<IEnumerable<PostAddWatermark>> factoryCreate([FromBody] PostAddWatermark data)
+        public HttpResponseMessage factoryCreate([FromBody] PostAddWatermark data)
         {
-            if (data.existing_watermark != "")
+            HttpResponseMessage response = new HttpResponseMessage();
+            var emailAddress = new System.Net.Mail.MailAddress(data.email);
+
+            if (emailAddress.Address != data.email)
             {
-                watermark = data.existing_watermark;
+                //return View("Error: email provided is not a valid email.");
+            }
+
+            if (data.asn_no.Length! > 2)
+            {
+                //return View("Error: asn_no must be greater than 2 characters.");
+            }
+
+            if (data.existing_watermark == "")
+            {
+                watermark = Generate_Watermark(data.email, data.asn_no);
             }
             else
             {
-                //GenerateWatermark
+                watermark = data.existing_watermark;
             }
-            WatermarkFile(data.directory);
-            return View();
-        }
 
+            using (StreamReader r = new StreamReader(data.directory + "/.acesconfig.json"))
+            {
+                string jsonnn = r.ReadToEnd();
+                Dictionary<string, string> files = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonnn);
+            }
+
+            var json = System.Text.Json.JsonSerializer.Serialize(new GetWatermarkedAssignment()
+            {
+                watermark = watermark,
+                watermark_count = WatermarkFile(data.directory),
+                zipped_directory = data.directory
+            });
+
+            response.Content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            return response;
+        }
         private int WatermarkFile(string path)
         {
             int watermarks = 0;
@@ -77,52 +104,6 @@ namespace ACES.Controllers
             }
 
             return "";
-
-        }
-
-        [HttpPost("factory")]
-        public ActionResult<IEnumerable<GetWatermarkedAssignment>> FactoryCreate([FromBody] PostAddWatermark data)
-        {
-
-            var emailAddress = new System.Net.Mail.MailAddress(data.email);
-
-            if (emailAddress.Address != data.email)
-            {
-
-                return View("Error: email provided is not a valid email.");
-
-            }
-
-            if (data.asn_no.Length! > 2)
-            {
-
-                return View("Error: asn_no must be greater than 2 characters.");
-
-            }
-
-            Console.WriteLine("Preparing " + data.directory + " for " + data.email + " as " + data.asn_no);
-
-            if (data.existing_watermark == "")
-            {
-
-                watermark = Generate_Watermark(data.email, data.asn_no);
-
-            }
-            else
-            {
-
-                watermark = data.existing_watermark;
-
-            }
-
-
-            using (StreamReader r = new StreamReader(data.directory + "/.acesconfig.json"))
-            {
-                string json = r.ReadToEnd();
-                Dictionary<string, string> files = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
-            }
-
-            return View();
 
         }
 
