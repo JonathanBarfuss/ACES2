@@ -175,12 +175,12 @@ namespace ACES.Controllers
             return _context.Course.Any(e => e.Id == id);
         }
 
-      
+
         [HttpGet]
-        public IActionResult DownloadAssignment(int courseId) //TODO: assignmentId
-        { 
+        public IActionResult DownloadAssignment(int assignmentId) //TODO: assignmentId
+        {
             // Get assignment's url and name from Assignments table:
-            var assignment = _context.Assignment.Where(x => x.Id == courseId).FirstOrDefault();
+            var assignment = _context.Assignment.Where(x => x.Id == assignmentId).FirstOrDefault();
             string assignmentUrl = assignment.RepositoryUrl.ToString(); // To test, update Assignment table in DB with relevant Url
             string assignmentName = $"{assignment.Name.Replace(" ", "_")}_";
 
@@ -188,19 +188,12 @@ namespace ACES.Controllers
             Request.Cookies.TryGetValue("StudentEmail", out string studentEmail);
             Request.Cookies.TryGetValue("StudentId", out string strStudentId);
             Int32.TryParse(strStudentId, out int studentId);
-
+            string student_assignment_watermark = String.Empty;
             // Get existing watermark if student already downloaded this assignment earlier
-            var studentAssignment = _context.StudentAssignment.Where(x => x.StudentId == studentId).FirstOrDefault();
-            studentAssignment = _context.StudentAssignment.Where(x => x.AssignmentId == courseId).FirstOrDefault();
-            string student_assignment_watermark = studentAssignment.Watermark;
-
-            // If watermark already exists, clear the assignment's prior version directory in case instructor made changes
-            if (student_assignment_watermark != "")
+            var studentAssignment = _context.StudentAssignment.Where(x => x.StudentId == studentId && x.AssignmentId == assignmentId).FirstOrDefault();
+            if (studentAssignment != null)
             {
-                string relativePath = $"out/{student_assignment_watermark.Substring(0, 16)}";
-                string newPath = Path.GetFullPath(Path.Combine(relativePath, @"..\..\..\..\..\"));
-                string pathToDeletePriorAssignment = Path.Combine(newPath, relativePath);
-                Directory.Delete(pathToDeletePriorAssignment, true);
+                student_assignment_watermark = studentAssignment.Watermark;
             }
 
             // Initiate Post API Call to uniquely watermark the downloading assignment for a student
@@ -210,13 +203,13 @@ namespace ACES.Controllers
                 var objRequest = new HttpRequestMessage(HttpMethod.Post, path);
 
                 // Populate request content to pass to the server
-                objRequest.Content = new StringContent(System.Text.Json.JsonSerializer.Serialize(new PostAddWatermark() 
+                objRequest.Content = new StringContent(System.Text.Json.JsonSerializer.Serialize(new PostAddWatermark()
                 {
                     directory = assignmentUrl,
                     email = studentEmail,
                     asn_no = assignmentName,
                     existing_watermark = student_assignment_watermark
-                }));                
+                }));
 
                 // Check response
                 using (HttpResponseMessage objResponse = httpClient.SendAsync(objRequest).Result)
@@ -225,7 +218,11 @@ namespace ACES.Controllers
                     {
                         // Parse response content
                         var deserializedObject = JsonConvert.DeserializeObject<GetWatermarkedAssignment>(objResponse.Content.ReadAsStringAsync().Result);
-                        string assignment_watermark = deserializedObject.watermark; 
+                        if (deserializedObject == null)
+                        {
+                            //TODO: pop-up user message
+                        }
+                        string assignment_watermark = deserializedObject.watermark;
                         int assignment_watermark_count = deserializedObject.watermark_count;
                         string zipped_directory = deserializedObject.zipped_directory;
 
@@ -235,20 +232,19 @@ namespace ACES.Controllers
                             var newStudentAssignment = new StudentAssignment()
                             {
                                 StudentId = studentId,
-                                AssignmentId = courseId,
+                                AssignmentId = assignmentId,
                                 Watermark = assignment_watermark,
                                 RepositoryUrl = zipped_directory,
                                 NumWatermarks = assignment_watermark_count
-                            };
+                            }; // don't store repositoryUrl on download
                             _context.StudentAssignment.Add(newStudentAssignment);
-                            _context.SaveChanges();
-                        } 
+                        }
                         else
                         {
                             studentAssignment.RepositoryUrl = zipped_directory;
                             studentAssignment.NumWatermarks = assignment_watermark_count;
-                            _context.SaveChanges();
                         }
+                        _context.SaveChanges(); //save changes should only be done once
 
                         // Download zipped file to the student's browser
                         var net = new System.Net.WebClient();
@@ -260,9 +256,10 @@ namespace ACES.Controllers
                     }
                     else
                     {
-                        return null;
-
                         //TODO: pop-up user message
+                        //ViewBag.Message = "Unsuccessful download attempt";
+                        var assignments = _context.Assignment.Where(x => x.CourseId == assignment.CourseId).ToListAsync();
+                        return View(assignments);
                     }
                 }
             }

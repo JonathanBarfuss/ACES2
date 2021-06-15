@@ -4,14 +4,16 @@ using ACES.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ACES.Migrations
 {
     [DbContext(typeof(ACESContext))]
-    partial class ACESContextModelSnapshot : ModelSnapshot
+    [Migration("20210613022422_UpdateCommit")]
+    partial class UpdateCommit
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -26,6 +28,9 @@ namespace ACES.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<int>("AssignmentCode")
+                        .HasColumnType("int");
+
                     b.Property<int>("CourseId")
                         .HasColumnType("int");
 
@@ -34,6 +39,9 @@ namespace ACES.Migrations
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PointsPossible")
+                        .HasColumnType("int");
 
                     b.Property<string>("RepositoryUrl")
                         .HasColumnType("nvarchar(max)");
@@ -63,6 +71,9 @@ namespace ACES.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("NumWatermarks")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PointsEarned")
                         .HasColumnType("int");
 
                     b.Property<int>("StudentAssignmentId")
@@ -181,9 +192,6 @@ namespace ACES.Migrations
 
                     b.Property<int>("AssignmentId")
                         .HasColumnType("int");
-
-                    b.Property<string>("JSONCode")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("NumWatermarks")
                         .HasColumnType("int");

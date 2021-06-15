@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ACES.Migrations
 {
     [DbContext(typeof(ACESContext))]
-    [Migration("20210531134602_Init-database")]
-    partial class Initdatabase
+    [Migration("20210613162754_removedCodeAndPoints")]
+    partial class removedCodeAndPoints
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -28,17 +28,14 @@ namespace ACES.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("AssignmentCode")
-                        .HasColumnType("int");
-
                     b.Property<int>("CourseId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("JSONCode")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("PointsPossible")
-                        .HasColumnType("int");
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RepositoryUrl")
                         .HasColumnType("nvarchar(max)");
@@ -58,6 +55,9 @@ namespace ACES.Migrations
                     b.Property<DateTime>("DateCommitted")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("JSONCode")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("LinesAdded")
                         .HasColumnType("int");
 
@@ -65,9 +65,6 @@ namespace ACES.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("NumWatermarks")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PointsEarned")
                         .HasColumnType("int");
 
                     b.Property<int>("StudentAssignmentId")
@@ -130,8 +127,8 @@ namespace ACES.Migrations
                     b.Property<string>("FirstName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("IsLoggedIn")
-                        .HasColumnType("int");
+                    b.Property<bool>("IsLoggedIn")
+                        .HasColumnType("bit");
 
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
@@ -160,8 +157,8 @@ namespace ACES.Migrations
                     b.Property<string>("FirstName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("IsLoggedIn")
-                        .HasColumnType("int");
+                    b.Property<bool>("IsLoggedIn")
+                        .HasColumnType("bit");
 
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
@@ -186,6 +183,9 @@ namespace ACES.Migrations
 
                     b.Property<int>("AssignmentId")
                         .HasColumnType("int");
+
+                    b.Property<string>("JSONCode")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("NumWatermarks")
                         .HasColumnType("int");

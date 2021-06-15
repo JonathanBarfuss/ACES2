@@ -1,3 +1,5 @@
+aces_factory.py
+
 #!/usr/bin/env python3
 import argparse, os, re, random, string, json
 import shutil
@@ -100,6 +102,11 @@ def factory_create(directory: str, email: str, asn_no: str, existing_watermark: 
 
     print("Attempting copytree...")
     copiedpath: str = "out/" + watermark[0:16] + "/" + asn_no
+
+    # If folder already exists, delete old
+    olddirectory: str = copiedpath[0:20]
+    if os.path.exists(olddirectory): 
+        shutil.rmtree(olddirectory)
     shutil.copytree(directory, copiedpath)
 
     for f in markable_files:

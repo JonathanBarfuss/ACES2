@@ -1,3 +1,5 @@
+factory_listener.py
+
 #!/usr/bin/env python3
 """
 Very simple HTTP server in python for logging requests
@@ -25,6 +27,7 @@ class S(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(f.read())
                 f.close()
+                # delete curdir if test successful: shutil.rmtree(dir_path)
                 return
 
         except IOError:
