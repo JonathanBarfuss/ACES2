@@ -27,7 +27,7 @@ namespace ACES.Controllers
 
         #region FactoryCreate
         [HttpPost("factory")]
-        public HttpResponseMessage FactoryCreate([FromBody] PostAddWatermark data)
+        public string FactoryCreate([FromBody] PostAddWatermark data)
         {
             HttpResponseMessage response = new HttpResponseMessage();
             var emailAddress = new System.Net.Mail.MailAddress(data.email);
@@ -64,6 +64,7 @@ namespace ACES.Controllers
 
             }
 
+            // can change GetWatermarkedAssignment to have whatever variables you need it to return. It is at the bottom of the StudentInterfaceController
             var json = System.Text.Json.JsonSerializer.Serialize(new GetWatermarkedAssignment()
             {
                 watermark = watermark,
@@ -71,9 +72,7 @@ namespace ACES.Controllers
                 zipped_directory = data.directory
             });
 
-            response.Content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            return response;
+            return json;
         }
         #endregion
 
@@ -105,7 +104,7 @@ namespace ACES.Controllers
 
             // Read the file and display it line by line.  
             StreamReader file = new StreamReader(path);
-            StreamWriter newFile = new StreamWriter("../../assignments/temp.cs");
+            StreamWriter newFile = new StreamWriter("../../assignments/temp.cs"); // this file is the watermarked one, should be put in the new repository after the while loop
             while ((line = file.ReadLine()) != null)
             {
                 if (line.Contains("aw:watermark"))
