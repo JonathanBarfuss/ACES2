@@ -190,13 +190,13 @@ namespace ACES.Controllers
             Request.Cookies.TryGetValue("StudentId", out string strStudentId);
             Int32.TryParse(strStudentId, out int studentId);
             string student_assignment_watermark = String.Empty;
-            string jsonCode = String.Empty;
+
             // Get existing watermark if student already downloaded this assignment earlier
             var studentAssignment = _context.StudentAssignment.Where(x => x.StudentId == studentId && x.AssignmentId == assignmentId).FirstOrDefault();
             if (studentAssignment != null)
             {
                 student_assignment_watermark = studentAssignment.Watermark;
-                jsonCode = studentAssignment.
+
             }
 
             // Initiate Post API Call to uniquely watermark the downloading assignment for a student
@@ -211,6 +211,7 @@ namespace ACES.Controllers
                     email = studentEmail,
                     asn_no =  assignmentName,
                     existing_watermark = student_assignment_watermark,
+                    jsonCode = assignment.JSONCode
 
                 });
 
