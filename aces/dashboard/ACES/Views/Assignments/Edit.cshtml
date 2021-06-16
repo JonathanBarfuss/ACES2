@@ -24,9 +24,9 @@
                 <span asp-validation-for="RepositoryUrl" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="CourseId" class="control-label"></label>
-                <input asp-for="CourseId" class="form-control" />
-                <span asp-validation-for="CourseId" class="text-danger"></span>
+                <label asp-for="SectionId" class="control-label"></label>
+                <input asp-for="SectionId" class="form-control" />
+                <span asp-validation-for="SectionId" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
@@ -39,7 +39,7 @@
     @*This takes us back to CourseAssignments if that's where we came from*@
     @if (ViewBag.From == "courses")
     {
-        <a asp-controller="Courses" asp-action="CourseAssignments" asp-route-id="@Model.CourseId">Back to List</a>
+        <a asp-controller="Courses" asp-action="CourseAssignments" asp-route-id="@Model.SectionId">Back to List</a>
     }
     else
     {

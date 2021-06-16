@@ -36,7 +36,7 @@ namespace ACES.Controllers
             List<Course> coursesList = new List<Course>();
             foreach (var enrollment in enrollments)
             {
-                List<Course> temp = await _context.Course.Where(x => x.Id == enrollment.CourseId).ToListAsync();
+                List<Course> temp = await _context.Course.Where(x => x.Id == enrollment.SectionId).ToListAsync();
                 foreach (var course in temp) 
                 {
                     coursesList.Add(course);
@@ -167,7 +167,7 @@ namespace ACES.Controllers
 
         public async Task<IActionResult> StudentAssignments(int courseId)
         {
-            var assignments = await _context.Assignment.Where(x => x.CourseId == courseId).ToListAsync();
+            var assignments = await _context.Assignment.Where(x => x.SectionId == courseId).ToListAsync();
             return View(assignments);
         }
 
