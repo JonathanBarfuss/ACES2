@@ -82,7 +82,7 @@ namespace ACES.Controllers
 
             var vm = new AssignmentStudentsVM()
             {
-                CourseId = assignment.CourseId,
+                CourseId = assignment.SectionId,
                 AssignmentId = id.Value,
                 AssignmentName = assignment.Name,
                 StudentAssignments = studentAssignments
@@ -135,7 +135,7 @@ namespace ACES.Controllers
             {
                 _context.Add(assignment);
                 await _context.SaveChangesAsync();
-                return RedirectToAction("CourseAssignments", "Courses", new { id = assignment.CourseId });
+                return RedirectToAction("CourseAssignments", "Courses", new { id = assignment.SectionId });
             }
             return View(assignment);
         }
@@ -219,12 +219,12 @@ namespace ACES.Controllers
             var assignment = await _context.Assignment.FindAsync(id);
             _context.Assignment.Remove(assignment);
             await _context.SaveChangesAsync();
-            return RedirectToAction("CourseAssignments", "Courses", new { id = assignment.CourseId });
+            return RedirectToAction("CourseAssignments", "Courses", new { id = assignment.SectionId });
         }
 
         public async Task<IActionResult> DownloadAssignment(int courseId)
         {
-            var assignments = await _context.Assignment.Where(x => x.CourseId == courseId).ToListAsync();
+            var assignments = await _context.Assignment.Where(x => x.SectionId == courseId).ToListAsync();
             return View(assignments);
         }
 

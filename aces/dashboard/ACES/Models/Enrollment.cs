@@ -12,7 +12,7 @@ namespace ACES.Models
     {
         public int Id { get; set; }
         public int StudentId { get; set; }
-        public int CourseId { get; set; }
+        public int SectionId { get; set; }
         /// <summary>
         /// If inactive, enrollment belongs to a past semester.
         /// </summary>

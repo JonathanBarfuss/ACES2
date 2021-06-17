@@ -9,6 +9,7 @@ using ACES.Models;
 using System.Net.Http;
 using Newtonsoft.Json;
 using System.IO;
+using System.Text;
 
 namespace ACES.Controllers
 {
@@ -35,7 +36,7 @@ namespace ACES.Controllers
             List<Course> coursesList = new List<Course>();
             foreach (var enrollment in enrollments)
             {
-                List<Course> temp = await _context.Course.Where(x => x.Id == enrollment.CourseId).ToListAsync();
+                List<Course> temp = await _context.Course.Where(x => x.Id == enrollment.SectionId).ToListAsync();
                 foreach (var course in temp) 
                 {
                     coursesList.Add(course);
@@ -166,7 +167,7 @@ namespace ACES.Controllers
 
         public async Task<IActionResult> StudentAssignments(int courseId)
         {
-            var assignments = await _context.Assignment.Where(x => x.CourseId == courseId).ToListAsync();
+            var assignments = await _context.Assignment.Where(x => x.SectionId == courseId).ToListAsync();
             return View(assignments);
         }
 
@@ -189,27 +190,33 @@ namespace ACES.Controllers
             Request.Cookies.TryGetValue("StudentId", out string strStudentId);
             Int32.TryParse(strStudentId, out int studentId);
             string student_assignment_watermark = String.Empty;
+
             // Get existing watermark if student already downloaded this assignment earlier
             var studentAssignment = _context.StudentAssignment.Where(x => x.StudentId == studentId && x.AssignmentId == assignmentId).FirstOrDefault();
             if (studentAssignment != null)
             {
                 student_assignment_watermark = studentAssignment.Watermark;
+
             }
 
             // Initiate Post API Call to uniquely watermark the downloading assignment for a student
             using (var httpClient = new HttpClient())
             {
-                string path = "http://localhost:8080"; //TODO: replace with Brad's link to cs website, e.g. cs.weber.bradley...
+                string path = "http://localhost:61946/factory"; //TODO: replace with Brad's link to cs website, e.g. cs.weber.bradley...
                 var objRequest = new HttpRequestMessage(HttpMethod.Post, path);
 
-                // Populate request content to pass to the server
-                objRequest.Content = new StringContent(System.Text.Json.JsonSerializer.Serialize(new PostAddWatermark()
+                var json = System.Text.Json.JsonSerializer.Serialize(new PostAddWatermark()
                 {
-                    directory = assignmentUrl,
+                    directory = "../../assignments/CS 4269/test.cs",
                     email = studentEmail,
-                    asn_no = assignmentName,
-                    existing_watermark = student_assignment_watermark
-                }));
+                    asn_no =  assignmentName,
+                    existing_watermark = student_assignment_watermark,
+                    jsonCode = assignment.JSONCode
+
+                });
+
+                // Populate request content to pass to the server
+                objRequest.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
                 // Check response
                 using (HttpResponseMessage objResponse = httpClient.SendAsync(objRequest).Result)
@@ -218,16 +225,12 @@ namespace ACES.Controllers
                     {
                         // Parse response content
                         var deserializedObject = JsonConvert.DeserializeObject<GetWatermarkedAssignment>(objResponse.Content.ReadAsStringAsync().Result);
-                        if (deserializedObject == null)
-                        {
-                            //TODO: pop-up user message
-                        }
                         string assignment_watermark = deserializedObject.watermark;
                         int assignment_watermark_count = deserializedObject.watermark_count;
                         string zipped_directory = deserializedObject.zipped_directory;
 
                         // If first download, store the downloading assignment data in StudentAssignment table in the DB:
-                        if (student_assignment_watermark == "")
+                        if (studentAssignment.Watermark == null)
                         {
                             var newStudentAssignment = new StudentAssignment()
                             {
@@ -236,15 +239,16 @@ namespace ACES.Controllers
                                 Watermark = assignment_watermark,
                                 RepositoryUrl = zipped_directory,
                                 NumWatermarks = assignment_watermark_count
-                            }; // don't store repositoryUrl on download
+                            };
                             _context.StudentAssignment.Add(newStudentAssignment);
+                            _context.SaveChanges();
                         }
                         else
                         {
                             studentAssignment.RepositoryUrl = zipped_directory;
                             studentAssignment.NumWatermarks = assignment_watermark_count;
+                            _context.SaveChanges();
                         }
-                        _context.SaveChanges(); //save changes should only be done once
 
                         // Download zipped file to the student's browser
                         var net = new System.Net.WebClient();
@@ -256,10 +260,9 @@ namespace ACES.Controllers
                     }
                     else
                     {
+                        return null;
+
                         //TODO: pop-up user message
-                        //ViewBag.Message = "Unsuccessful download attempt";
-                        var assignments = _context.Assignment.Where(x => x.CourseId == assignment.CourseId).ToListAsync();
-                        return View(assignments);
                     }
                 }
             }
@@ -279,5 +282,6 @@ namespace ACES.Controllers
         public string email { get; set; }
         public string asn_no { get; set; }
         public string existing_watermark { get; set; }
+        public string jsonCode { get; set; }
     }
 }
