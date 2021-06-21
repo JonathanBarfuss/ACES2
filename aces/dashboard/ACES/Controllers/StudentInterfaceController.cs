@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using ACES.Data;
 using ACES.Models;
 using System.Net.Http;
+//using System.Web.Http;
+using System.Web;
 using Newtonsoft.Json;
 using System.IO;
 using System.Text;
@@ -163,23 +165,22 @@ namespace ACES.Controllers
             _context.Course.Remove(course);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-        }
-
-        public async Task<IActionResult> StudentAssignments(int courseId)
-        {
-            var assignments = await _context.Assignment.Where(x => x.SectionId == courseId).ToListAsync();
-            return View(assignments);
-        }
+        }        
 
         private bool CourseExists(int id)
         {
             return _context.Course.Any(e => e.Id == id);
         }
 
-
         [HttpGet]
-        public IActionResult DownloadAssignment(int assignmentId) //TODO: assignmentId
+        public async Task<IActionResult> StudentAssignments(int assignmentId, int sectionId) 
         {
+            if (assignmentId == 0)
+            {
+                var courseAssignments = await _context.Assignment.Where(x => x.SectionId == sectionId).ToListAsync();
+                return View(courseAssignments);
+            }
+            
             // Get assignment's url and name from Assignments table:
             var assignment = _context.Assignment.Where(x => x.Id == assignmentId).FirstOrDefault();
             string assignmentUrl = assignment.RepositoryUrl.ToString(); // To test, update Assignment table in DB with relevant Url
@@ -189,99 +190,195 @@ namespace ACES.Controllers
             Request.Cookies.TryGetValue("StudentEmail", out string studentEmail);
             Request.Cookies.TryGetValue("StudentId", out string strStudentId);
             Int32.TryParse(strStudentId, out int studentId);
-            string student_assignment_watermark = String.Empty;
 
-            // Get existing watermark if student already downloaded this assignment earlier
-            var studentAssignment = _context.StudentAssignment.Where(x => x.StudentId == studentId && x.AssignmentId == assignmentId).FirstOrDefault();
-            if (studentAssignment != null)
-            {
-                student_assignment_watermark = studentAssignment.Watermark;
-
-            }
-
-            // Initiate Post API Call to uniquely watermark the downloading assignment for a student
+            //TODO: Add code to clone instructor's repo for a student
+            var contentsRepoUrl = $"https://api.github.com/repos/AntiCheatSummer2021/assignment4-ShaneyPooh/contents";
             using (var httpClient = new HttpClient())
             {
-                string path = "http://localhost:61946/factory"; //TODO: replace with Brad's link to cs website, e.g. cs.weber.bradley...
-                var objRequest = new HttpRequestMessage(HttpMethod.Post, path);
-
-                var json = System.Text.Json.JsonSerializer.Serialize(new PostAddWatermark()
-                {
-                    directory = "../../assignments/CS 4269/test.cs",
-                    email = studentEmail,
-                    asn_no =  assignmentName,
-                    existing_watermark = student_assignment_watermark,
-                    jsonCode = assignment.JSONCode
-
-                });
-
-                // Populate request content to pass to the server
-                objRequest.Content = new StringContent(json, Encoding.UTF8, "application/json");
+                httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer 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");
+                httpClient.DefaultRequestHeaders.Add("User-Agent", "C# App"); // TODO: name of appl: ACES
+                httpClient.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
+                var objRequest1 = new HttpRequestMessage(HttpMethod.Get, contentsRepoUrl);
 
                 // Check response
-                using (HttpResponseMessage objResponse = httpClient.SendAsync(objRequest).Result)
+                using (HttpResponseMessage objResponse = httpClient.SendAsync(objRequest1).Result)
                 {
                     if (objResponse.IsSuccessStatusCode)
                     {
-                        // Parse response content
-                        var deserializedObject = JsonConvert.DeserializeObject<GetWatermarkedAssignment>(objResponse.Content.ReadAsStringAsync().Result);
-                        string assignment_watermark = deserializedObject.watermark;
-                        int assignment_watermark_count = deserializedObject.watermark_count;
-                        string zipped_directory = deserializedObject.zipped_directory;
-
-                        // If first download, store the downloading assignment data in StudentAssignment table in the DB:
-                        if (studentAssignment.Watermark == null)
+                        FileInfo[] contents = JsonConvert.DeserializeObject<FileInfo[]>(objResponse.Content.ReadAsStringAsync().Result);
+                        foreach (var file in contents)
                         {
-                            var newStudentAssignment = new StudentAssignment()
+                            var fileType = file.type;
+                            if (file.type == "dir")
                             {
-                                StudentId = studentId,
-                                AssignmentId = assignmentId,
-                                Watermark = assignment_watermark,
-                                RepositoryUrl = zipped_directory,
-                                NumWatermarks = assignment_watermark_count
-                            };
-                            _context.StudentAssignment.Add(newStudentAssignment);
-                            _context.SaveChanges();
-                        }
-                        else
-                        {
-                            studentAssignment.RepositoryUrl = zipped_directory;
-                            studentAssignment.NumWatermarks = assignment_watermark_count;
-                            _context.SaveChanges();
-                        }
+                                var directoryContentsUrl = file.url;
+                                // use this URL to list the contents of the folder
+                            }
+                            else if (file.type == "file")
+                            {
+                                // use this URL to download the contents of the file
+                                if (file.name == "add.c")
+                                {
+                                    string test = "add.c";
+                                    //Download only marked files
 
-                        // Download zipped file to the student's browser
-                        var net = new System.Net.WebClient();
-                        var data = net.DownloadData($"{path}/{deserializedObject.zipped_directory}");
-                        var content = new System.IO.MemoryStream(data);
-                        var contentType = "APPLICATION/octet-stream";
-                        var fileName = $"{assignmentName}prepared.zip";
-                        return File(content, contentType, fileName);
-                    }
-                    else
-                    {
-                        return null;
+                                    HttpRequestMessage fileGetRequest = new HttpRequestMessage(HttpMethod.Get, file.download_url);
+                                    fileGetRequest.Headers.Add("Authorization", "Bearer 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");
+                                    HttpResponseMessage fileGetResponse = httpClient.SendAsync(fileGetRequest).Result;
+                                    String content = fileGetResponse.Content.ReadAsStringAsync().Result;
+                                    fileGetResponse.Dispose();
+                                    //TODO: also need to check if file is already modified
+                                    // if not, modify file according to JSON column instructions
 
-                        //TODO: pop-up user message
+                                    // instead of array probably better to use list, or stringbuilder to insert, etc.
+                                    // should validate first, line count and maybe name on first line?
+                                    string[] contentLines = content.Split("\n");
+                                    contentLines[1] = "wk:3333"; // this is just a temp example to modify a line
+                                    content = string.Join("\n", contentLines);
+
+                                    //call api to put file to student's repo
+                                    HttpRequestMessage filePutRequest = new HttpRequestMessage(HttpMethod.Put, file.url);
+                                    filePutRequest.Headers.Add("Authorization", "Bearer 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");
+                                    filePutRequest.Content = new StringContent(JsonConvert.SerializeObject(new PutBody { message = "Added watermark", content = Convert.ToBase64String(Encoding.UTF8.GetBytes(content)), sha = file.sha }), Encoding.UTF8, "application/json");
+                                    HttpResponseMessage filePutResponse = httpClient.SendAsync(filePutRequest).Result;
+                                    if (filePutResponse.IsSuccessStatusCode) 
+                                    {
+                                        //TODO: display confirmation to a student?
+                                    }
+                                    else 
+                                    {
+                                        //TODO: display an error message to a student
+                                    }
+                                    filePutResponse.Dispose();
+                                }
+                            }
+                        }
                     }
                 }
             }
-        }     
-    }  
+            var assignments = await _context.Assignment.Where(x => x.SectionId == sectionId).ToListAsync();
+            return View(assignments);
 
-    public class GetWatermarkedAssignment
-    {
-        public string zipped_directory { get; set; }
-        public string watermark { get; set; }
-        public int watermark_count { get; set; }
+            //string student_assignment_watermark = String.Empty;
+            //// Get existing watermark if student already downloaded this assignment earlier
+            //var studentAssignment = _context.StudentAssignment.Where(x => x.StudentId == studentId && x.AssignmentId == assignmentId).FirstOrDefault();
+            //if (studentAssignment != null)
+            //{
+            //    student_assignment_watermark = studentAssignment.Watermark;
+            //}
+
+            //// Initiate Post API Call to uniquely watermark the downloading assignment for a student
+            //using (var httpClient = new HttpClient())
+            //{
+            //    string path = "http://localhost:8080"; //TODO: replace with Brad's link to cs website, e.g. cs.weber.bradley...
+            //    var objRequest = new HttpRequestMessage(HttpMethod.Post, path);
+
+            //    // Populate request content to pass to the server
+            //    objRequest.Content = new StringContent(System.Text.Json.JsonSerializer.Serialize(new PostAddWatermark()
+            //    {
+            //        directory = assignmentUrl,
+            //        email = studentEmail,
+            //        asn_no = assignmentName,
+            //        existing_watermark = student_assignment_watermark
+            //    }));
+
+            //    // Check response
+            //    using (HttpResponseMessage objResponse = httpClient.SendAsync(objRequest).Result)
+            //    {
+            //        if (objResponse.IsSuccessStatusCode)
+            //        {
+            //            // Parse response content
+            //            var deserializedObject = JsonConvert.DeserializeObject<GetWatermarkedAssignment>(objResponse.Content.ReadAsStringAsync().Result);
+            //            if (deserializedObject.zipped_directory == null)
+            //            {
+            //                //TODO: pop-up user message
+            //            }
+            //            string assignment_watermark = deserializedObject.watermark;
+            //            int assignment_watermark_count = deserializedObject.watermark_count;
+            //            string zipped_directory = deserializedObject.zipped_directory;
+
+            //            // If first download, store the downloading assignment data in StudentAssignment table in the DB:
+            //            if (student_assignment_watermark == "")
+            //            {
+            //                var newStudentAssignment = new StudentAssignment()
+            //                {
+            //                    StudentId = studentId,
+            //                    AssignmentId = assignmentId,
+            //                    Watermark = assignment_watermark,
+            //                    RepositoryUrl = zipped_directory,
+            //                    NumWatermarks = assignment_watermark_count
+            //                }; // don't store repositoryUrl on download
+            //                _context.StudentAssignment.Add(newStudentAssignment);
+            //            }
+            //            else
+            //            {
+            //                studentAssignment.RepositoryUrl = zipped_directory;
+            //                studentAssignment.NumWatermarks = assignment_watermark_count;
+            //            }
+            //            _context.SaveChanges(); //save changes should only be done once
+
+            //            // Download zipped file to the student's browser
+            //            var net = new System.Net.WebClient();
+            //            var data = net.DownloadData($"{path}/{deserializedObject.zipped_directory}");
+            //            var content = new System.IO.MemoryStream(data);
+            //            var contentType = "APPLICATION/octet-stream";
+            //            var fileName = $"{assignmentName}prepared.zip";
+            //            return File(content, contentType, fileName);
+            //        }
+            //        else
+            //        {
+            //            //TODO: pop-up user message
+            //        }
+            //    }           
+        }
     }
 
-    public class PostAddWatermark
+    //JSON structures
+    struct PutBody
     {
-        public string directory { get; set; }
-        public string email { get; set; }
-        public string asn_no { get; set; }
-        public string existing_watermark { get; set; }
-        public string jsonCode { get; set; }
+        public String message;
+        public String content;
+        public String sha;
+    }
+
+    struct LinkFields
+    {
+        public String self;
+    }
+    struct FileInfo
+    {
+        public String name;
+        public String type;
+        public String sha;
+        public String download_url;
+        public String url;
+    }
+
+    public struct FileData
+    {
+        public String name;
+        public String contents;
+    }
+    public struct Directory
+    {
+        public String name;
+        public List<Directory> subDirs;
+        public List<FileData> files;
+    }
+
+    public struct GetWatermarkedAssignment
+    {
+        public string zipped_directory;
+        public string watermark;
+        public int watermark_count;
+    }
+
+    public struct PostAddWatermark
+    {
+        public string directory;
+        public string email;
+        public string asn_no;
+        public string existing_watermark;
+        public string jsonCode;
     }
 }
