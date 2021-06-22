@@ -129,7 +129,7 @@ namespace ACES.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,RepositoryUrl,AssignmentCode,CourseId,PointsPossible")] Assignment assignment)
+        public async Task<IActionResult> Create([Bind("Id,Name,RepositoryUrl,SectionId,JSONCode")] Assignment assignment)
         {
             if (ModelState.IsValid)
             {
@@ -154,6 +154,7 @@ namespace ACES.Controllers
                 return NotFound();
             }
 
+            ViewBag.SectionId = assignment.SectionId;
             ViewBag.From = from; // This helps take us back to CourseAssignments if that's where we came from
             return View(assignment);
         }
@@ -163,7 +164,7 @@ namespace ACES.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,RepositoryUrl,AssignmentCode,CourseId")] Assignment assignment)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,RepositoryUrl,SectionId,JSONCode")] Assignment assignment)
         {
             if (id != assignment.Id)
             {
@@ -188,7 +189,8 @@ namespace ACES.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                //return RedirectToAction(nameof(Index));  //use this if you would rather go to the list of all assignments
+                return RedirectToAction("CourseAssignments", "Courses", new { id = assignment.SectionId });
             }
             return View(assignment);
         }
