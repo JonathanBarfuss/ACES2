@@ -92,7 +92,7 @@ namespace ACES.Controllers
 
                     if(!String.IsNullOrEmpty(assignmentID))
                     {
-                        string tempurl = String.Format("/StudentInterface/DownloadAssignment?assignmentId={0}", assignmentID);
+                        string tempurl = String.Format("/StudentInterface/StudentAssignments?assignmentId={0}", assignmentID);
                         return Redirect(tempurl);
                     }
                     return RedirectToAction("Index", "StudentInterface");
