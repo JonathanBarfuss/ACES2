@@ -90,9 +90,12 @@ namespace ACES.Controllers
                     student.IsLoggedIn = true;
                     _context.SaveChanges();
 
-                    if(!String.IsNullOrEmpty(assignmentID))
+                    if(!String.IsNullOrEmpty(assignmentID))  //if an assignment ID is provided go to that specific assignment
                     {
-                        string tempurl = String.Format("/StudentInterface/StudentAssignments?assignmentId={0}", assignmentID);
+                        Int32.TryParse(assignmentID, out int intID);
+                        var assignment = _context.Assignment.Where(x => x.Id == intID).FirstOrDefault();  //get the specific assignment
+                        string sectionID = assignment.SectionId.ToString();  //get the assignment's sectionId
+                        string tempurl = String.Format("/StudentInterface/StudentAssignments?assignmentId={0}&sectionId={1}", assignmentID, sectionID);  //create the url
                         return Redirect(tempurl);
                     }
                     return RedirectToAction("Index", "StudentInterface");
