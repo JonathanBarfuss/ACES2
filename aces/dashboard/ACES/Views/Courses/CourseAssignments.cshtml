@@ -15,7 +15,7 @@
         <thead>
             <tr>
                 <th>Assignment</th>
-                <th>Repository URL</th>
+                <th>Canvas Link</th>
                 <th>JSON Criteria</th>
                 <th></th>
             </tr>
@@ -25,7 +25,7 @@
             {
             <tr>
                 <td>@assignment.Name</td>
-                <td>@assignment.RepositoryUrl</td>
+                <td><span class="canvasLink" id=@assignment.Id>@assignment.CanvasLink</span><button onclick="copyFunction(@assignment.Id)">Copy</button> </td>
                 <td>@assignment.JSONCode</td>
                 <td>
                     <a asp-controller="Assignments" asp-action="Edit" asp-route-id="@assignment.Id" asp-route-from="courses">Tweak</a> |
