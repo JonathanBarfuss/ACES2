@@ -129,7 +129,7 @@ namespace ACES.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,RepositoryUrl,SectionId,JSONCode")] Assignment assignment)
+        public async Task<IActionResult> Create([Bind("Id,Name,RepositoryUrl,SectionId,JSONCode,DueDate,CanvasLink")] Assignment assignment)
         {
             if (ModelState.IsValid)
             {
@@ -164,7 +164,7 @@ namespace ACES.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,RepositoryUrl,SectionId,JSONCode")] Assignment assignment)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,RepositoryUrl,SectionId,JSONCode,DueDate,CanvasLink")] Assignment assignment)
         {
             if (id != assignment.Id)
             {

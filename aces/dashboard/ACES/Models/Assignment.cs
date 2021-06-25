@@ -20,5 +20,10 @@ namespace ACES.Models
 
         public int SectionId { get; set; }
 
+        public DateTime DueDate { get; set; }
+
+        [DisplayName("Canvas Link")]
+        public string CanvasLink { get; set; }
+
     }
 }
