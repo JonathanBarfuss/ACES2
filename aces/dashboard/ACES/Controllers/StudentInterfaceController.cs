@@ -209,7 +209,7 @@ namespace ACES.Controllers
             var contentsRepoUrl = $"https://api.github.com/repos/AntiCheatSummer2021/assignment4-ShaneyPooh/contents";
             using (var httpClient = new HttpClient())
             {
-                httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer  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");
+                httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer  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");
                 httpClient.DefaultRequestHeaders.Add("User-Agent", "C# App"); // TODO: name of appl: ACES
                 httpClient.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
                 var objRequest1 = new HttpRequestMessage(HttpMethod.Get, contentsRepoUrl);
@@ -234,7 +234,7 @@ namespace ACES.Controllers
 
 
                                 HttpRequestMessage fileGetRequest = new HttpRequestMessage(HttpMethod.Get, file.download_url);
-                                fileGetRequest.Headers.Add("Authorization", "Bearer  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");
+                                fileGetRequest.Headers.Add("Authorization", "Bearer  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");
                                 HttpResponseMessage fileGetResponse = httpClient.SendAsync(fileGetRequest).Result;
                                 String content = fileGetResponse.Content.ReadAsStringAsync().Result;
                                 fileGetResponse.Dispose();
@@ -263,7 +263,7 @@ namespace ACES.Controllers
 
                                 //    //call api to put file to student's repo
                                 //    HttpRequestMessage filePutRequest = new HttpRequestMessage(HttpMethod.Put, file.url);
-                                //    filePutRequest.Headers.Add("Authorization", "Bearer  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");
+                                //    filePutRequest.Headers.Add("Authorization", "Bearer  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");
                                 //    filePutRequest.Content = new StringContent(JsonConvert.SerializeObject(new PutBody { message = "Added watermark", content = Convert.ToBase64String(Encoding.UTF8.GetBytes(content)), sha = file.sha }), Encoding.UTF8, "application/json");
                                 //    HttpResponseMessage filePutResponse = httpClient.SendAsync(filePutRequest).Result;
                                 //    if (filePutResponse.IsSuccessStatusCode) 
