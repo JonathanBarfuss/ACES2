@@ -1,0 +1,26 @@
+﻿@model ACES.Models.ViewModels.StudentRepoVM
+
+@{
+    ViewData["Title"] = "Student Repo Form";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Student Repository</h2>
+<br />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div class="form-group">
+                <label name="RepoURL" class="control-label">Please Enter your Repo URL:</label>
+                <input name="RepoURL" class="form-control" />
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Submit" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

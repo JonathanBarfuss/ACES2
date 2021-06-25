@@ -224,7 +224,38 @@ namespace ACES.Controllers
             return RedirectToAction("CourseAssignments", "Courses", new { id = assignment.SectionId });
         }
 
-        public async Task<IActionResult> DownloadAssignment(int courseId)
+        // Get: Assignments/StudentRepoForm
+        [HttpGet]
+        public async Task<IActionResult> StudentRepoForm(int assignmentId)
+        {
+            var vm = new StudentRepoVM()
+            {
+                assignmentId = assignmentId,
+                RepoURL = ""
+            };
+
+            return View(vm);
+        }
+
+        // Post: Assignments/StudentRepoForm
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> StudentRepoForm(int id, [Bind("Id,RepoURL")] StudentRepoVM vm)
+        {
+            string studentID;
+            string assignmentID = vm.assignmentId.ToString();
+            if (Request.Cookies.ContainsKey("StudentID"))
+            {
+                studentID = Request.Cookies["StudentID"];
+            }
+
+            var assignment = _context.Assignment.Where(x => x.Id == vm.assignmentId).FirstOrDefault();
+            string sectionID = assignment.SectionId.ToString();
+
+            string tempurl = String.Format("/StudentInterface/StudentAssignments?assignmentId={0}&sectionId={1}", assignmentID, sectionID);
+            return RedirectToAction(tempurl);
+        }
+            public async Task<IActionResult> DownloadAssignment(int courseId)
         {
             var assignments = await _context.Assignment.Where(x => x.SectionId == courseId).ToListAsync();
             return View(assignments);
