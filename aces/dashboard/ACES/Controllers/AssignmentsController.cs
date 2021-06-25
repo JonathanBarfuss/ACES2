@@ -133,8 +133,17 @@ namespace ACES.Controllers
         {
             if (ModelState.IsValid)
             {
+                
                 _context.Add(assignment);
                 await _context.SaveChangesAsync();
+                var newId = (from x in _context.Assignment //get the generated assignmentId
+                             select x.Id).Max();
+
+                string canvasLink = String.Format(@"http://localhost:61946/?aID={0}", newId);
+                assignment.CanvasLink = canvasLink;
+                _context.Update(assignment);
+                await _context.SaveChangesAsync();
+
                 return RedirectToAction("CourseAssignments", "Courses", new { id = assignment.SectionId });
             }
             return View(assignment);
