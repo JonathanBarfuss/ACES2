@@ -70,7 +70,9 @@ namespace ACES.Controllers
                 // add field for repo once we get it working
                 watermark = watermark,
                 watermark_count = totalMarks,
-                whitespace_count = numWhitespaces
+                whitespace_count = numWhitespaces,
+                fileNames = markableFiles
+
             });
 
             return json;
@@ -141,6 +143,7 @@ namespace ACES.Controllers
                 }
                 lineCount++;
             }
+            file.Close();
             newFile.Close();
             return watermarks;
         }

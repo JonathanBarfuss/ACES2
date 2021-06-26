@@ -176,6 +176,7 @@ namespace ACES.Controllers
         [HttpGet]
         public async Task<IActionResult> StudentAssignments(int assignmentId, int sectionId) 
         {
+
             if (assignmentId == 0)
             {
                 var courseAssignments = await _context.Assignment.Where(x => x.SectionId == sectionId).ToListAsync();
@@ -203,13 +204,11 @@ namespace ACES.Controllers
                 whitespace_watermark = json.SelectToken("whitespace_count").Value<int>();
             }
 
-
-
             //TODO: Add code to clone instructor's repo for a student
             var contentsRepoUrl = $"https://api.github.com/repos/AntiCheatSummer2021/assignment4-ShaneyPooh/contents";
             using (var httpClient = new HttpClient())
             {
-                httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer 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");
+                httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer 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");
                 httpClient.DefaultRequestHeaders.Add("User-Agent", "C# App"); // TODO: name of appl: ACES
                 httpClient.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
                 var objRequest1 = new HttpRequestMessage(HttpMethod.Get, contentsRepoUrl);
@@ -223,6 +222,7 @@ namespace ACES.Controllers
                         foreach (var file in contents)
                         {
                             var fileType = file.type;
+
                             if (file.type == "dir")
                             {
                                 var directoryContentsUrl = file.url;
@@ -231,51 +231,16 @@ namespace ACES.Controllers
                             else if (file.type == "file")
                             {
 
-
-
                                 HttpRequestMessage fileGetRequest = new HttpRequestMessage(HttpMethod.Get, file.download_url);
-                                fileGetRequest.Headers.Add("Authorization", "Bearer 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");
+                                fileGetRequest.Headers.Add("Authorization", "Bearer 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");
                                 HttpResponseMessage fileGetResponse = httpClient.SendAsync(fileGetRequest).Result;
-                                String content = fileGetResponse.Content.ReadAsStringAsync().Result;
+                                string content = fileGetResponse.Content.ReadAsStringAsync().Result;
                                 fileGetResponse.Dispose();
 
-
                                 StreamWriter sr = new StreamWriter("../../assignments/temp/" + file.name);
-                                sr.WriteLine(content);
+                                sr.Write(content);
+                                sr.Close();
 
-
-
-
-                                //// use this URL to download the contents of the file
-                                //if (file.name == "add.c")
-                                //{
-                                //    string test = "add.c";
-                                //    //Download only marked files
-
-                                //    //TODO: also need to check if file is already modified
-                                //    // if not, modify file according to JSON column instructions
-
-                                //    // instead of array probably better to use list, or stringbuilder to insert, etc.
-                                //    // should validate first, line count and maybe name on first line?
-                                //    string[] contentLines = content.Split("\n");
-                                //    contentLines[1] = "wk:3333"; // this is just a temp example to modify a line
-                                //    content = string.Join("\n", contentLines);
-
-                                //    //call api to put file to student's repo
-                                //    HttpRequestMessage filePutRequest = new HttpRequestMessage(HttpMethod.Put, file.url);
-                                //    filePutRequest.Headers.Add("Authorization", "Bearer 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");
-                                //    filePutRequest.Content = new StringContent(JsonConvert.SerializeObject(new PutBody { message = "Added watermark", content = Convert.ToBase64String(Encoding.UTF8.GetBytes(content)), sha = file.sha }), Encoding.UTF8, "application/json");
-                                //    HttpResponseMessage filePutResponse = httpClient.SendAsync(filePutRequest).Result;
-                                //    if (filePutResponse.IsSuccessStatusCode) 
-                                //    {
-                                //        //TODO: display confirmation to a student?
-                                //    }
-                                //    else 
-                                //    {
-                                //        //TODO: display an error message to a student
-                                //    }
-                                //    filePutResponse.Dispose();
-                                //}
                             }
                         }
 
@@ -283,8 +248,8 @@ namespace ACES.Controllers
                         string path = "http://localhost:61946/factory"; //TODO: replace with Brad's link to cs website, e.g. cs.weber.bradley...
                         var objRequest2 = new HttpRequestMessage(HttpMethod.Post, path);
 
-                        StreamReader r = new StreamReader("../../assignments/samples/c_asn/.acesconfig.json");
-                        var jsonFile = r.ReadToEnd();
+                        //StreamReader r = new StreamReader("../../assignments/samples/c_asn/.acesconfig.json");
+                        //var jsonFile = r.ReadToEnd();
 
                         var json = System.Text.Json.JsonSerializer.Serialize(new PostAddWatermark()
                         {
@@ -293,8 +258,8 @@ namespace ACES.Controllers
                             asn_no = assignmentName,
                             existing_watermark = student_assignment_watermark,
                             whitespaces = whitespace_watermark,
-                            //jsonCode = assignment.JSONCode
-                            jsonCode = jsonFile
+                            jsonCode = assignment.JSONCode
+                            //jsonCode = jsonFile
 
                         });
 
@@ -314,7 +279,8 @@ namespace ACES.Controllers
                                 {
                                     whitespace_count = deserializedObject.whitespace_count,
                                     watermark = deserializedObject.watermark,
-                                    watermark_count = deserializedObject.watermark_count
+                                    watermark_count = deserializedObject.watermark_count,
+                                    fileNames = deserializedObject.fileNames
                                 });
 
                                 // If first download, store the downloading assignment data in StudentAssignment table in the DB:
@@ -332,9 +298,61 @@ namespace ACES.Controllers
                                 }
                                 else
                                 {
-                                    studentAssignment.RepositoryUrl = "placeholder.com";
+                                    studentAssignment.RepositoryUrl = contentsRepoUrl;
                                     studentAssignment.JSONCode = assignmentJSON;
                                     _context.SaveChanges();
+                                }
+
+                                string[] tempFiles = System.IO.Directory.GetFiles("../../assignments/temp");
+                                string[] temp2Files = System.IO.Directory.GetFiles("../../assignments/temp2");
+                                List<string> fileContents = new List<string>();
+
+                                foreach(var file in temp2Files)
+                                {
+
+                                    StreamReader sr = new StreamReader(file);
+                                    var newFile = sr.ReadToEnd();
+                                    fileContents.Add(newFile);
+                                    sr.Close();
+
+                                }
+
+                                var count = 0;
+
+                                foreach(var file in contents) {
+
+                                    if (deserializedObject.fileNames[count] == file.name)
+                                    {
+                                        //call api to put file to student's repo
+                                        HttpRequestMessage filePutRequest = new HttpRequestMessage(HttpMethod.Put, file.url);
+                                        filePutRequest.Headers.Add("Authorization", "Bearer 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");
+                                        filePutRequest.Content = new StringContent(JsonConvert.SerializeObject(new PutBody { message = "Added watermark", content = Convert.ToBase64String(Encoding.UTF8.GetBytes(fileContents[count])), sha = file.sha }), Encoding.UTF8, "application/json");
+                                        HttpResponseMessage filePutResponse = httpClient.SendAsync(filePutRequest).Result;
+                                        if (filePutResponse.IsSuccessStatusCode)
+                                        {
+                                            //TODO: display confirmation to a student?
+                                        }
+                                        else
+                                        {
+                                            //TODO: display an error message to a student
+                                        }
+                                        filePutResponse.Dispose();
+                                        count++;
+                                    }
+
+                                }
+
+                                foreach(var file in tempFiles)
+                                {
+
+                                    System.IO.File.Delete(file);
+
+                                }
+                                foreach (var file in temp2Files)
+                                {
+
+                                    System.IO.File.Delete(file);
+
                                 }
 
                             }
@@ -350,80 +368,10 @@ namespace ACES.Controllers
                     }
                 }
             }
+
             var assignments = await _context.Assignment.Where(x => x.SectionId == sectionId).ToListAsync();
             return View(assignments);
-
-            //string student_assignment_watermark = String.Empty;
-            //// Get existing watermark if student already downloaded this assignment earlier
-            //var studentAssignment = _context.StudentAssignment.Where(x => x.StudentId == studentId && x.AssignmentId == assignmentId).FirstOrDefault();
-            //if (studentAssignment != null)
-            //{
-            //    student_assignment_watermark = studentAssignment.Watermark;
-            //}
-
-            //// Initiate Post API Call to uniquely watermark the downloading assignment for a student
-            //using (var httpClient = new HttpClient())
-            //{
-            //    string path = "http://localhost:8080"; //TODO: replace with Brad's link to cs website, e.g. cs.weber.bradley...
-            //    var objRequest = new HttpRequestMessage(HttpMethod.Post, path);
-
-            //    // Populate request content to pass to the server
-            //    objRequest.Content = new StringContent(System.Text.Json.JsonSerializer.Serialize(new PostAddWatermark()
-            //    {
-            //        directory = assignmentUrl,
-            //        email = studentEmail,
-            //        asn_no = assignmentName,
-            //        existing_watermark = student_assignment_watermark
-            //    }));
-
-            //    // Check response
-            //    using (HttpResponseMessage objResponse = httpClient.SendAsync(objRequest).Result)
-            //    {
-            //        if (objResponse.IsSuccessStatusCode)
-            //        {
-            //            // Parse response content
-            //            var deserializedObject = JsonConvert.DeserializeObject<GetWatermarkedAssignment>(objResponse.Content.ReadAsStringAsync().Result);
-            //            if (deserializedObject.zipped_directory == null)
-            //            {
-            //                //TODO: pop-up user message
-            //            }
-            //            string assignment_watermark = deserializedObject.watermark;
-            //            int assignment_watermark_count = deserializedObject.watermark_count;
-            //            string zipped_directory = deserializedObject.zipped_directory;
-
-            //            // If first download, store the downloading assignment data in StudentAssignment table in the DB:
-            //            if (student_assignment_watermark == "")
-            //            {
-            //                var newStudentAssignment = new StudentAssignment()
-            //                {
-            //                    StudentId = studentId,
-            //                    AssignmentId = assignmentId,
-            //                    Watermark = assignment_watermark,
-            //                    RepositoryUrl = zipped_directory,
-            //                    NumWatermarks = assignment_watermark_count
-            //                }; // don't store repositoryUrl on download
-            //                _context.StudentAssignment.Add(newStudentAssignment);
-            //            }
-            //            else
-            //            {
-            //                studentAssignment.RepositoryUrl = zipped_directory;
-            //                studentAssignment.NumWatermarks = assignment_watermark_count;
-            //            }
-            //            _context.SaveChanges(); //save changes should only be done once
-
-            //            // Download zipped file to the student's browser
-            //            var net = new System.Net.WebClient();
-            //            var data = net.DownloadData($"{path}/{deserializedObject.zipped_directory}");
-            //            var content = new System.IO.MemoryStream(data);
-            //            var contentType = "APPLICATION/octet-stream";
-            //            var fileName = $"{assignmentName}prepared.zip";
-            //            return File(content, contentType, fileName);
-            //        }
-            //        else
-            //        {
-            //            //TODO: pop-up user message
-            //        }
-            //    }           
+     
         }
     }
 
@@ -466,6 +414,7 @@ namespace ACES.Controllers
         public int whitespace_count { get; set; }
         public string watermark { get; set; }
         public int watermark_count { get; set; }
+        public List<string> fileNames { get; set; }
     }
 
     public struct PostAddWatermark

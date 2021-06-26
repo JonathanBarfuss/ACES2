@@ -1,15 +1,14 @@
 {
   "files": [
-    "add.c",
-    "main.c"
+    "add.c"
   ],
   "whitespaces": [
-    "2",
-    "11",
-    "17"
+    "6",
+    "12",
+    "16"
   ],
   "randomstring": [
-    "3",
+    "2",
     "19"
   ]
 }
