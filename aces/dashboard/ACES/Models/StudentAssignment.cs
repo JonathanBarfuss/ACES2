@@ -11,13 +11,11 @@ namespace ACES.Models
         public int Id { get; set; }
         public int StudentId { get; set; }
         public int AssignmentId { get; set; }
-        public string Watermark { get; set; }
         public string RepositoryUrl { get; set; }
         /// <summary>
         /// This represents the number of watermarks a students personal assignment should have. 
         /// It is compared with Commit.NumWatermarks to see if they have tampered with the code.
         /// </summary>
-        public int NumWatermarks { get; set; }
         public string JSONCode { get; set; }
 
         #region For Views

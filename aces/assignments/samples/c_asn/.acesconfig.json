@@ -1,7 +1,16 @@
 {
-    "method": "namedfiles",
-    "namedfiles": [
-        "add.c",
-        "main.c"
-    ]
+  "files": [
+    "add.c",
+    "b.c",
+    "e.c"
+  ],
+  "whitespaces": [
+    "6",
+    "12",
+    "16"
+  ],
+  "randomstring": [
+    "2",
+    "19"
+  ]
 }
