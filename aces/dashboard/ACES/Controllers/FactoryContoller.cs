@@ -2,14 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using ACES.Models;
-using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json.Linq;
-using ACES.Data;
 using System.Net.Http;
 using System.IO;
-using System.Collections;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -22,6 +17,10 @@ namespace ACES.Controllers
         #region Globals
 
         private string watermark;
+        private int numWhitespaces;
+        string whiteString = "";
+        private List<string> whitespaces = new List<string>();
+        private List<string> randomstring = new List<string>();
 
         #endregion
 
@@ -31,6 +30,7 @@ namespace ACES.Controllers
         {
             HttpResponseMessage response = new HttpResponseMessage();
             var emailAddress = new System.Net.Mail.MailAddress(data.email);
+            numWhitespaces = data.whitespaces;
 
             if (emailAddress.Address != data.email)
             {
@@ -51,45 +51,50 @@ namespace ACES.Controllers
                 watermark = data.existing_watermark;
             }
 
-            var markableFiles = GenerateFileList(data.jsonCode);
+            var markableFiles = GenerateListsFromJSON(data.jsonCode);
 
             int totalMarks = 0;
-            //string copiedPath = "out/" + watermark.Substring(0, 16) + "/" + data.asn_no;
-
 
             foreach (var f in markableFiles)
             {
 
-                totalMarks += WatermarkFile(data.directory);  //Change the directory to the files retrieved. "copiedPath + "/" + f" or something that gets the correct files each time.
+                totalMarks += WatermarkFile(data.directory, f);
 
             }
 
             // can change GetWatermarkedAssignment to have whatever variables you need it to return. It is at the bottom of the StudentInterfaceController
             var json = System.Text.Json.JsonSerializer.Serialize(new GetWatermarkedAssignment()
             {
+                // add field for repo once we get it working
                 watermark = watermark,
                 watermark_count = totalMarks,
-                zipped_directory = data.directory
+                whitespace_count = numWhitespaces,
+                fileNames = markableFiles
+
             });
 
             return json;
         }
         #endregion
 
-        #region GenerateFileList
-        private List<string> GenerateFileList(string jsonCode)
+        #region GenerateListsFromJSON
+        private List<string> GenerateListsFromJSON(string jsonCode)
         {
 
             //Parse the json code provided in the string parameter
             JObject json = JObject.Parse(jsonCode);
 
-            //Get file names (the children of the "namedFiles" object in the json)
-            var files = json["namedfiles"].Children();
+            //get the data from the json string in the database
+            var files = json["files"].Children();
+            var lines = json["whitespaces"].Children();
+            var moreLines = json["randomstring"].Children();
 
             var fileList = new List<string>();
 
             //Put the file names obtained in files variable into this list object
             fileList.AddRange(files.Select(file => file.Value<string>()));
+            whitespaces.AddRange(lines.Select(lines => lines.Value<string>()));
+            randomstring.AddRange(moreLines.Select(moreLines => moreLines.Value<string>()));
 
             return fileList;
 
@@ -97,28 +102,69 @@ namespace ACES.Controllers
         #endregion
 
         #region WatermarkFile
-        private int WatermarkFile(string path)
+        private int WatermarkFile(string dir, string filename)
         {
+
             int watermarks = 0;
             string line;
+            int lineCount = 1;
+            Random rnd = new Random();
 
-            // Read the file and display it line by line.  
-            StreamReader file = new StreamReader(path);
-            StreamWriter newFile = new StreamWriter("../../assignments/temp.cs"); // this file is the watermarked one, should be put in the new repository after the while loop
+            if (numWhitespaces == -1) // -1 if it doesn't exist so it has to generate a number
+            {
+
+                numWhitespaces = rnd.Next(25);
+
+            }
+
+            for (int i = 0; i < numWhitespaces; i++)
+            {
+
+                whiteString += " ";
+
+            }
+
+            //For reading file to be watermarked  
+            StreamReader file = new StreamReader(dir + "/" + filename);
+
+            //this file is the watermarked one, should be put in the new repository after the while loop
+            StreamWriter newFile = new StreamWriter("../../assignments/temp2/" + filename); 
+
+            //Write all watermarks into new temp file on their appropriate lines
             while ((line = file.ReadLine()) != null)
             {
-                if (line.Contains("aw:watermark"))
+
+                if (whitespaces.Contains(lineCount.ToString()))
                 {
-                    newFile.WriteLine("//aw:" + watermark);
+
+                    newFile.WriteLine(whiteString);
                     watermarks++;
+
+                }
+                else if (randomstring.Contains(lineCount.ToString()))
+                {
+
+                    newFile.WriteLine("//" + watermark);
+                    watermarks++;
+
                 }
                 else
                 {
+
                     newFile.WriteLine(line);
+
                 }
+
+                lineCount++;
+
             }
+
+            //Close stream reader and writer
+            file.Close();
             newFile.Close();
+
             return watermarks;
+
         }
         #endregion
 
@@ -127,8 +173,9 @@ namespace ACES.Controllers
         {
 
             RNGCryptoServiceProvider rngCsp = new RNGCryptoServiceProvider();
- 
+
             byte[] salt = new byte[20];
+
             //Fill array with random bytes to be salt value
             rngCsp.GetBytes(salt);
 
@@ -147,7 +194,7 @@ namespace ACES.Controllers
 
             //Put hashed value into one string
             StringBuilder fullWatermark = new StringBuilder();
-            for(int i = 0; i < bytes.Length; i++)
+            for (int i = 0; i < bytes.Length; i++)
             {
 
                 fullWatermark.Append(bytes[i].ToString("x2"));

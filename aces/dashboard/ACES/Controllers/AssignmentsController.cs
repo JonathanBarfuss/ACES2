@@ -75,7 +75,7 @@ namespace ACES.Controllers
                 }
 
                 // Otherwise they are all 0
-                sAssignment.WatermarksRatio = watermarkAvg + "/" + sAssignment.NumWatermarks;
+                //sAssignment.WatermarksRatio = watermarkAvg + "/" + sAssignment.NumWatermarks;
                 sAssignment.LinesModifiedAvg = linesModifiedAvg;
                 sAssignment.TimeBetweenAvg = timeBetweenAvg;
             }
@@ -109,7 +109,7 @@ namespace ACES.Controllers
             {
                 StudentAssignmentId = (int)id,
                 StudentName = studentName,
-                NumWatermarks = sAssingment.NumWatermarks,
+                //NumWatermarks = sAssingment.NumWatermarks,
                 Assignment = assignment,
                 Commits = commits
             };
