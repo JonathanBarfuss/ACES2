@@ -1,6 +1,8 @@
 {
   "files": [
-    "add.c"
+    "add.c",
+    "b.c",
+    "e.c"
   ],
   "whitespaces": [
     "6",

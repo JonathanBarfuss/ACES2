@@ -54,13 +54,11 @@ namespace ACES.Controllers
             var markableFiles = GenerateListsFromJSON(data.jsonCode);
 
             int totalMarks = 0;
-            //string copiedPath = "out/" + watermark.Substring(0, 16) + "/" + data.asn_no;
-
 
             foreach (var f in markableFiles)
             {
 
-                totalMarks += WatermarkFile(data.directory, f);  //Change the directory to the files retrieved. "copiedPath + "/" + f" or something that gets the correct files each time.
+                totalMarks += WatermarkFile(data.directory, f);
 
             }
 
@@ -79,7 +77,7 @@ namespace ACES.Controllers
         }
         #endregion
 
-        #region GenerateFileList
+        #region GenerateListsFromJSON
         private List<string> GenerateListsFromJSON(string jsonCode)
         {
 
@@ -106,6 +104,7 @@ namespace ACES.Controllers
         #region WatermarkFile
         private int WatermarkFile(string dir, string filename)
         {
+
             int watermarks = 0;
             string line;
             int lineCount = 1;
@@ -113,39 +112,59 @@ namespace ACES.Controllers
 
             if (numWhitespaces == -1) // -1 if it doesn't exist so it has to generate a number
             {
+
                 numWhitespaces = rnd.Next(25);
+
             }
 
             for (int i = 0; i < numWhitespaces; i++)
             {
+
                 whiteString += " ";
+
             }
 
-
-            // Read the file and display it line by line.  
+            //For reading file to be watermarked  
             StreamReader file = new StreamReader(dir + "/" + filename);
-            StreamWriter newFile = new StreamWriter("../../assignments/temp2/" + filename); // this file is the watermarked one, should be put in the new repository after the while loop
+
+            //this file is the watermarked one, should be put in the new repository after the while loop
+            StreamWriter newFile = new StreamWriter("../../assignments/temp2/" + filename); 
+
+            //Write all watermarks into new temp file on their appropriate lines
             while ((line = file.ReadLine()) != null)
             {
+
                 if (whitespaces.Contains(lineCount.ToString()))
                 {
+
                     newFile.WriteLine(whiteString);
                     watermarks++;
+
                 }
                 else if (randomstring.Contains(lineCount.ToString()))
                 {
+
                     newFile.WriteLine("//" + watermark);
                     watermarks++;
+
                 }
                 else
                 {
+
                     newFile.WriteLine(line);
+
                 }
+
                 lineCount++;
+
             }
+
+            //Close stream reader and writer
             file.Close();
             newFile.Close();
+
             return watermarks;
+
         }
         #endregion
 
@@ -156,6 +175,7 @@ namespace ACES.Controllers
             RNGCryptoServiceProvider rngCsp = new RNGCryptoServiceProvider();
 
             byte[] salt = new byte[20];
+
             //Fill array with random bytes to be salt value
             rngCsp.GetBytes(salt);
 

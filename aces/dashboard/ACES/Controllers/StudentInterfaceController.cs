@@ -7,8 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using ACES.Data;
 using ACES.Models;
 using System.Net.Http;
-//using System.Web.Http;
-using System.Web;
 using Newtonsoft.Json;
 using System.IO;
 using System.Text;
@@ -18,6 +16,7 @@ namespace ACES.Controllers
 {
     public class StudentInterfaceController : Controller
     {
+
         private readonly ACESContext _context;
 
         public StudentInterfaceController(ACESContext context)
@@ -25,7 +24,18 @@ namespace ACES.Controllers
             _context = context;
         }
 
-        // GET: StudentInterface
+        // GET: StudentInterface/Create
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        private bool CourseExists(int id)
+        {
+            return _context.Course.Any(e => e.Id == id);
+        }
+
+        #region GET: StudentInterface
         public async Task<IActionResult> Index()
         {
             if (!Request.Cookies.ContainsKey("StudentID"))
@@ -47,8 +57,9 @@ namespace ACES.Controllers
             }
             return View(coursesList);
         }
+        #endregion
 
-        // GET: StudentInterface/Details/5
+        #region GET: StudentInterface/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -65,14 +76,9 @@ namespace ACES.Controllers
 
             return View(course);
         }
+        #endregion
 
-        // GET: StudentInterface/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: StudentInterface/Create
+        #region POST: StudentInterface/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to, for 
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -87,8 +93,9 @@ namespace ACES.Controllers
             }
             return View(course);
         }
+        #endregion
 
-        // GET: StudentInterface/Edit/5
+        #region GET: StudentInterface/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -103,8 +110,9 @@ namespace ACES.Controllers
             }
             return View(course);
         }
+        #endregion
 
-        // POST: StudentInterface/Edit/5
+        #region POST: StudentInterface/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for 
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -138,7 +146,9 @@ namespace ACES.Controllers
             }
             return View(course);
         }
+        #endregion
 
+        #region Delete & DeleteConfirmed
         // GET: StudentInterface/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
@@ -166,13 +176,10 @@ namespace ACES.Controllers
             _context.Course.Remove(course);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-        }        
-
-        private bool CourseExists(int id)
-        {
-            return _context.Course.Any(e => e.Id == id);
         }
+        #endregion        
 
+        #region StudentAssignments
         [HttpGet]
         public async Task<IActionResult> StudentAssignments(int assignmentId, int sectionId) 
         {
@@ -208,7 +215,9 @@ namespace ACES.Controllers
             var contentsRepoUrl = $"https://api.github.com/repos/AntiCheatSummer2021/assignment4-ShaneyPooh/contents";
             using (var httpClient = new HttpClient())
             {
-                httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer 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");
+
+                //Set up Header info to request files from GitHub
+                httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer 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");
                 httpClient.DefaultRequestHeaders.Add("User-Agent", "C# App"); // TODO: name of appl: ACES
                 httpClient.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
                 var objRequest1 = new HttpRequestMessage(HttpMethod.Get, contentsRepoUrl);
@@ -216,8 +225,11 @@ namespace ACES.Controllers
                 // Check response
                 using (HttpResponseMessage objResponse = httpClient.SendAsync(objRequest1).Result)
                 {
+
                     if (objResponse.IsSuccessStatusCode)
                     {
+
+                        #region Get Files From Repository/Put them in temp files
                         FileInfo[] contents = JsonConvert.DeserializeObject<FileInfo[]>(objResponse.Content.ReadAsStringAsync().Result);
                         foreach (var file in contents)
                         {
@@ -231,41 +243,43 @@ namespace ACES.Controllers
                             else if (file.type == "file")
                             {
 
+                                //Get file from repository contents
                                 HttpRequestMessage fileGetRequest = new HttpRequestMessage(HttpMethod.Get, file.download_url);
-                                fileGetRequest.Headers.Add("Authorization", "Bearer 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");
+                                fileGetRequest.Headers.Add("Authorization", "Bearer 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");
                                 HttpResponseMessage fileGetResponse = httpClient.SendAsync(fileGetRequest).Result;
                                 string content = fileGetResponse.Content.ReadAsStringAsync().Result;
                                 fileGetResponse.Dispose();
 
+                                //Write the content from GitHub file to a temp file in project temp folder
                                 StreamWriter sr = new StreamWriter("../../assignments/temp/" + file.name);
                                 sr.Write(content);
                                 sr.Close();
 
                             }
                         }
+                        #endregion
 
+                        #region Gather Needed Info to Pass to Factory
+                        var objRequest2 = new HttpRequestMessage(HttpMethod.Post, "http://localhost:61946/factory"); //TODO: replace path with Brad's link to cs website, e.g. cs.weber.bradley...
 
-                        string path = "http://localhost:61946/factory"; //TODO: replace with Brad's link to cs website, e.g. cs.weber.bradley...
-                        var objRequest2 = new HttpRequestMessage(HttpMethod.Post, path);
-
-                        //StreamReader r = new StreamReader("../../assignments/samples/c_asn/.acesconfig.json");
-                        //var jsonFile = r.ReadToEnd();
-
+                        //Gather JSON info to pass to Factory
                         var json = System.Text.Json.JsonSerializer.Serialize(new PostAddWatermark()
                         {
+
                             directory = "../../assignments/temp",
                             email = studentEmail,
                             asn_no = assignmentName,
                             existing_watermark = student_assignment_watermark,
                             whitespaces = whitespace_watermark,
                             jsonCode = assignment.JSONCode
-                            //jsonCode = jsonFile
 
                         });
 
                         // Populate request content to pass to the server
                         objRequest2.Content = new StringContent(json, Encoding.UTF8, "application/json");
+                        #endregion
 
+                        #region Pass Gathered Info to Factory/Check Response Content
                         // Check response
                         using (HttpResponseMessage objResponse2 = httpClient.SendAsync(objRequest2).Result)
                         {
@@ -307,6 +321,7 @@ namespace ACES.Controllers
                                 string[] temp2Files = System.IO.Directory.GetFiles("../../assignments/temp2");
                                 List<string> fileContents = new List<string>();
 
+                                //Get all watermarked files from temp folder and store in a List
                                 foreach(var file in temp2Files)
                                 {
 
@@ -317,17 +332,19 @@ namespace ACES.Controllers
 
                                 }
 
-                                var count = 0;
+                                var count = 0; //index variable to access items from List
 
+                                //This loop adds all watermarked files stored in List back to GitHub
                                 foreach(var file in contents) {
 
                                     if (deserializedObject.fileNames[count] == file.name)
                                     {
                                         //call api to put file to student's repo
                                         HttpRequestMessage filePutRequest = new HttpRequestMessage(HttpMethod.Put, file.url);
-                                        filePutRequest.Headers.Add("Authorization", "Bearer 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");
+                                        filePutRequest.Headers.Add("Authorization", "Bearer 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");
                                         filePutRequest.Content = new StringContent(JsonConvert.SerializeObject(new PutBody { message = "Added watermark", content = Convert.ToBase64String(Encoding.UTF8.GetBytes(fileContents[count])), sha = file.sha }), Encoding.UTF8, "application/json");
                                         HttpResponseMessage filePutResponse = httpClient.SendAsync(filePutRequest).Result;
+
                                         if (filePutResponse.IsSuccessStatusCode)
                                         {
                                             //TODO: display confirmation to a student?
@@ -336,12 +353,15 @@ namespace ACES.Controllers
                                         {
                                             //TODO: display an error message to a student
                                         }
+
                                         filePutResponse.Dispose();
                                         count++;
+
                                     }
 
                                 }
 
+                                //These foreach loops delete all temp files used
                                 foreach(var file in tempFiles)
                                 {
 
@@ -364,18 +384,29 @@ namespace ACES.Controllers
                             }
 
                         }
+                        #endregion
 
                     }
+                    else
+                    {
+
+                        //Give error
+
+                    }
+
                 }
+
             }
 
             var assignments = await _context.Assignment.Where(x => x.SectionId == sectionId).ToListAsync();
             return View(assignments);
      
         }
+        #endregion
+
     }
 
-    //JSON structures
+    #region JSON Structures
     struct PutBody
     {
         public String message;
@@ -426,4 +457,6 @@ namespace ACES.Controllers
         public int whitespaces { get; set; }
         public string jsonCode { get; set; }
     }
+    #endregion
+
 }
