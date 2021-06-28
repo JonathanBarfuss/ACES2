@@ -82,7 +82,7 @@ namespace ACES.Controllers
 
             var vm = new AssignmentStudentsVM()
             {
-                CourseId = assignment.SectionId,
+                CourseId = assignment.CourseId,
                 AssignmentId = id.Value,
                 AssignmentName = assignment.Name,
                 StudentAssignments = studentAssignments
@@ -129,22 +129,13 @@ namespace ACES.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,RepositoryUrl,SectionId,JSONCode,DueDate,CanvasLink")] Assignment assignment)
+        public async Task<IActionResult> Create([Bind("Id,Name,RepositoryUrl,CourseId,JSONCode,DueDate,CanvasLink")] Assignment assignment)
         {
             if (ModelState.IsValid)
             {
-                
                 _context.Add(assignment);
                 await _context.SaveChangesAsync();
-                var newId = (from x in _context.Assignment //get the generated assignmentId
-                             select x.Id).Max();
-
-                string canvasLink = String.Format(@"http://localhost:61946/?aID={0}", newId);
-                assignment.CanvasLink = canvasLink;
-                _context.Update(assignment);
-                await _context.SaveChangesAsync();
-
-                return RedirectToAction("CourseAssignments", "Courses", new { id = assignment.SectionId });
+                return RedirectToAction("CourseAssignments", "Courses", new { id = assignment.CourseId });
             }
             return View(assignment);
         }
@@ -163,7 +154,7 @@ namespace ACES.Controllers
                 return NotFound();
             }
 
-            ViewBag.SectionId = assignment.SectionId;
+            ViewBag.CourseId = assignment.CourseId;
             ViewBag.From = from; // This helps take us back to CourseAssignments if that's where we came from
             return View(assignment);
         }
@@ -173,7 +164,7 @@ namespace ACES.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,RepositoryUrl,SectionId,JSONCode,DueDate,CanvasLink")] Assignment assignment)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,RepositoryUrl,CourseId,JSONCode,DueDate,CanvasLink")] Assignment assignment)
         {
             if (id != assignment.Id)
             {
@@ -199,7 +190,7 @@ namespace ACES.Controllers
                     }
                 }
                 //return RedirectToAction(nameof(Index));  //use this if you would rather go to the list of all assignments
-                return RedirectToAction("CourseAssignments", "Courses", new { id = assignment.SectionId });
+                return RedirectToAction("CourseAssignments", "Courses", new { id = assignment.CourseId });
             }
             return View(assignment);
         }
@@ -230,50 +221,12 @@ namespace ACES.Controllers
             var assignment = await _context.Assignment.FindAsync(id);
             _context.Assignment.Remove(assignment);
             await _context.SaveChangesAsync();
-            return RedirectToAction("CourseAssignments", "Courses", new { id = assignment.SectionId });
+            return RedirectToAction("CourseAssignments", "Courses", new { id = assignment.CourseId });
         }
 
-        // Get: Assignments/StudentRepoForm
-        [HttpGet]
-        public async Task<IActionResult> StudentRepoForm(int assignmentId)
-        {
-            var vm = new StudentRepoVM()
-            {
-                assignmentId = assignmentId,
-                RepoURL = ""
-            };
-            ViewBag.assignmentId = assignmentId;
-
-            return View(vm);
-        }
-
-        // Post: Assignments/StudentRepoForm
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> StudentRepoForm([Bind("assignmentId,RepoURL")] StudentRepoVM vm)
-        {
-            //get the required data from form and cookie
-            string studentID;
-            int assignmentID = vm.assignmentId;
-            string studentRepoURL = vm.RepoURL;
-            if (Request.Cookies.ContainsKey("StudentID"))
-            {
-                studentID = Request.Cookies["StudentID"];
-            }
-
-            //find the assignment and get the sectionID
-            var assignment = _context.Assignment.Where(x => x.Id == vm.assignmentId).FirstOrDefault();
-            string sectionID = assignment.SectionId.ToString();
-
-
-            //redirect to the studentAssignments function
-            string tempurl = String.Format("/StudentInterface/StudentAssignments?assignmentId={0}&sectionId={1}", assignmentID, sectionID);
-            return RedirectToAction(tempurl);
-        }            
-        
         public async Task<IActionResult> DownloadAssignment(int courseId)
         {
-            var assignments = await _context.Assignment.Where(x => x.SectionId == courseId).ToListAsync();
+            var assignments = await _context.Assignment.Where(x => x.CourseId == courseId).ToListAsync();
             return View(assignments);
         }
 
