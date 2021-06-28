@@ -49,7 +49,7 @@ namespace ACES.Controllers
             List<Course> coursesList = new List<Course>();
             foreach (var enrollment in enrollments)
             {
-                List<Course> temp = await _context.Course.Where(x => x.Id == enrollment.SectionId).ToListAsync();
+                List<Course> temp = await _context.Course.Where(x => x.Id == enrollment.CourseId).ToListAsync();
                 foreach (var course in temp) 
                 {
                     coursesList.Add(course);
@@ -181,12 +181,12 @@ namespace ACES.Controllers
 
         #region StudentAssignments
         [HttpGet]
-        public async Task<IActionResult> StudentAssignments(int assignmentId, int sectionId) 
+        public async Task<IActionResult> StudentAssignments(int assignmentId, int courseId) 
         {
 
             if (assignmentId == 0)
             {
-                var courseAssignments = await _context.Assignment.Where(x => x.SectionId == sectionId).ToListAsync();
+                var courseAssignments = await _context.Assignment.Where(x => x.CourseId == courseId).ToListAsync();
                 return View(courseAssignments);
             }
             
@@ -398,7 +398,7 @@ namespace ACES.Controllers
 
             }
 
-            var assignments = await _context.Assignment.Where(x => x.SectionId == sectionId).ToListAsync();
+            var assignments = await _context.Assignment.Where(x => x.CourseId == courseId).ToListAsync();
             return View(assignments);
      
         }

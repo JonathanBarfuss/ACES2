@@ -20,7 +20,7 @@
                 @Html.DisplayNameFor(model => model.RepositoryUrl)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.SectionId)
+                @Html.DisplayNameFor(model => model.CourseId)
             </th>
             <th></th>
         </tr>
@@ -35,7 +35,7 @@
                 @Html.DisplayFor(modelItem => item.RepositoryUrl)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.SectionId)
+                @Html.DisplayFor(modelItem => item.CourseId)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Tweak</a> |
