@@ -41,7 +41,7 @@ namespace ACES.Migrations
                     b.Property<string>("RepositoryUrl")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("CourseId")
+                    b.Property<int>("SectionId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -107,7 +107,7 @@ namespace ACES.Migrations
                     b.Property<bool>("Active")
                         .HasColumnType("bit");
 
-                    b.Property<int>("CourseId")
+                    b.Property<int>("SectionId")
                         .HasColumnType("int");
 
                     b.Property<int>("StudentId")

@@ -24,7 +24,7 @@ namespace ACES.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "CourseId",
+                name: "SectionId",
                 table: "Enrollment");
 
             migrationBuilder.DropColumn(
@@ -36,7 +36,7 @@ namespace ACES.Migrations
                 table: "Assignment");
 
             migrationBuilder.DropColumn(
-                name: "CourseId",
+                name: "SectionId",
                 table: "Assignment");
 
             migrationBuilder.AddColumn<int>(
