@@ -192,8 +192,9 @@ namespace ACES.Controllers
             
             // Get assignment's url and name from Assignments table:
             var assignment = _context.Assignment.Where(x => x.Id == assignmentId).FirstOrDefault();
-            string assignmentUrl = assignment.RepositoryUrl.ToString(); // To test, update Assignment table in DB with relevant Url
+            string insructorAssignmentRepoUrl = assignment.RepositoryUrl.ToString(); 
             string assignmentName = $"{assignment.Name.Replace(" ", "_")}_";
+            string oatkn = new StreamReader("../../../.vscode/api.txt").ReadLine();
 
             // Get student's email and Id:
             Request.Cookies.TryGetValue("StudentEmail", out string studentEmail);
@@ -211,16 +212,17 @@ namespace ACES.Controllers
                 whitespace_watermark = json.SelectToken("whitespace_count").Value<int>();
             }
 
-            //TODO: Add code to clone instructor's repo for a student
-            var contentsRepoUrl = $"https://api.github.com/repos/AntiCheatSummer2021/assignment4-ShaneyPooh/contents";
+            //TODO: get student url from the field the students enters the repo name into
+            var studentRepoURL = "https://github.com/AntiCheatSummer2021/brad-assignment-ShaneyPooh";
             using (var httpClient = new HttpClient())
             {
 
                 //Set up Header info to request files from GitHub
-                httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer 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");
-                httpClient.DefaultRequestHeaders.Add("User-Agent", "C# App"); // TODO: name of appl: ACES
+                httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + oatkn);
+                httpClient.DefaultRequestHeaders.Add("User-Agent", "ACES");
                 httpClient.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
-                var objRequest1 = new HttpRequestMessage(HttpMethod.Get, contentsRepoUrl);
+                string instructorRepoContents = $"{insructorAssignmentRepoUrl}/contents".Replace("//github.com", "//api.github.com/repos");
+                var objRequest1 = new HttpRequestMessage(HttpMethod.Get, instructorRepoContents);
 
                 // Check response
                 using (HttpResponseMessage objResponse = httpClient.SendAsync(objRequest1).Result)
@@ -242,10 +244,9 @@ namespace ACES.Controllers
                             }
                             else if (file.type == "file")
                             {
-
                                 //Get file from repository contents
                                 HttpRequestMessage fileGetRequest = new HttpRequestMessage(HttpMethod.Get, file.download_url);
-                                fileGetRequest.Headers.Add("Authorization", "Bearer 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");
+                                fileGetRequest.Headers.Add("Authorization", "Bearer " + oatkn);
                                 HttpResponseMessage fileGetResponse = httpClient.SendAsync(fileGetRequest).Result;
                                 string content = fileGetResponse.Content.ReadAsStringAsync().Result;
                                 fileGetResponse.Dispose();
@@ -304,7 +305,7 @@ namespace ACES.Controllers
                                     {
                                         StudentId = studentId,
                                         AssignmentId = assignmentId,
-                                        RepositoryUrl = contentsRepoUrl,  //Change this to the actual student repo url
+                                        RepositoryUrl = studentRepoURL,  
                                         JSONCode = assignmentJSON
                                     };
                                     _context.StudentAssignment.Add(newStudentAssignment);
@@ -312,7 +313,7 @@ namespace ACES.Controllers
                                 }
                                 else
                                 {
-                                    studentAssignment.RepositoryUrl = contentsRepoUrl;
+                                    studentAssignment.RepositoryUrl = studentRepoURL;
                                     studentAssignment.JSONCode = assignmentJSON;
                                     _context.SaveChanges();
                                 }
@@ -340,9 +341,12 @@ namespace ACES.Controllers
                                     if (deserializedObject.fileNames[count] == file.name)
                                     {
                                         //call api to put file to student's repo
-                                        HttpRequestMessage filePutRequest = new HttpRequestMessage(HttpMethod.Put, file.url);
-                                        filePutRequest.Headers.Add("Authorization", "Bearer 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");
-                                        filePutRequest.Content = new StringContent(JsonConvert.SerializeObject(new PutBody { message = "Added watermark", content = Convert.ToBase64String(Encoding.UTF8.GetBytes(fileContents[count])), sha = file.sha }), Encoding.UTF8, "application/json");
+                                        string studentPartName = studentRepoURL.Substring(studentRepoURL.LastIndexOf("/") + 1);
+                                        string studentAssignmentRepoUrl = file.url.Replace("Template1", studentPartName);
+                                        HttpRequestMessage filePutRequest = new HttpRequestMessage(HttpMethod.Put, studentAssignmentRepoUrl);
+
+                                        filePutRequest.Headers.Add("Authorization", "Bearer " + oatkn);
+                                        filePutRequest.Content = new StringContent(JsonConvert.SerializeObject(new PutBody { message = "Add assignment file(s)", content = Convert.ToBase64String(Encoding.UTF8.GetBytes(fileContents[count])), sha = file.sha }), Encoding.UTF8, "application/json");
                                         HttpResponseMessage filePutResponse = httpClient.SendAsync(filePutRequest).Result;
 
                                         if (filePutResponse.IsSuccessStatusCode)
