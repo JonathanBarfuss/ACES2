@@ -34,8 +34,8 @@ namespace ACES.Controllers
             // Get more info about courses (total number of assignments and students):
             foreach (var course in courses)
             {
-                course.NumAssignments = _context.Assignment.Where(x => x.SectionId == course.Id).ToList().Count();
-                course.NumStudents = _context.Enrollment.Where(x => x.SectionId == course.Id).ToList().Count();
+                course.NumAssignments = _context.Assignment.Where(x => x.CourseId == course.Id).ToList().Count();
+                course.NumStudents = _context.Enrollment.Where(x => x.CourseId == course.Id).ToList().Count();
             }
             return View(courses);
         }
@@ -53,7 +53,7 @@ namespace ACES.Controllers
                 return NotFound();
             }
 
-            var assignments = await _context.Assignment.Where(x => x.SectionId == id).ToListAsync();
+            var assignments = await _context.Assignment.Where(x => x.CourseId == id).ToListAsync();
             var vm = new CourseAssignmentsVM()
             {
                 CourseId = id.Value,

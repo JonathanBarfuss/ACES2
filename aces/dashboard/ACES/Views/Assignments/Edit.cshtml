@@ -28,7 +28,7 @@
                 <input asp-for="DueDate" class="form-control" />
                 <span asp-validation-for="DueDate" class="text-danger"></span>
             </div>
-            <input name="SectionId" value="@ViewBag.SectionId" type="hidden" />  <!--Section ID shouldn't be something that can be changed, hidden value passed-->
+            <input name="CourseId" value="@ViewBag.CourseId" type="hidden" />  <!--Section ID shouldn't be something that can be changed, hidden value passed-->
             <div class="form-group">
                 <label asp-for="JSONCode" class="control-label"></label>
                 <textarea asp-for="JSONCode" class="form-control" rows="4"></textarea>
@@ -50,7 +50,7 @@
     @*This takes us back to CourseAssignments if that's where we came from*@
     @if (ViewBag.From == "courses")
     {
-        <a asp-controller="Courses" asp-action="CourseAssignments" asp-route-id="@Model.SectionId">Back to List</a>
+        <a asp-controller="Courses" asp-action="CourseAssignments" asp-route-id="@Model.CourseId">Back to List</a>
     }
     else
     {

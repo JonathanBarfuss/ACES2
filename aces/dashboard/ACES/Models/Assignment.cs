@@ -18,7 +18,7 @@ namespace ACES.Models
         [DisplayName("JSON Criteria")]
         public string JSONCode { get; set; }
 
-        public int SectionId { get; set; }
+        public int CourseId { get; set; }
 
         public DateTime DueDate { get; set; }
 

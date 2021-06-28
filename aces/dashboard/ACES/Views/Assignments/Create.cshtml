@@ -33,7 +33,7 @@
                 <textarea asp-for="JSONCode" class="form-control" rows="4"></textarea>
                 <span asp-validation-for="JSONCode" class="text-danger"></span>
             </div>
-            <input name="SectionId" value="@ViewBag.CourseId" type="hidden" />
+            <input name="CourseId" value="@ViewBag.CourseId" type="hidden" />
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>

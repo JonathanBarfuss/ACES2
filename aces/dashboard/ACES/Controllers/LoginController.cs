@@ -99,8 +99,8 @@ namespace ACES.Controllers
                         /*
                         Int32.TryParse(assignmentID, out int intID);
                         var assignment = _context.Assignment.Where(x => x.Id == intID).FirstOrDefault();  //get the specific assignment
-                        string sectionID = assignment.SectionId.ToString();  //get the assignment's sectionId
-                        string tempurl = String.Format("/StudentInterface/StudentAssignments?assignmentId={0}&sectionId={1}", assignmentID, sectionID);  //create the url
+                        string sectionID = assignment.CourseId.ToString();  //get the assignment's courseId
+                        string tempurl = String.Format("/StudentInterface/StudentAssignments?assignmentId={0}&courseId={1}", assignmentID, sectionID);  //create the url
                         return Redirect(tempurl);
                         */
                     }
