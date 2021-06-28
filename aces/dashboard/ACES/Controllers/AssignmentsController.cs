@@ -134,6 +134,12 @@ namespace ACES.Controllers
             if (ModelState.IsValid)
             {
                 _context.Add(assignment);
+                await _context.SaveChangesAsync(); var newId = (from x in _context.Assignment //get the generated assignmentId
+                                                                select x.Id).Max();
+
+                string canvasLink = String.Format(@"http://localhost:61946/?aID={0}", newId);
+                assignment.CanvasLink = canvasLink;
+                _context.Update(assignment);
                 await _context.SaveChangesAsync();
                 return RedirectToAction("CourseAssignments", "Courses", new { id = assignment.CourseId });
             }
@@ -222,6 +228,45 @@ namespace ACES.Controllers
             _context.Assignment.Remove(assignment);
             await _context.SaveChangesAsync();
             return RedirectToAction("CourseAssignments", "Courses", new { id = assignment.CourseId });
+        }
+
+        // Get: Assignments/StudentRepoForm
+        [HttpGet]
+        public async Task<IActionResult> StudentRepoForm(int assignmentId)
+        {
+            var vm = new StudentRepoVM()
+            {
+                assignmentId = assignmentId,
+                RepoURL = ""
+            };
+            ViewBag.assignmentId = assignmentId;
+
+            return View(vm);
+            //return RedirectToAction("CourseAssignments", "Courses", new { id = assignment.CourseId });
+        }
+
+        // Post: Assignments/StudentRepoForm
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> StudentRepoForm([Bind("assignmentId,RepoURL")] StudentRepoVM vm)
+        {
+            //get the required data from form and cookie
+            string studentID;
+            int assignmentID = vm.assignmentId;
+            string studentRepoURL = vm.RepoURL;
+            if (Request.Cookies.ContainsKey("StudentID"))
+            {
+                studentID = Request.Cookies["StudentID"];
+            }
+
+            //find the assignment and get the sectionID
+            var assignment = _context.Assignment.Where(x => x.Id == vm.assignmentId).FirstOrDefault();
+            string sectionID = assignment.CourseId.ToString();
+
+
+            //redirect to the studentAssignments function
+            string tempurl = String.Format("/StudentInterface/StudentAssignments?assignmentId={0}&sectionId={1}", assignmentID, sectionID);
+            return RedirectToAction(tempurl);
         }
 
         public async Task<IActionResult> DownloadAssignment(int courseId)
