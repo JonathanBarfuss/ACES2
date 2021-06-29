@@ -265,8 +265,7 @@ namespace ACES.Controllers
 
 
             //redirect to the studentAssignments function
-            //string tempurl = String.Format("../StudentInterface/StudentAssignments?assignmentId={0}&courseId={1}", assignmentID, courseID);
-            return RedirectToAction("StudentAssignments", "StudentInterface", new { assignmentId = assignmentID, courseId = courseID});
+            return RedirectToAction("StudentAssignments", "StudentInterface", new { assignmentId = assignmentID, courseId = courseID, studentRepoURL = studentRepoURL });
         }
 
         public async Task<IActionResult> DownloadAssignment(int courseId)

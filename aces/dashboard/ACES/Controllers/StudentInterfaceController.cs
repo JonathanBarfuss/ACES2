@@ -181,7 +181,7 @@ namespace ACES.Controllers
 
         #region StudentAssignments
         [HttpGet]
-        public async Task<IActionResult> StudentAssignments(int assignmentId, int courseId) 
+        public async Task<IActionResult> StudentAssignments(int assignmentId, int courseId, string studentRepoURL) 
         {
 
             if (assignmentId == 0)
@@ -213,7 +213,7 @@ namespace ACES.Controllers
             }
 
             //TODO: get student url from the field the students enters the repo name into
-            var studentRepoURL = "https://github.com/AntiCheatSummer2021/brad-assignment-ShaneyPooh";
+            //var studentRepoURL = "https://github.com/AntiCheatSummer2021/brad-assignment-ShaneyPooh";
             using (var httpClient = new HttpClient())
             {
 
