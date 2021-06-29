@@ -261,12 +261,12 @@ namespace ACES.Controllers
 
             //find the assignment and get the sectionID
             var assignment = _context.Assignment.Where(x => x.Id == vm.assignmentId).FirstOrDefault();
-            string sectionID = assignment.CourseId.ToString();
+            string courseID = assignment.CourseId.ToString();
 
 
             //redirect to the studentAssignments function
-            string tempurl = String.Format("/StudentInterface/StudentAssignments?assignmentId={0}&sectionId={1}", assignmentID, sectionID);
-            return RedirectToAction(tempurl);
+            //string tempurl = String.Format("../StudentInterface/StudentAssignments?assignmentId={0}&courseId={1}", assignmentID, courseID);
+            return RedirectToAction("StudentAssignments", "StudentInterface", new { assignmentId = assignmentID, courseId = courseID});
         }
 
         public async Task<IActionResult> DownloadAssignment(int courseId)
