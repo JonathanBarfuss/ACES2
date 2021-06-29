@@ -262,7 +262,6 @@ namespace ACES.Controllers
                                 System.IO.Directory.CreateDirectory("../../assignments/temp/");
                                 System.IO.Directory.CreateDirectory("../../assignments/temp2/");
 
-
                                 //Write the content from GitHub file to a temp file in project temp folder
                                 StreamWriter sr = new StreamWriter("../../assignments/temp/" + file.name);
                                 sr.Write(content);
