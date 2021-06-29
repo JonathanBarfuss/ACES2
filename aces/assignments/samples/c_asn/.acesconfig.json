@@ -1,16 +1,11 @@
 {
   "files": [
-    "add.c",
-    "b.c",
-    "e.c"
+    "add.c"
   ],
   "whitespaces": [
-    "6",
-    "12",
-    "16"
+    "6"
   ],
   "randomstring": [
-    "2",
-    "19"
+    "2"
   ]
 }

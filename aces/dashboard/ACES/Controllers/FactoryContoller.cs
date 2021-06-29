@@ -163,6 +163,9 @@ namespace ACES.Controllers
             file.Close();
             newFile.Close();
 
+            System.IO.File.Delete(dir + "/" + filename);
+            System.IO.File.Move("../../assignments/temp2/" + filename, dir + "/" + filename);
+
             return watermarks;
 
         }
