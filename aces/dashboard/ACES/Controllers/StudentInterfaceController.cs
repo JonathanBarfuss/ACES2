@@ -184,6 +184,14 @@ namespace ACES.Controllers
         public async Task<IActionResult> StudentAssignments(int assignmentId, int courseId, string studentRepoURL) 
         {
 
+            if(studentRepoURL == null)
+            {
+
+                studentRepoURL = "https://github.com/AntiCheatSummer2021/assignment4-ShaneyPooh";
+
+            }
+
+
             if (assignmentId == 0)
             {
                 var courseAssignments = await _context.Assignment.Where(x => x.CourseId == courseId).ToListAsync();
@@ -250,6 +258,10 @@ namespace ACES.Controllers
                                 HttpResponseMessage fileGetResponse = httpClient.SendAsync(fileGetRequest).Result;
                                 string content = fileGetResponse.Content.ReadAsStringAsync().Result;
                                 fileGetResponse.Dispose();
+
+                                System.IO.Directory.CreateDirectory("../../assignments/temp/");
+                                System.IO.Directory.CreateDirectory("../../assignments/temp2/");
+
 
                                 //Write the content from GitHub file to a temp file in project temp folder
                                 StreamWriter sr = new StreamWriter("../../assignments/temp/" + file.name);
@@ -318,66 +330,60 @@ namespace ACES.Controllers
                                     _context.SaveChanges();
                                 }
 
-                                string[] tempFiles = System.IO.Directory.GetFiles("../../assignments/temp");
-                                string[] temp2Files = System.IO.Directory.GetFiles("../../assignments/temp2");
-                                List<string> fileContents = new List<string>();
 
-                                //Get all watermarked files from temp folder and store in a List
-                                foreach(var file in temp2Files)
-                                {
-
-                                    StreamReader sr = new StreamReader(file);
-                                    var newFile = sr.ReadToEnd();
-                                    fileContents.Add(newFile);
-                                    sr.Close();
-
-                                }
+                                DirectoryInfo di = new DirectoryInfo("../../assignments/temp/");
+                                StreamReader sr = null;
+                                var firstFile = "";
 
                                 var count = 0; //index variable to access items from List
 
                                 //This loop adds all watermarked files stored in List back to GitHub
-                                foreach(var file in contents) {
+                                foreach(var file in contents) {                                   
 
-                                    if (deserializedObject.fileNames[count] == file.name)
+                                    if (file.name == "README.md")
                                     {
-                                        //call api to put file to student's repo
-                                        string studentPartName = studentRepoURL.Substring(studentRepoURL.LastIndexOf("/") + 1);
-                                        string studentAssignmentRepoUrl = file.url.Replace("Template1", studentPartName);
-                                        HttpRequestMessage filePutRequest = new HttpRequestMessage(HttpMethod.Put, studentAssignmentRepoUrl);
 
-                                        filePutRequest.Headers.Add("Authorization", "Bearer " + oatkn);
-                                        filePutRequest.Content = new StringContent(JsonConvert.SerializeObject(new PutBody { message = "Add assignment file(s)", content = Convert.ToBase64String(Encoding.UTF8.GetBytes(fileContents[count])), sha = file.sha }), Encoding.UTF8, "application/json");
-                                        HttpResponseMessage filePutResponse = httpClient.SendAsync(filePutRequest).Result;
-
-                                        if (filePutResponse.IsSuccessStatusCode)
-                                        {
-                                            //TODO: display confirmation to a student?
-                                        }
-                                        else
-                                        {
-                                            //TODO: display an error message to a student
-                                        }
-
-                                        filePutResponse.Dispose();
-                                        count++;
+                                        firstFile = "README.md";
+                                        sr = new StreamReader("../../assignments/temp/" + firstFile);
 
                                     }
+                                    else
+                                    {
 
+                                        firstFile = di.EnumerateFiles()
+                                                      .Select(f => f.Name)
+                                                      .FirstOrDefault();
+                                        sr = new StreamReader("../../assignments/temp/" + firstFile);
+
+                                    }
+                                    
+                                    var fileContent = sr.ReadToEnd();
+                                    sr.Close();
+
+                                    //call api to put file to student's repo
+                                    string studentPartName = studentRepoURL.Substring(studentRepoURL.LastIndexOf("/") + 1);
+                                    string studentAssignmentRepoUrl = file.url.Replace("Template1", studentPartName);
+                                    HttpRequestMessage filePutRequest = new HttpRequestMessage(HttpMethod.Put, studentAssignmentRepoUrl);
+
+                                    filePutRequest.Headers.Add("Authorization", "Bearer " + oatkn);
+                                    filePutRequest.Content = new StringContent(JsonConvert.SerializeObject(new PutBody { message = "Add assignment file(s)", content = Convert.ToBase64String(Encoding.UTF8.GetBytes(fileContent)), sha = file.sha }), Encoding.UTF8, "application/json");
+                                    HttpResponseMessage filePutResponse = httpClient.SendAsync(filePutRequest).Result;
+
+                                    if (filePutResponse.IsSuccessStatusCode)
+                                    {
+                                        //TODO: display confirmation to a student?
+                                    }
+                                    else
+                                    {
+                                        //TODO: display an error message to a student
+                                    }
+                                    
+                                    filePutResponse.Dispose();
+                                    count++;
+                                    System.IO.File.Delete("../../assignments/temp/" + firstFile);
+                                
                                 }
 
-                                //These foreach loops delete all temp files used
-                                foreach(var file in tempFiles)
-                                {
-
-                                    System.IO.File.Delete(file);
-
-                                }
-                                foreach (var file in temp2Files)
-                                {
-
-                                    System.IO.File.Delete(file);
-
-                                }
 
                             }
                             else
