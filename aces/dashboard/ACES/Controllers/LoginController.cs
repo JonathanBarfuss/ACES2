@@ -17,12 +17,13 @@ namespace ACES.Controllers
             _context = context;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string aID)
         {
+            ViewBag.assignmentID = aID;
             return View();
         }
 
-        public IActionResult AttemptLogin(string username, string password)
+        public IActionResult AttemptLogin(string username, string password, string assignmentID)
         {
             // Get lists of students and instructors
             var instructors = _context.Instructor.ToList();
@@ -88,6 +89,21 @@ namespace ACES.Controllers
                     Response.Cookies.Append("StudentID", student.Id.ToString());
                     student.IsLoggedIn = true;
                     _context.SaveChanges();
+
+                    if(!String.IsNullOrEmpty(assignmentID))  //if an assignment ID is provided go to that specific assignment
+                    {
+                        string tempurl = String.Format("/Assignments/StudentRepoForm?assignmentId={0}", assignmentID);
+                        return Redirect(tempurl);
+                        
+                        
+                        /*
+                        Int32.TryParse(assignmentID, out int intID);
+                        var assignment = _context.Assignment.Where(x => x.Id == intID).FirstOrDefault();  //get the specific assignment
+                        string sectionID = assignment.CourseId.ToString();  //get the assignment's courseId
+                        string tempurl = String.Format("/StudentInterface/StudentAssignments?assignmentId={0}&courseId={1}", assignmentID, sectionID);  //create the url
+                        return Redirect(tempurl);
+                        */
+                    }
                     return RedirectToAction("Index", "StudentInterface");
                 }
             }

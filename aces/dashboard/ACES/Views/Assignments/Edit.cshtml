@@ -28,7 +28,7 @@
                 <input asp-for="DueDate" class="form-control" />
                 <span asp-validation-for="DueDate" class="text-danger"></span>
             </div>
-            <input name="CourseId" value="@ViewBag.CourseId" type="hidden" />  <!--course ID shouldn't be something that can be changed, hidden value passed-->
+            <input name="CourseId" value="@ViewBag.CourseId" type="hidden" />  <!--Section ID shouldn't be something that can be changed, hidden value passed-->
             <div class="form-group">
                 <label asp-for="JSONCode" class="control-label"></label>
                 <textarea asp-for="JSONCode" class="form-control" rows="4"></textarea>
