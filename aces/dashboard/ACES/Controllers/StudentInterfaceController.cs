@@ -43,7 +43,7 @@ namespace ACES.Controllers
                 return RedirectToAction("Index", "Login");
             }
 
-            if (!String.IsNullOrEmpty(message))
+            if (!String.IsNullOrEmpty(message))  //check if an alert message is being passed
             {
                 ViewBag.IsMessage = "true";
                 ViewBag.Message = message;
@@ -397,9 +397,9 @@ namespace ACES.Controllers
                             }
                             else
                             {
-
                                 //Give error
-
+                                string error = String.Format("Error: Repository for assignment {0} has not been updated", assignment.Name);
+                                return RedirectToAction("Index", "StudentInterface", new { message = error });
                             }
 
                         }
@@ -408,9 +408,9 @@ namespace ACES.Controllers
                     }
                     else
                     {
-
                         //Give error
-
+                        string error = String.Format("Error: Repository for assignment {0} has not been updated", assignment.Name);
+                        return RedirectToAction("Index", "StudentInterface", new { message = error });
                     }
 
                 }

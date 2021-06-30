@@ -15,6 +15,7 @@ function copyFunction(id) {
     textArea.remove();
 }
 
+// Function used to animate the alert box
 $(document).ready(function () {
     $("#statusBox").animate({ height: "25%",opacity: "100%" }, 2000);
     });
