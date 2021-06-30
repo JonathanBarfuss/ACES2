@@ -205,7 +205,7 @@ namespace ACES.Controllers
             }
 
             // Get assignment's url and name from Assignments table:
-                var assignment = _context.Assignment.Where(x => x.Id == assignmentId).FirstOrDefault();
+            var assignment = _context.Assignment.Where(x => x.Id == assignmentId).FirstOrDefault();
             string insructorAssignmentRepoUrl = assignment.RepositoryUrl.ToString(); 
             string assignmentName = $"{assignment.Name.Replace(" ", "_")}_";
             string oatkn = new StreamReader("../../../.vscode/api.txt").ReadLine();
@@ -377,22 +377,22 @@ namespace ACES.Controllers
                                     if (filePutResponse.IsSuccessStatusCode)
                                     {
                                         //TODO: display confirmation to a student?
-                                        string confirm = String.Format("Your Repository for assignment {0} has been updated", assignment.Name);
-                                        return RedirectToAction("Index", "StudentInterface", new { message = confirm });
+                                        filePutResponse.Dispose();
+                                        count++;
+                                        System.IO.File.Delete("../../assignments/temp/" + firstFile);
+
                                     }
                                     else
                                     {
                                         //TODO: display an error message to a student
                                         string error = String.Format("Error: Repository for assignment {0} has not been updated", assignment.Name);
                                         return RedirectToAction("Index", "StudentInterface", new { message = error });
-                                    }
-                                    
-                                    filePutResponse.Dispose();
-                                    count++;
-                                    System.IO.File.Delete("../../assignments/temp/" + firstFile);
+                                    }                                  
                                 
                                 }
 
+                                string confirm = String.Format("Your Repository for assignment {0} has been updated", assignment.Name);
+                                return RedirectToAction("Index", "StudentInterface", new { message = confirm });
 
                             }
                             else
