@@ -14,3 +14,7 @@ function copyFunction(id) {
     document.execCommand("Copy");  //copy it to the clipboard
     textArea.remove();
 }
+
+$(document).ready(function () {
+    $("#statusBox").animate({ height: "25%",opacity: "100%" }, 2000);
+    });

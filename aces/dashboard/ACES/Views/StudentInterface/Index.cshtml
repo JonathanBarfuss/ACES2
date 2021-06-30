@@ -17,15 +17,24 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.CourseName)
-            </td>
-            <td>
-                <a asp-action="StudentAssignments" asp-route-courseId="@item.Id">Assignments</a> 
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CourseName)
+                </td>
+                <td>
+                    <a asp-action="StudentAssignments" asp-route-courseId="@item.Id">Assignments</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
+@if (ViewBag.IsMessage == "true")
+{
+    <div class="alert alert-primary alert-dismissible hide" id="statusBox">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <h4>Alert:</h4>
+        <p>@ViewBag.Message</p>
+    </div>
+}

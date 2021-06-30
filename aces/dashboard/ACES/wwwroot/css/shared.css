@@ -19,3 +19,12 @@
     background: #fff;
 }
 
+#statusBox {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 20%;
+    height: 5%;
+    z-index: 5;
+    opacity: 1%;
+}

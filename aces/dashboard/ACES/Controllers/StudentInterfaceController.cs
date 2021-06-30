@@ -36,11 +36,17 @@ namespace ACES.Controllers
         }
 
         #region GET: StudentInterface
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? message)
         {
             if (!Request.Cookies.ContainsKey("StudentID"))
             {
                 return RedirectToAction("Index", "Login");
+            }
+
+            if (!String.IsNullOrEmpty(message))
+            {
+                ViewBag.IsMessage = "true";
+                ViewBag.Message = message;
             }
 
             var studentId = int.Parse(Request.Cookies["StudentID"]);
@@ -197,9 +203,9 @@ namespace ACES.Controllers
                 var courseAssignments = await _context.Assignment.Where(x => x.CourseId == courseId).ToListAsync();
                 return View(courseAssignments);
             }
-            
+
             // Get assignment's url and name from Assignments table:
-            var assignment = _context.Assignment.Where(x => x.Id == assignmentId).FirstOrDefault();
+                var assignment = _context.Assignment.Where(x => x.Id == assignmentId).FirstOrDefault();
             string insructorAssignmentRepoUrl = assignment.RepositoryUrl.ToString(); 
             string assignmentName = $"{assignment.Name.Replace(" ", "_")}_";
             string oatkn = new StreamReader("../../../.vscode/api.txt").ReadLine();
@@ -371,10 +377,14 @@ namespace ACES.Controllers
                                     if (filePutResponse.IsSuccessStatusCode)
                                     {
                                         //TODO: display confirmation to a student?
+                                        string confirm = String.Format("Your Repository for assignment {0} has been updated", assignment.Name);
+                                        return RedirectToAction("Index", "StudentInterface", new { message = confirm });
                                     }
                                     else
                                     {
                                         //TODO: display an error message to a student
+                                        string error = String.Format("Error: Repository for assignment {0} has not been updated", assignment.Name);
+                                        return RedirectToAction("Index", "StudentInterface", new { message = error });
                                     }
                                     
                                     filePutResponse.Dispose();

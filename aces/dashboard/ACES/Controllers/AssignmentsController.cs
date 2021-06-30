@@ -242,7 +242,6 @@ namespace ACES.Controllers
             ViewBag.assignmentId = assignmentId;
 
             return View(vm);
-            //return RedirectToAction("CourseAssignments", "Courses", new { id = assignment.CourseId });
         }
 
         // Post: Assignments/StudentRepoForm
@@ -262,7 +261,6 @@ namespace ACES.Controllers
             //find the assignment and get the sectionID
             var assignment = _context.Assignment.Where(x => x.Id == vm.assignmentId).FirstOrDefault();
             string courseID = assignment.CourseId.ToString();
-
 
             //redirect to the studentAssignments function
             return RedirectToAction("StudentAssignments", "StudentInterface", new { assignmentId = assignmentID, courseId = courseID, studentRepoURL = studentRepoURL });
