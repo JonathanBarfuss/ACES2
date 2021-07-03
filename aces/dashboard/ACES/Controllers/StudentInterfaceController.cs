@@ -282,7 +282,7 @@ namespace ACES.Controllers
                         #endregion
 
                         #region Gather Needed Info to Pass to Factory
-                        var objRequest2 = new HttpRequestMessage(HttpMethod.Post, "http://localhost:61946/factory"); //TODO: replace path with Brad's link to cs website, e.g. cs.weber.bradley... // should still use localhost, otherwise needs to do dns routing, going to internet, call does not go out
+                        var objRequest2 = new HttpRequestMessage(HttpMethod.Post, "http://localhost:61946/factory"); //TODO: replace path with Brad's link to cs website, e.g. cs.weber.bradley...// should still use localhost, otherwise needs to do dns routing, going to internet, vs call does not go out
 
                         //Gather JSON info to pass to Factory
                         var json = System.Text.Json.JsonSerializer.Serialize(new PostAddWatermark()
