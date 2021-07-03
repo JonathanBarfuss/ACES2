@@ -1,3 +1,19 @@
+### appsettings.json template
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information"
+    }
+  },
+  "AllowedHosts": "*",
+  "ConnectionStrings": {
+    "ACESContext": "Data Source=titan.cs.weber.edu,10433;Initial Catalog=BradHasIt;User ID=BradHasIt;Password=BradHasIt"
+  },
+  "GithubToken": "BradHasIt"
+}
+
 # Anti-Cheat Enforcement System
 
 ACES is a containerized web application designed to manage software-based assignments for instructors while providing guards against various forms of cheating. The application runs through [Docker](https://www.docker.com/) and utilizes Docker-Compose to build and manage different microservices, consisting of four main pieces:
