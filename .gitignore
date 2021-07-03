@@ -364,6 +364,9 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 
+# Ignore github token
+appsettings.json
+
 # Ignore things not set up automatically (05/27/2020)
 *.cshtml.g.cs
 *.cache

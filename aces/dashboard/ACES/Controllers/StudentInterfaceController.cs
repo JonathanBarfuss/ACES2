@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using System.IO;
 using System.Text;
 using Newtonsoft.Json.Linq;
+using Microsoft.Extensions.Configuration;
 
 namespace ACES.Controllers
 {
@@ -19,10 +20,13 @@ namespace ACES.Controllers
 
         private readonly ACESContext _context;
 
-        public StudentInterfaceController(ACESContext context)
+        public StudentInterfaceController(ACESContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
+
+        private readonly IConfiguration _configuration;
 
         // GET: StudentInterface/Create
         public IActionResult Create()
@@ -208,7 +212,7 @@ namespace ACES.Controllers
             var assignment = _context.Assignment.Where(x => x.Id == assignmentId).FirstOrDefault();
             string insructorAssignmentRepoUrl = assignment.RepositoryUrl.ToString(); 
             string assignmentName = $"{assignment.Name.Replace(" ", "_")}_";
-            string oatkn = new StreamReader("../../../.vscode/api.txt").ReadLine();
+            string token = _configuration["GithubToken"];
 
             // Get student's email and Id:
             Request.Cookies.TryGetValue("StudentEmail", out string studentEmail);
@@ -232,7 +236,7 @@ namespace ACES.Controllers
             {
 
                 //Set up Header info to request files from GitHub
-                httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + oatkn);
+                httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
                 httpClient.DefaultRequestHeaders.Add("User-Agent", "ACES");
                 httpClient.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
                 string instructorRepoContents = $"{insructorAssignmentRepoUrl}/contents".Replace("//github.com", "//api.github.com/repos");
@@ -260,7 +264,7 @@ namespace ACES.Controllers
                             {
                                 //Get file from repository contents
                                 HttpRequestMessage fileGetRequest = new HttpRequestMessage(HttpMethod.Get, file.download_url);
-                                fileGetRequest.Headers.Add("Authorization", "Bearer " + oatkn);
+                                fileGetRequest.Headers.Add("Authorization", "Bearer " + token);
                                 HttpResponseMessage fileGetResponse = httpClient.SendAsync(fileGetRequest).Result;
                                 string content = fileGetResponse.Content.ReadAsStringAsync().Result;
                                 fileGetResponse.Dispose();
@@ -278,7 +282,7 @@ namespace ACES.Controllers
                         #endregion
 
                         #region Gather Needed Info to Pass to Factory
-                        var objRequest2 = new HttpRequestMessage(HttpMethod.Post, "http://localhost:61946/factory"); //TODO: replace path with Brad's link to cs website, e.g. cs.weber.bradley...
+                        var objRequest2 = new HttpRequestMessage(HttpMethod.Post, "http://localhost:61946/factory"); //TODO: replace path with Brad's link to cs website, e.g. cs.weber.bradley... // should still use localhost, otherwise needs to do dns routing, going to internet, call does not go out
 
                         //Gather JSON info to pass to Factory
                         var json = System.Text.Json.JsonSerializer.Serialize(new PostAddWatermark()
@@ -370,7 +374,7 @@ namespace ACES.Controllers
                                     string studentAssignmentRepoUrl = file.url.Replace("Template1", studentPartName);
                                     HttpRequestMessage filePutRequest = new HttpRequestMessage(HttpMethod.Put, studentAssignmentRepoUrl);
 
-                                    filePutRequest.Headers.Add("Authorization", "Bearer " + oatkn);
+                                    filePutRequest.Headers.Add("Authorization", "Bearer " + token);
                                     filePutRequest.Content = new StringContent(JsonConvert.SerializeObject(new PutBody { message = "Add assignment file(s)", content = Convert.ToBase64String(Encoding.UTF8.GetBytes(fileContent)), sha = file.sha }), Encoding.UTF8, "application/json");
                                     HttpResponseMessage filePutResponse = httpClient.SendAsync(filePutRequest).Result;
 
