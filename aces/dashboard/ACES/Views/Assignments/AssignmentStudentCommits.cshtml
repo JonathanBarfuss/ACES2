@@ -12,9 +12,6 @@
         <thead>
             <tr>
                 <th>Commit Date</th>
-                <th>Lines Added</th>
-                <th>Lines Deleted</th>
-                <th>Number of Watermarks</th>
                 <th>JSON Results</th>
             </tr>
         </thead>
@@ -23,9 +20,6 @@
             {
             <tr>
                 <td>@commit.DateCommitted.ToString("MM/dd/yyyy hh:mm tt")</td>
-                <td>@commit.LinesAdded</td>
-                <td>@commit.LinesDeleted</td>
-                <td>@commit.NumWatermarks/@Model.NumWatermarks</td>
                 <td>@commit.JSONCode</td>
             </tr>
             }

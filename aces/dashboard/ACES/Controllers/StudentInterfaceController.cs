@@ -54,12 +54,13 @@ namespace ACES.Controllers
             }
 
             var studentId = int.Parse(Request.Cookies["StudentID"]);
-            var enrollments = await _context.Enrollment.Where(x => x.StudentId == studentId).ToListAsync();
-            enrollments = enrollments.Where(x => x.Active == true).ToList();    //filter based on active enrollments
-            List<Course> coursesList = new List<Course>();
+            var enrollments = await _context.Enrollment.Where(x => x.StudentId == studentId).ToListAsync();  //get the active student's enrollments
+
+            List < Course > coursesList = new List<Course>();
             foreach (var enrollment in enrollments)
             {
                 List<Course> temp = await _context.Course.Where(x => x.Id == enrollment.CourseId).ToListAsync();
+                temp = temp.Where(x => x.IsCourseActive == true).ToList();  //filter based on active courses
                 foreach (var course in temp) 
                 {
                     coursesList.Add(course);

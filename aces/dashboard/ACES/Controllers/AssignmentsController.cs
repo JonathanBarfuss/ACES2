@@ -51,6 +51,7 @@ namespace ACES.Controllers
                 sAssignment.NumCommits = commits.Count();
                 sAssignment.StudentName = student.FullName;
 
+                /***************************************** verify this block of code is no longer needed ******************************************
                 // Get rations
                 var watermarkAvg = 0.0;
                 var linesModifiedAvg = 0.0;
@@ -72,12 +73,14 @@ namespace ACES.Controllers
                     linesModifiedAvg /= commits.Count();
                     timeBetweenAvg /= commits.Count();
                     pointsAvg /= commits.Count();
+                
                 }
 
                 // Otherwise they are all 0
                 //sAssignment.WatermarksRatio = watermarkAvg + "/" + sAssignment.NumWatermarks;
                 sAssignment.LinesModifiedAvg = linesModifiedAvg;
                 sAssignment.TimeBetweenAvg = timeBetweenAvg;
+                */
             }
 
             var vm = new AssignmentStudentsVM()

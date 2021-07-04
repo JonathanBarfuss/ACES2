@@ -30,6 +30,7 @@ namespace ACES.Controllers
 
             var instructorId = int.Parse(Request.Cookies["InstructorID"]);
             var courses = await _context.Course.Where(x => x.InstructorId == instructorId).ToListAsync();
+            courses = courses.Where(x => x.IsCourseActive == true).ToList();  //only show the active courses
 
             // Get more info about courses (total number of assignments and students):
             foreach (var course in courses)

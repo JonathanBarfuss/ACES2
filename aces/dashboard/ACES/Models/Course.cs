@@ -13,6 +13,7 @@ namespace ACES.Models
         [DisplayName("Course Name")]
         public string CourseName { get; set; }
         public int InstructorId { get; set; }
+        public bool IsCourseActive { get; set; }
 
         #region For Views
         [NotMapped]
