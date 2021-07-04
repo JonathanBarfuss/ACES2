@@ -17,5 +17,5 @@ function copyFunction(id) {
 
 // Function used to animate the alert box
 $(document).ready(function () {
-    $("#statusBox").animate({ height: "25%",opacity: "100%" }, 2000);
+    $("#statusBox").animate({ height: "25%", opacity: "1.0" }, 2000);
     });
