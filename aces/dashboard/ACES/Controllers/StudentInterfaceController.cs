@@ -193,20 +193,19 @@ namespace ACES.Controllers
         #region StudentAssignments
         [HttpGet]
         public async Task<IActionResult> StudentAssignments(int assignmentId, int courseId, string studentRepoURL) 
-        {
-
-            if(studentRepoURL == null)
-            {
-
-                studentRepoURL = "https://github.com/AntiCheatSummer2021/assignment4-ShaneyPooh";
-
-            }
-
-
+        {          
             if (assignmentId == 0)
             {
                 var courseAssignments = await _context.Assignment.Where(x => x.CourseId == courseId).ToListAsync();
                 return View(courseAssignments);
+            }
+
+            //TODO: modify to validate (first check for empty repo entry, second check for invalid repo)
+            //TODO: and to display error to a student to enter the valid repo string, also provide an example above the field!
+            if (studentRepoURL == null)
+            {
+                studentRepoURL = "https://github.com/AntiCheatSummer2021/assignment4-ShaneyPooh";
+                //studentRepoURL = "https://github.com/AntiCheatSummer2021/brad-assignment-ShaneyPooh";
             }
 
             // Get assignment's url and name from Assignments table:
@@ -214,44 +213,42 @@ namespace ACES.Controllers
             string insructorAssignmentRepoUrl = assignment.RepositoryUrl.ToString(); 
             string assignmentName = $"{assignment.Name.Replace(" ", "_")}_";
             string token = _configuration["GithubToken"];
-
+            dynamic objAssignmentJson = Newtonsoft.Json.JsonConvert.DeserializeObject(assignment.JSONCode);
+       
             // Get student's email and Id:
-            Request.Cookies.TryGetValue("StudentEmail", out string studentEmail);
+            Request.Cookies.TryGetValue("StudentEmail", out string studentEmail); 
             Request.Cookies.TryGetValue("StudentId", out string strStudentId);
             Int32.TryParse(strStudentId, out int studentId);
-            string student_assignment_watermark = String.Empty;
-            int whitespace_watermark = -1;
 
-            // Get existing watermark if student already downloaded this assignment earlier
+            // Stop downloading assignment if student already downloaded this assignment earlier
             var studentAssignment = _context.StudentAssignment.Where(x => x.StudentId == studentId && x.AssignmentId == assignmentId).FirstOrDefault();
             if (studentAssignment != null)
             {
-                JObject json = JObject.Parse(studentAssignment.JSONCode);
-                student_assignment_watermark = json.SelectToken("watermark").Value<string>();
-                whitespace_watermark = json.SelectToken("whitespace_count").Value<int>();
+                string error = String.Format("Error: Repository for assignment {0} has already been created earlier. Click Remake link for this assignment, if you want new files", assignment.Name);
+                return RedirectToAction("Index", "StudentInterface", new { message = error });
             }
 
-            //TODO: get student url from the field the students enters the repo name into
-            //var studentRepoURL = "https://github.com/AntiCheatSummer2021/brad-assignment-ShaneyPooh";
+            // Declare studentMarkedfiles list to start adding marked files data that later will go to StudentAssignmentJson object for storing in the database in the StudentAssignment table in the JSONCode column           
+            List<StudentMarkedFile> studentMarkedfiles = new List<StudentMarkedFile>();
+            var studentAssignmentJson = new StudentAssignmentJson() { };            
+
+            // Start GitHub API call to get files from instructor's repo
             using (var httpClient = new HttpClient())
             {
-
                 //Set up Header info to request files from GitHub
                 httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
                 httpClient.DefaultRequestHeaders.Add("User-Agent", "ACES");
                 httpClient.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
                 string instructorRepoContents = $"{insructorAssignmentRepoUrl}/contents".Replace("//github.com", "//api.github.com/repos");
-                var objRequest1 = new HttpRequestMessage(HttpMethod.Get, instructorRepoContents);
+                var objInstructorRepoRequest = new HttpRequestMessage(HttpMethod.Get, instructorRepoContents);
 
-                // Check response
-                using (HttpResponseMessage objResponse = httpClient.SendAsync(objRequest1).Result)
+                // Get response
+                using (HttpResponseMessage objInstructorRepoResponse = httpClient.SendAsync(objInstructorRepoRequest).Result)
                 {
-
-                    if (objResponse.IsSuccessStatusCode)
+                    if (objInstructorRepoResponse.IsSuccessStatusCode)
                     {
-
-                        #region Get Files From Repository/Put them in temp files
-                        FileInfo[] contents = JsonConvert.DeserializeObject<FileInfo[]>(objResponse.Content.ReadAsStringAsync().Result);
+                        #region Get Files From Instructor's Repository/Put them in temp files
+                        FileInfo[] contents = JsonConvert.DeserializeObject<FileInfo[]>(objInstructorRepoResponse.Content.ReadAsStringAsync().Result);
                         foreach (var file in contents)
                         {
                             var fileType = file.type;
@@ -259,175 +256,136 @@ namespace ACES.Controllers
                             if (file.type == "dir")
                             {
                                 var directoryContentsUrl = file.url;
-                                // use this URL to list the contents of the folder
+                                // future enhancement: use this URL to get the contents of the folder if instructor uses folders in addition to files
                             }
                             else if (file.type == "file")
                             {
-                                //Get file from repository contents
+                                // Get file from instructor's repository contents, customize it if needed
+                                // and put it into student's repo
                                 HttpRequestMessage fileGetRequest = new HttpRequestMessage(HttpMethod.Get, file.download_url);
                                 fileGetRequest.Headers.Add("Authorization", "Bearer " + token);
                                 HttpResponseMessage fileGetResponse = httpClient.SendAsync(fileGetRequest).Result;
                                 string content = fileGetResponse.Content.ReadAsStringAsync().Result;
                                 fileGetResponse.Dispose();
 
-                                System.IO.Directory.CreateDirectory("../../assignments/temp/");
-                                System.IO.Directory.CreateDirectory("../../assignments/temp2/");
-
-                                //Write the content from GitHub file to a temp file in project temp folder
-                                StreamWriter sr = new StreamWriter("../../assignments/temp/" + file.name);
-                                sr.Write(content);
-                                sr.Close();
-
-                            }
-                        }
-                        #endregion
-
-                        #region Gather Needed Info to Pass to Factory
-                        var objRequest2 = new HttpRequestMessage(HttpMethod.Post, "http://localhost:61946/factory"); //TODO: replace path with Brad's link to cs website, e.g. cs.weber.bradley...// should still use localhost, otherwise needs to do dns routing, going to internet, vs call does not go out
-
-                        //Gather JSON info to pass to Factory
-                        var json = System.Text.Json.JsonSerializer.Serialize(new PostAddWatermark()
-                        {
-
-                            directory = "../../assignments/temp",
-                            email = studentEmail,
-                            asn_no = assignmentName,
-                            existing_watermark = student_assignment_watermark,
-                            whitespaces = whitespace_watermark,
-                            jsonCode = assignment.JSONCode
-
-                        });
-
-                        // Populate request content to pass to the server
-                        objRequest2.Content = new StringContent(json, Encoding.UTF8, "application/json");
-                        #endregion
-
-                        #region Pass Gathered Info to Factory/Check Response Content
-                        // Check response
-                        using (HttpResponseMessage objResponse2 = httpClient.SendAsync(objRequest2).Result)
-                        {
-                            if (objResponse.IsSuccessStatusCode)
-                            {
-                                // Parse response content
-                                var deserializedObject = JsonConvert.DeserializeObject<GetWatermarkedAssignment>(objResponse2.Content.ReadAsStringAsync().Result);
-
-                                // formats watermark data in a json to store in the database
-                                var assignmentJSON = System.Text.Json.JsonSerializer.Serialize(new GetWatermarkedAssignment()
+                                // Check if file is part of JSON instructions for watermarking.
+                                foreach (var fileInJson in objAssignmentJson.files)
                                 {
-                                    whitespace_count = deserializedObject.whitespace_count,
-                                    watermark = deserializedObject.watermark,
-                                    watermark_count = deserializedObject.watermark_count,
-                                    fileNames = deserializedObject.fileNames
-                                });
-
-                                // If first download, store the downloading assignment data in StudentAssignment table in the DB:
-                                if (studentAssignment == null)
-                                {
-                                    var newStudentAssignment = new StudentAssignment()
+                                    if (fileInJson.name.Value == file.name)
                                     {
-                                        StudentId = studentId,
-                                        AssignmentId = assignmentId,
-                                        RepositoryUrl = studentRepoURL,  
-                                        JSONCode = assignmentJSON
-                                    };
-                                    _context.StudentAssignment.Add(newStudentAssignment);
-                                    _context.SaveChanges();
+                                        // If yes, send the file to factory with Json object.
+                                        #region Gather Needed Info to Pass to Factory
+                                        var fileInstructions = System.Text.Json.JsonSerializer.Serialize(new PostAddWatermark()
+                                        {
+                                            email = studentEmail,
+                                            assignmentName = assignmentName,
+                                            fileName = fileInJson.name.Value,
+                                            whitespacesLineNumbers = fileInJson.whitespaces.ToObject<int[]>(),
+                                            randomStringLineNumbers = fileInJson.randomstring.ToObject<int[]>(),
+                                            fileContent = content
+                                        });
+                                        #endregion
+
+                                        #region Pass Gathered Info to Factory/Check Response Content
+                                        var objFactoryRequest = new HttpRequestMessage(HttpMethod.Post, "http://localhost:61946/factory"); //TODO: replace path with Brad's link to cs website, e.g. cs.weber.bradley...// should still use localhost, otherwise needs to do dns routing, going to internet, vs call does not go out?
+                                         objFactoryRequest.Content = new StringContent(fileInstructions, Encoding.UTF8, "application/json");
+                                        // Check response
+                                        using (HttpResponseMessage objFactoryResponse = httpClient.SendAsync(objFactoryRequest).Result)
+                                        {
+                                            if (objInstructorRepoResponse.IsSuccessStatusCode)
+                                            {
+                                                // Parse response content
+                                                var deserializedObject = JsonConvert.DeserializeObject<GetWatermarkedAssignment>(objFactoryResponse.Content.ReadAsStringAsync().Result);
+                                                content = deserializedObject.markedFileContent; // update content for relevant file                                             
+
+                                                // Add a new StudentMarkedFile object to the studentMarkedfiles list to be added to the database later
+                                                studentMarkedfiles.Add(new StudentMarkedFile
+                                                {
+                                                    fileName = fileInJson.name.Value,
+                                                    numberOfLinesInFile = (int)fileInJson.lines.Value,
+                                                    watermark = deserializedObject.watermark,
+                                                    numberOfWhitespaceCharacters = deserializedObject.numberOfWhitespaceCharacters,
+                                                    whitespacesLineNumbers = fileInJson.whitespaces.ToObject<int[]>(),
+                                                    randomStringLineNumbers = fileInJson.randomstring.ToObject<int[]>()
+                                                });
+                                            }
+                                            else
+                                            {
+                                                string error = String.Format("Error: Repository for assignment {0} has not been updated", assignment.Name);
+                                                return RedirectToAction("Index", "StudentInterface", new { message = error });
+                                            }
+                                        }
+                                        #endregion
+
+                                        break;
+                                    }
+                                }                                
+
+                                #region Upload file to student's repo
+                                // Upload each file (we are still in the files loop) to student's repo,
+                                // regardless of whether this file is customized or not requiring customization, e.g. README.md
+                                string studentPartName = studentRepoURL.Substring(studentRepoURL.LastIndexOf("/") + 1);
+                                string studentAssignmentRepoUrl = file.url.Replace("Template1", studentPartName); //TODO: replace Template1 for parcing actual name
+                                HttpRequestMessage filePutToStudentRepoRequest = new HttpRequestMessage(HttpMethod.Put, studentAssignmentRepoUrl);
+
+                                filePutToStudentRepoRequest.Headers.Add("Authorization", "Bearer " + token);
+                                filePutToStudentRepoRequest.Content = new StringContent(JsonConvert.SerializeObject(new PutBody { message = "Add assignment file(s)", content = Convert.ToBase64String(Encoding.UTF8.GetBytes(content)), sha = file.sha }), Encoding.UTF8, "application/json");
+                                HttpResponseMessage filePutToStudentRepoResponse = httpClient.SendAsync(filePutToStudentRepoRequest).Result;
+
+                                if (filePutToStudentRepoResponse.IsSuccessStatusCode)
+                                {
+                                    filePutToStudentRepoResponse.Dispose();                                    
                                 }
                                 else
                                 {
-                                    studentAssignment.RepositoryUrl = studentRepoURL;
-                                    studentAssignment.JSONCode = assignmentJSON;
-                                    _context.SaveChanges();
+                                    string error = String.Format("Error: Repository for assignment {0} has not been updated", assignment.Name);
+                                    return RedirectToAction("Index", "StudentInterface", new { message = error });
                                 }
-
-
-                                DirectoryInfo di = new DirectoryInfo("../../assignments/temp/");
-                                StreamReader sr = null;
-                                var firstFile = "";
-
-                                var count = 0; //index variable to access items from List
-
-                                //This loop adds all watermarked files stored in List back to GitHub
-                                foreach(var file in contents) {                                   
-
-                                    if (file.name == "README.md")
-                                    {
-
-                                        firstFile = "README.md";
-                                        sr = new StreamReader("../../assignments/temp/" + firstFile);
-
-                                    }
-                                    else
-                                    {
-
-                                        firstFile = di.EnumerateFiles()
-                                                      .Select(f => f.Name)
-                                                      .FirstOrDefault();
-                                        sr = new StreamReader("../../assignments/temp/" + firstFile);
-
-                                    }
-                                    
-                                    var fileContent = sr.ReadToEnd();
-                                    sr.Close();
-
-                                    //call api to put file to student's repo
-                                    string studentPartName = studentRepoURL.Substring(studentRepoURL.LastIndexOf("/") + 1);
-                                    string studentAssignmentRepoUrl = file.url.Replace("Template1", studentPartName);
-                                    HttpRequestMessage filePutRequest = new HttpRequestMessage(HttpMethod.Put, studentAssignmentRepoUrl);
-
-                                    filePutRequest.Headers.Add("Authorization", "Bearer " + token);
-                                    filePutRequest.Content = new StringContent(JsonConvert.SerializeObject(new PutBody { message = "Add assignment file(s)", content = Convert.ToBase64String(Encoding.UTF8.GetBytes(fileContent)), sha = file.sha }), Encoding.UTF8, "application/json");
-                                    HttpResponseMessage filePutResponse = httpClient.SendAsync(filePutRequest).Result;
-
-                                    if (filePutResponse.IsSuccessStatusCode)
-                                    {
-                                        //TODO: display confirmation to a student?
-                                        filePutResponse.Dispose();
-                                        count++;
-                                        System.IO.File.Delete("../../assignments/temp/" + firstFile);
-
-                                    }
-                                    else
-                                    {
-                                        //TODO: display an error message to a student
-                                        string error = String.Format("Error: Repository for assignment {0} has not been updated", assignment.Name);
-                                        return RedirectToAction("Index", "StudentInterface", new { message = error });
-                                    }                                  
-                                
-                                }
-
-                                string confirm = String.Format("Your Repository for assignment {0} has been updated", assignment.Name);
-                                return RedirectToAction("Index", "StudentInterface", new { message = confirm });
-
+                                #endregion
                             }
-                            else
-                            {
-                                //Give error
-                                string error = String.Format("Error: Repository for assignment {0} has not been updated", assignment.Name);
-                                return RedirectToAction("Index", "StudentInterface", new { message = error });
-                            }
-
                         }
-                        #endregion
 
+                        //Finalize studentAssignmentJson object before storing it in the database                        
+                        studentAssignmentJson.files = studentMarkedfiles;
+                        var jsonString = System.Text.Json.JsonSerializer.Serialize(studentAssignmentJson);
+
+                        // If first download, store the downloading assignment data in StudentAssignment table in the DB:
+                        if (studentAssignment == null)
+                        {
+                            var newStudentAssignment = new StudentAssignment()
+                            {
+                                StudentId = studentId,
+                                AssignmentId = assignmentId,
+                                RepositoryUrl = studentRepoURL,
+                                JSONCode = jsonString
+                            };
+                            _context.StudentAssignment.Add(newStudentAssignment);
+                            _context.SaveChanges();
+                        }
+                        else
+                        {
+                            studentAssignment.RepositoryUrl = studentRepoURL;
+                            studentAssignment.JSONCode = jsonString;
+                            _context.SaveChanges();
+                        }
+
+                        string confirm = String.Format("Your Repository for assignment {0} has been updated", assignment.Name);
+                        return RedirectToAction("Index", "StudentInterface", new { message = confirm });
+
+                        #endregion                     
                     }
                     else
                     {
-                        //Give error
                         string error = String.Format("Error: Repository for assignment {0} has not been updated", assignment.Name);
                         return RedirectToAction("Index", "StudentInterface", new { message = error });
                     }
-
                 }
-
             }
 
             var assignments = await _context.Assignment.Where(x => x.CourseId == courseId).ToListAsync();
-            return View(assignments);
-     
+            return View(assignments);     
         }
         #endregion
-
     }
 
     #region JSON Structures
@@ -438,10 +396,6 @@ namespace ACES.Controllers
         public String sha;
     }
 
-    struct LinkFields
-    {
-        public String self;
-    }
     struct FileInfo
     {
         public String name;
@@ -465,22 +419,34 @@ namespace ACES.Controllers
 
     public struct GetWatermarkedAssignment
     {
-        // add field for repo name
-        public int whitespace_count { get; set; }
+        public int numberOfWhitespaceCharacters { get; set; }
         public string watermark { get; set; }
-        public int watermark_count { get; set; }
-        public List<string> fileNames { get; set; }
+        public string markedFileContent { get; set; }
     }
 
     public struct PostAddWatermark
     {
-        public string directory { get; set; }
         public string email { get; set; }
-        public string asn_no { get; set; }
-        public string existing_watermark { get; set; }
-        public int whitespaces { get; set; }
-        public string jsonCode { get; set; }
+        public string assignmentName { get; set; }
+        public string fileName { get; set; }
+        public int[] whitespacesLineNumbers { get; set; }
+        public int[] randomStringLineNumbers { get; set; }
+        public string fileContent { get; set; }
+    }
+
+    public struct StudentMarkedFile
+    {
+        public string fileName { get; set; }
+        public int numberOfLinesInFile { get; set; }
+        public string watermark { get; set; }
+        public int numberOfWhitespaceCharacters { get; set; }
+        public int[] whitespacesLineNumbers { get; set; }
+        public int[] randomStringLineNumbers { get; set; }
+    }
+
+    public struct StudentAssignmentJson
+    {
+        public List<StudentMarkedFile> files { get; set; }
     }
     #endregion
-
 }

@@ -17,8 +17,10 @@ namespace ACES.Controllers
         #region Globals
 
         private string watermark;
-        private int numWhitespaces;
+        private int numberOfWhitespaces;
         string whiteString = "";
+        int[] whitespacesLineNumbers;
+        int[] randomStringLineNumbers;
         private List<string> whitespaces = new List<string>();
         private List<string> randomstring = new List<string>();
 
@@ -30,153 +32,55 @@ namespace ACES.Controllers
         {
             HttpResponseMessage response = new HttpResponseMessage();
             var emailAddress = new System.Net.Mail.MailAddress(data.email);
-            numWhitespaces = data.whitespaces;
+            whitespacesLineNumbers = data.whitespacesLineNumbers;
+            randomStringLineNumbers = data.randomStringLineNumbers;
 
-            if (emailAddress.Address != data.email)
-            {
-                //return View("Error: email provided is not a valid email.");
-            }
+            watermark = GenerateWatermark(data.email, data.assignmentName);
 
-            if (data.asn_no.Length! > 2)
-            {
-                //return View("Error: asn_no must be greater than 2 characters.");
-            }
+            Random rnd = new Random();
+            numberOfWhitespaces = rnd.Next(25);
+            for (int i = 0; i < numberOfWhitespaces; i++){ whiteString += " "; }
 
-            if (data.existing_watermark == "")
-            {
-                watermark = GenerateWatermark(data.email, data.asn_no);
-            }
-            else
-            {
-                watermark = data.existing_watermark;
-            }
-
-            var markableFiles = GenerateListsFromJSON(data.jsonCode);
-
-            int totalMarks = 0;
-
-            foreach (var f in markableFiles)
-            {
-
-                totalMarks += WatermarkFile(data.directory, f);
-
-            }
+            data.fileContent = WatermarkFile(data.fileContent);
 
             // can change GetWatermarkedAssignment to have whatever variables you need it to return. It is at the bottom of the StudentInterfaceController
             var json = System.Text.Json.JsonSerializer.Serialize(new GetWatermarkedAssignment()
             {
-                // add field for repo once we get it working
+                numberOfWhitespaceCharacters = numberOfWhitespaces,
                 watermark = watermark,
-                watermark_count = totalMarks,
-                whitespace_count = numWhitespaces,
-                fileNames = markableFiles
-
+                markedFileContent = data.fileContent
             });
 
             return json;
         }
-        #endregion
-
-        #region GenerateListsFromJSON
-        private List<string> GenerateListsFromJSON(string jsonCode)
-        {
-
-            //Parse the json code provided in the string parameter
-            JObject json = JObject.Parse(jsonCode);
-
-            //get the data from the json string in the database
-            var files = json["files"].Children();
-            var lines = json["whitespaces"].Children();
-            var moreLines = json["randomstring"].Children();
-
-            var fileList = new List<string>();
-
-            //Put the file names obtained in files variable into this list object
-            fileList.AddRange(files.Select(file => file.Value<string>()));
-            whitespaces.AddRange(lines.Select(lines => lines.Value<string>()));
-            randomstring.AddRange(moreLines.Select(moreLines => moreLines.Value<string>()));
-
-            return fileList;
-
-        }
-        #endregion
+        #endregion       
 
         #region WatermarkFile
-        private int WatermarkFile(string dir, string filename)
-        {
+        private string WatermarkFile(string fileContent)
+        {   
+            //TODO: instead of array probably better to use list, or stringbuilder to insert, etc.
+            // should validate first, line count and maybe name on first line?
+            string[] contentLines = fileContent.Split("\n");
 
-            int watermarks = 0;
-            string line;
-            int lineCount = 1;
-            Random rnd = new Random();
-
-            if (numWhitespaces == -1) // -1 if it doesn't exist so it has to generate a number
+            // Add generated whitestring
+            for (int i = 0; i < whitespacesLineNumbers.Length; i++)
             {
-
-                numWhitespaces = rnd.Next(25);
-
+                contentLines[whitespacesLineNumbers[i]-1] = whiteString;
             }
 
-            for (int i = 0; i < numWhitespaces; i++)
+            // Add generated watermark
+            for (int i = 0; i < randomStringLineNumbers.Length; i++)
             {
-
-                whiteString += " ";
-
-            }
-
-            //For reading file to be watermarked  
-            StreamReader file = new StreamReader(dir + "/" + filename);
-
-            //this file is the watermarked one, should be put in the new repository after the while loop
-            StreamWriter newFile = new StreamWriter("../../assignments/temp2/" + filename); 
-
-            //Write all watermarks into new temp file on their appropriate lines
-            while ((line = file.ReadLine()) != null)
-            {
-
-                if (whitespaces.Contains(lineCount.ToString()))
-                {
-
-                    newFile.WriteLine(whiteString);
-                    watermarks++;
-
-                }
-                else if (randomstring.Contains(lineCount.ToString()))
-                {
-
-                    newFile.WriteLine("//" + watermark);
-                    watermarks++;
-
-                }
-                else
-                {
-
-                    newFile.WriteLine(line);
-
-                }
-
-                lineCount++;
-
-            }
-
-            //Close stream reader and writer
-            file.Close();
-            newFile.Close();
-
-            System.IO.File.Delete(dir + "/" + filename);
-            System.IO.File.Move("../../assignments/temp2/" + filename, dir + "/" + filename);
-
-            return watermarks;
-
+                contentLines[randomStringLineNumbers[i]-1] = watermark;
+            } 
+            return string.Join("\n", contentLines);
         }
         #endregion
 
         #region GenerateWatermark
         private string GenerateWatermark(string email, string asn_no)
         {
-
             RNGCryptoServiceProvider rngCsp = new RNGCryptoServiceProvider();
-
             byte[] salt = new byte[20];
 
             //Fill array with random bytes to be salt value
@@ -199,16 +103,11 @@ namespace ACES.Controllers
             StringBuilder fullWatermark = new StringBuilder();
             for (int i = 0; i < bytes.Length; i++)
             {
-
                 fullWatermark.Append(bytes[i].ToString("x2"));
-
             }
-
             return fullWatermark.ToString();
-
         }
         #endregion
-
     }
 }
 
