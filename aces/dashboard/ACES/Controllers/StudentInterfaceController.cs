@@ -8,9 +8,7 @@ using ACES.Data;
 using ACES.Models;
 using System.Net.Http;
 using Newtonsoft.Json;
-using System.IO;
 using System.Text;
-using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.Configuration;
 
 namespace ACES.Controllers
