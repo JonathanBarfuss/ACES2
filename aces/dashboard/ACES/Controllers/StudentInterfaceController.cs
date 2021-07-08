@@ -210,13 +210,13 @@ namespace ACES.Controllers
 
             // Get assignment's url and name from Assignments table:
             var assignment = _context.Assignment.Where(x => x.Id == assignmentId).FirstOrDefault();
-            string insructorAssignmentRepoUrl = assignment.RepositoryUrl.ToString(); 
+            string insructorAssignmentRepoUrl = assignment.RepositoryUrl.ToString();
             string assignmentName = $"{assignment.Name.Replace(" ", "_")}_";
             string token = _configuration["GithubToken"];
             dynamic objAssignmentJson = Newtonsoft.Json.JsonConvert.DeserializeObject(assignment.JSONCode);
        
             // Get student's email and Id:
-            Request.Cookies.TryGetValue("StudentEmail", out string studentEmail); 
+            Request.Cookies.TryGetValue("StudentEmail", out string studentEmail);
             Request.Cookies.TryGetValue("StudentId", out string strStudentId);
             Int32.TryParse(strStudentId, out int studentId);
 
