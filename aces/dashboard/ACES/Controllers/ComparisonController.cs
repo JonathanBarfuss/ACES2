@@ -1,4 +1,5 @@
 ﻿using ACES.Data;
+using ACES.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
@@ -14,11 +15,15 @@ namespace ACES.Controllers
 {
     public class ComparisonController : Controller
     {
-        private string watermark;
         private List<string> fileList = new List<string>();
-        private int numWatermarks;
-        private int numWhitespaces;
+        private string watermark;
         private string whitestring;
+        private int ogWatermarkCount;
+        private int ogWhitespaceCount;
+        private int curWatermarkCount;
+        private int curWhitespaceCount;
+        int[] whiteLines;
+        int[] stringLines;
 
         private readonly ACESContext _context;
         private readonly IConfiguration _configuration;
@@ -44,9 +49,8 @@ namespace ACES.Controllers
                 httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
                 httpClient.DefaultRequestHeaders.Add("User-Agent", "ACES");
                 httpClient.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
-                
 
-                // for each to loop through students
+                //foreach(var student in students) {}
                 dynamic json = JsonConvert.DeserializeObject(studAssign.JSONCode);
 
                 string studentRepoContents = $"{studAssign.RepositoryUrl}/contents".Replace("//github.com", "//api.github.com/repos");
@@ -64,56 +68,81 @@ namespace ACES.Controllers
                                 // Check if file is part of JSON instructions for watermarking.
                                 foreach (var fileInJson in json.files)
                                 {
-                                    if (fileInJson.name.Value == file.name)
+                                    if (fileInJson.fileName.Value == file.name)
                                     {
-                                        //content var has file contents
+                                        // get file from github
+                                        HttpRequestMessage fileGetRequest = new HttpRequestMessage(HttpMethod.Get, file.download_url);
+                                        fileGetRequest.Headers.Add("Authorization", "Bearer " + token);
+                                        HttpResponseMessage fileGetResponse = httpClient.SendAsync(fileGetRequest).Result;
+                                        string fileContent = fileGetResponse.Content.ReadAsStringAsync().Result;
+                                        fileGetResponse.Dispose();
+
+                                        whitestring = ""; // reset for use of new file watermark
+                                        for(int i = 0; i < fileInJson.numberOfWhitespaceCharacters.Value; i++)
+                                        {
+                                            whitestring += " ";
+                                        }
+                                        watermark = fileInJson.watermark.Value;
+                                        whiteLines = fileInJson.whitespacesLineNumbers.ToObject<int[]>();
+                                        stringLines = fileInJson.randomStringLineNumbers.ToObject<int[]>();
+                                        ogWhitespaceCount += whiteLines.Count(); // increment total whitespaces count
+                                        ogWatermarkCount += stringLines.Count(); // increment total watermark count
+                                        CompareFile(fileContent);
+                                        PopulateCommitDB(studAssign.Id, "2020-02-20 12:00:00.0000000"); // change date to whatever we pull from github api
                                     }
                                 }
                             }
                         }
+                    } 
+                    else
+                    {
+
                     }
                 }
             }
 
-            foreach (var file in fileList)
-            {
-                CompareFile("../../assignments", file);
-            }
             return View();
         }
 
-        private void CompareFile(string dir, string filename)
+        private void CompareFile(string fileContent)
         {
-            string line;
-            int white = 0;
-            int strung = 0;
-            int lineCount = 1;
-            //For reading file to be compared  
-            StreamReader file = new StreamReader(dir + "/" + filename);
+            string[] contentLines = fileContent.Split("\n");
 
-            while ((line = file.ReadLine()) != null)
+            foreach (var line in contentLines)
             {
-                if (line.Contains(whitestring))
+                if (whitestring != "" && line.Contains(whitestring))
                 {
-                    white++;
+                    curWhitespaceCount++;
                 }
                 else if (line.Contains(watermark))
                 {
-                    strung++;
+                    curWatermarkCount++;
                 }
-                lineCount++;
             }
-
-            Calculate(white / numWhitespaces, strung / numWatermarks);
-
-            //Close stream reader and writer
-            file.Close();
         }
 
-        private void Calculate(float whiteRatio, float stringRatio)
+        private void PopulateCommitDB(int id, string dateCommit)
         {
-
+            var json = System.Text.Json.JsonSerializer.Serialize(new CommitJSON()
+            {
+                watermarks = curWatermarkCount + "/" + ogWatermarkCount,
+                whitespaces = curWhitespaceCount + "/" + ogWhitespaceCount
+            });
+            var newCommit = new Commit()
+            {
+                StudentAssignmentId = id,
+                DateCommitted = Convert.ToDateTime(dateCommit),
+                JSONCode = json
+            };
+            _context.Commit.Add(newCommit);
+            _context.SaveChanges();
         }
     }
+}
+
+public struct CommitJSON
+{
+    public string watermarks { get; set; }
+    public string whitespaces { get; set; }
 }
 
