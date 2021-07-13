@@ -57,6 +57,10 @@ namespace ACES.Controllers
 
                 foreach (var student in studentSubmissionsList)
                 {
+                    ogWatermarkCount = 0;
+                    ogWhitespaceCount = 0;
+                    curWatermarkCount = 0;
+                    curWhitespaceCount = 0;
                     dynamic json = JsonConvert.DeserializeObject(student.JSONCode);
 
                     string studentRepoContents = $"{student.RepositoryUrl}/contents".Replace("//github.com", "//api.github.com/repos");
@@ -94,7 +98,6 @@ namespace ACES.Controllers
                                             ogWhitespaceCount += whiteLines.Count(); // increment total whitespaces count
                                             ogWatermarkCount += stringLines.Count(); // increment total watermark count
                                             CompareFile(fileContent);
-                                            PopulateCommitDB(student.Id, "2020-02-20 12:00:00.0000000"); // change date to whatever we pull from github api
                                         }
                                     }
                                 }
@@ -105,8 +108,7 @@ namespace ACES.Controllers
 
                         }
                     }
-
-
+                    PopulateCommitDB(student.Id, "2020-02-20 12:00:00.0000000"); // change date to whatever we pull from github api
                 }
                 
             }
