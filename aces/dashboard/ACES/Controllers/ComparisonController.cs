@@ -113,6 +113,7 @@ namespace ACES.Controllers
 
                         }
                     }
+                    GatherGithubInfo(studentRepoContents);
                     PopulateCommitDB(student.Id, "2020-02-20 12:00:00.0000000"); // change date to whatever we pull from github api
                 }
                 
