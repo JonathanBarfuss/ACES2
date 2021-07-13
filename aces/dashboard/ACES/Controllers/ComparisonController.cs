@@ -41,11 +41,7 @@ namespace ACES.Controllers
 
         public IActionResult Index()//List<StudentAssignment> students)
         {
-            Request.Cookies.TryGetValue("StudentId", out string stringid);
-            Int32.TryParse(stringid, out int studentId);
-
-            var studAssign = _context.StudentAssignment.FirstOrDefault(x => x.StudentId == 2);  //hard coded for testing only*******************************
-            //var studAssign = _context.StudentAssignment.FirstOrDefault(x => x.StudentId == studentId);
+            
             string token = _configuration["GithubToken"];
 
 
