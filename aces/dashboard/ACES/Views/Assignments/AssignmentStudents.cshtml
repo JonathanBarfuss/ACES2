@@ -7,6 +7,10 @@
 
 <h2>@Model.AssignmentName</h2>
 <h3>Students with Submissions</h3>
+
+<input type="button" value="Compare" style="text-align: center; top: 80%" onclick="location.href='@Url.Action("Index", "Comparison", new { @Model.AssignmentId })'" />
+
+
 <div>
     <table class="table">
         <thead>

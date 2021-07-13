@@ -39,9 +39,17 @@ namespace ACES.Controllers
             _configuration = configuration;
         }
 
-        public IActionResult Index()//List<StudentAssignment> students)
+        public IActionResult Index(int assignmentID)
         {
-            
+            //var studentList = assignmentID;
+
+            var studentSubmissions = _context.StudentAssignment.Where(i => i.AssignmentId == assignmentID);
+            List<StudentAssignment> studentSubmissionsList = studentSubmissions.ToList(); 
+
+            //Request.Cookies.TryGetValue("StudentId", out string stringid);
+            //Int32.TryParse(stringid, out int studentId);
+
+            //var studAssign = _context.StudentAssignment.FirstOrDefault(x => x.StudentId == studentId);
             string token = _configuration["GithubToken"];
 
 
@@ -52,56 +60,62 @@ namespace ACES.Controllers
                 httpClient.DefaultRequestHeaders.Add("User-Agent", "ACES");
                 httpClient.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
 
-                //foreach(var student in students) {}
-                dynamic json = JsonConvert.DeserializeObject(studAssign.JSONCode);
-
-                string studentRepoContents = $"{studAssign.RepositoryUrl}/contents".Replace("//github.com", "//api.github.com/repos");
-                var objStudentRepoRequest = new HttpRequestMessage(HttpMethod.Get, studentRepoContents);
-
-                using (HttpResponseMessage objStudentRepoResponse = httpClient.SendAsync(objStudentRepoRequest).Result)
+                foreach (var student in studentSubmissionsList)
                 {
-                    if (objStudentRepoResponse.IsSuccessStatusCode)
-                    {
-                        FileInfo[] contents = JsonConvert.DeserializeObject<FileInfo[]>(objStudentRepoResponse.Content.ReadAsStringAsync().Result);
-                        foreach (var file in contents)
-                        {
-                            if (file.type == "file")
-                            {
-                                // Check if file is part of JSON instructions for watermarking.
-                                foreach (var fileInJson in json.files)
-                                {
-                                    if (fileInJson.fileName.Value == file.name)
-                                    {
-                                        // get file from github
-                                        HttpRequestMessage fileGetRequest = new HttpRequestMessage(HttpMethod.Get, file.download_url);
-                                        fileGetRequest.Headers.Add("Authorization", "Bearer " + token);
-                                        HttpResponseMessage fileGetResponse = httpClient.SendAsync(fileGetRequest).Result;
-                                        string fileContent = fileGetResponse.Content.ReadAsStringAsync().Result;
-                                        fileGetResponse.Dispose();
+                    ogWatermarkCount = 0;
+                    ogWhitespaceCount = 0;
+                    curWatermarkCount = 0;
+                    curWhitespaceCount = 0;
+                    dynamic json = JsonConvert.DeserializeObject(student.JSONCode);
 
-                                        whitestring = ""; // reset for use of new file watermark
-                                        for(int i = 0; i < fileInJson.numberOfWhitespaceCharacters.Value; i++)
+                    string studentRepoContents = $"{student.RepositoryUrl}/contents".Replace("//github.com", "//api.github.com/repos");
+                    var objStudentRepoRequest = new HttpRequestMessage(HttpMethod.Get, studentRepoContents);
+
+                    using (HttpResponseMessage objStudentRepoResponse = httpClient.SendAsync(objStudentRepoRequest).Result)
+                    {
+                        if (objStudentRepoResponse.IsSuccessStatusCode)
+                        {
+                            FileInfo[] contents = JsonConvert.DeserializeObject<FileInfo[]>(objStudentRepoResponse.Content.ReadAsStringAsync().Result);
+                            foreach (var file in contents)
+                            {
+                                if (file.type == "file")
+                                {
+                                    // Check if file is part of JSON instructions for watermarking.
+                                    foreach (var fileInJson in json.files)
+                                    {
+                                        if (fileInJson.fileName.Value == file.name)
                                         {
-                                            whitestring += " ";
+                                            // get file from github
+                                            HttpRequestMessage fileGetRequest = new HttpRequestMessage(HttpMethod.Get, file.download_url);
+                                            fileGetRequest.Headers.Add("Authorization", "Bearer " + token);
+                                            HttpResponseMessage fileGetResponse = httpClient.SendAsync(fileGetRequest).Result;
+                                            string fileContent = fileGetResponse.Content.ReadAsStringAsync().Result;
+                                            fileGetResponse.Dispose();
+
+                                            whitestring = ""; // reset for use of new file watermark
+                                            for (int i = 0; i < fileInJson.numberOfWhitespaceCharacters.Value; i++)
+                                            {
+                                                whitestring += " ";
+                                            }
+                                            watermark = fileInJson.watermark.Value;
+                                            whiteLines = fileInJson.whitespacesLineNumbers.ToObject<int[]>();
+                                            stringLines = fileInJson.randomStringLineNumbers.ToObject<int[]>();
+                                            ogWhitespaceCount += whiteLines.Count(); // increment total whitespaces count
+                                            ogWatermarkCount += stringLines.Count(); // increment total watermark count
+                                            CompareFile(fileContent);
                                         }
-                                        watermark = fileInJson.watermark.Value;
-                                        whiteLines = fileInJson.whitespacesLineNumbers.ToObject<int[]>();
-                                        stringLines = fileInJson.randomStringLineNumbers.ToObject<int[]>();
-                                        ogWhitespaceCount += whiteLines.Count(); // increment total whitespaces count
-                                        ogWatermarkCount += stringLines.Count(); // increment total watermark count
-                                        CompareFile(fileContent);
-                                        GatherGithubInfo(studentRepoContents);
-                                        PopulateCommitDB(studAssign.Id, "2020-02-20 12:00:00.0000000"); // change date to whatever we pull from github api
                                     }
                                 }
                             }
                         }
-                    } 
-                    else
-                    {
+                        else
+                        {
 
+                        }
                     }
+                    PopulateCommitDB(student.Id, "2020-02-20 12:00:00.0000000"); // change date to whatever we pull from github api
                 }
+                
             }
 
             return View();
