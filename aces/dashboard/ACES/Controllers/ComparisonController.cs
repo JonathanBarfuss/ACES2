@@ -28,6 +28,7 @@ namespace ACES.Controllers
         private TimeSpan averageTimeBetweenCommits;
         private int linesAdded;
         private int linesDeleted;
+        private DateTime finalCommit;
 
         private readonly ACESContext _context;
         private readonly IConfiguration _configuration;
@@ -43,7 +44,8 @@ namespace ACES.Controllers
             Request.Cookies.TryGetValue("StudentId", out string stringid);
             Int32.TryParse(stringid, out int studentId);
 
-            var studAssign = _context.StudentAssignment.FirstOrDefault(x => x.StudentId == studentId);
+            var studAssign = _context.StudentAssignment.FirstOrDefault(x => x.StudentId == 2);  //hard coded for testing only*******************************
+            //var studAssign = _context.StudentAssignment.FirstOrDefault(x => x.StudentId == studentId);
             string token = _configuration["GithubToken"];
 
 
@@ -92,7 +94,7 @@ namespace ACES.Controllers
                                         ogWhitespaceCount += whiteLines.Count(); // increment total whitespaces count
                                         ogWatermarkCount += stringLines.Count(); // increment total watermark count
                                         CompareFile(fileContent);
-                                        GatherGithubInfo();
+                                        GatherGithubInfo(studentRepoContents);
                                         PopulateCommitDB(studAssign.Id, "2020-02-20 12:00:00.0000000"); // change date to whatever we pull from github api
                                     }
                                 }
@@ -143,23 +145,72 @@ namespace ACES.Controllers
             _context.SaveChanges();
         }
 
-        private void GatherGithubInfo()
+        private void GatherGithubInfo(string studentURL)
         {
             List<String> shas = new List<string>();
             List<DateTime> times = new List<DateTime>();
+            string token = _configuration["GithubToken"];
 
             using (var httpClient = new HttpClient())
             {
                 //Set up Header info to request files from GitHub
-                httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + "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");
+                httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
                 httpClient.DefaultRequestHeaders.Add("User-Agent", "ACES");
                 httpClient.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
-                string studentRepoContents = $"{studAssign.RepositoryUrl}/contents".Replace("//github.com", "//api.github.com/repos");
 
-                string RepoContents = @"https://api.github.com/repos/AntiCheatSummer2021/Template1/commits";  //currently hard coded
-                var objRepoRequest = new HttpRequestMessage(HttpMethod.Get, RepoContents);
+                string studentRepoCommits = $"{studentURL}".Replace("/contents", "/commits");  //**********************verify correct URL***************
+                var objRepoRequest = new HttpRequestMessage(HttpMethod.Get, studentRepoCommits);
 
+                using (HttpResponseMessage objRepoResponse = httpClient.SendAsync(objRepoRequest).Result)
+                {
+                    if (objRepoResponse.IsSuccessStatusCode)
+                    {
+                        var jsonInfo = (Newtonsoft.Json.Linq.JArray)JsonConvert.DeserializeObject(objRepoResponse.Content.ReadAsStringAsync().Result);
+                        numberOfCommits = jsonInfo.Count;  //count the number of commits
+                        finalCommit = (DateTime)jsonInfo[0]["commit"]["committer"]["date"];  //get the datetime of the most recent commit*********************verify this is the last commit
+
+                        for (int i = 0; i < jsonInfo.Count; i++)
+                        {
+
+                            shas.Add(jsonInfo[i]["sha"].ToString());
+                            var tempDate = jsonInfo[i]["commit"]["committer"]["date"];
+                            times.Add((DateTime)tempDate);
+                        }
+                        averageTimeBetweenCommits = calculateAverageTime(times);
+                    }
+                }
+                foreach (String sha in shas)
+                {
+                    string studentRepoCommitURL = String.Format($"{studentRepoCommits}/{0}", sha);  //**************verify correct url**************
+                    objRepoRequest = new HttpRequestMessage(HttpMethod.Get, studentRepoCommitURL);
+
+                    using (HttpResponseMessage objRepoResponse = httpClient.SendAsync(objRepoRequest).Result)
+                    {
+                        if (objRepoResponse.IsSuccessStatusCode)
+                        {
+                            var jsonStuff = (Newtonsoft.Json.Linq.JObject)JsonConvert.DeserializeObject(objRepoResponse.Content.ReadAsStringAsync().Result);
+                            int tempAdded = (int)jsonStuff["stats"]["additions"];
+                            linesAdded += tempAdded;
+                            linesDeleted += (int)jsonStuff["stats"]["deletions"];
+                        }
+                    }
+                }
             }
+        }
+
+        //helper method to calculate the average amount of time between commits
+        private TimeSpan calculateAverageTime(List<DateTime> times)
+        {
+            TimeSpan timeTotal;
+            timeTotal = TimeSpan.Zero;
+
+            for (int i = 0; i < times.Count - 1; i++)  //calculate all the differences in time
+            {
+                var tempTime = times[i].Subtract(times[i + 1]);
+                timeTotal = timeTotal.Add(tempTime);
+            }
+            return timeTotal / times.Count;
+        }
     }
 }
 
@@ -167,84 +218,4 @@ public struct CommitJSON
 {
     public string watermarks { get; set; }
     public string whitespaces { get; set; }
-}
-
-// delete all past this point
-//initialize required variables
-var info = new GoTimeVM();
-List<String> shas = new List<string>();
-List<DateTime> times = new List<DateTime>();
-int linesAdded = 0;
-int linesDeleted = 0;
-List<int> listAdded = new List<int>(); //*****************************for testing only*******************
-
-            using (var httpClient = new HttpClient())
-            {
-                //Set up Header info to request files from GitHub
-                httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + "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");
-                httpClient.DefaultRequestHeaders.Add("User-Agent", "ACES");
-                httpClient.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
-                string RepoContents = @"https://api.github.com/repos/AntiCheatSummer2021/Template1/commits";  //currently hard coded
-var objRepoRequest = new HttpRequestMessage(HttpMethod.Get, RepoContents);
-
-                // Get response
-                using (HttpResponseMessage objRepoResponse = httpClient.SendAsync(objRepoRequest).Result)
-                {
-                    if (objRepoResponse.IsSuccessStatusCode)
-                    {
-                        var jsonStuff = (Newtonsoft.Json.Linq.JArray)JsonConvert.DeserializeObject(objRepoResponse.Content.ReadAsStringAsync().Result);
-info.NumCommits = jsonStuff.Count;
-
-                        for (int i = 0; i<jsonStuff.Count; i++)
-                        {
-
-                            shas.Add(jsonStuff[i]["sha"].ToString());
-                            var tempDate = jsonStuff[i]["commit"]["committer"]["date"];
-times.Add((DateTime) tempDate);
-                        }
-                        info.AverageTime = calculateAverageTime(times);
-
-                    }
-                }
-
-                int tempAdded = 0;  //***********************for testing********************************************
-                foreach (String sha in shas)
-                {
-                    RepoContents = String.Format(@"https://api.github.com/repos/AntiCheatSummer2021/Template1/commits/{0}", sha);  //hard coded plus sha
-                    objRepoRequest = new HttpRequestMessage(HttpMethod.Get, RepoContents);
-
-                    using (HttpResponseMessage objRepoResponse = httpClient.SendAsync(objRepoRequest).Result)
-                    {
-                        if (objRepoResponse.IsSuccessStatusCode)
-                        {
-                            var jsonStuff = (Newtonsoft.Json.Linq.JObject)JsonConvert.DeserializeObject(objRepoResponse.Content.ReadAsStringAsync().Result);
-tempAdded = (int) jsonStuff["stats"]["additions"];
-                            listAdded.Add(tempAdded); //for testing only**********************************************
-                            linesAdded += tempAdded;
-                            linesDeleted += (int) jsonStuff["stats"]["deletions"];
-                        }
-                    }
-                }
-                info.LinesAdded = listAdded;  //****************************testing only*******************
-                info.TotalAdded = linesAdded;
-                info.TotalDeleted = linesDeleted;
-                return View(info);
-            }
-            
-            info.NumCommits = 6969;
-            return View(info);
-                        
-        }
-
-        private TimeSpan calculateAverageTime(List<DateTime> times)
-{
-    TimeSpan timeTotal;
-    timeTotal = TimeSpan.Zero;
-
-    for (int i = 0; i < times.Count - 1; i++)  //calculate all the differences in time
-    {
-        var tempTime = times[i].Subtract(times[i + 1]);
-        timeTotal = timeTotal.Add(tempTime);
-    }
-    return timeTotal / times.Count;
 }
