@@ -24,6 +24,10 @@ namespace ACES.Controllers
         private int curWhitespaceCount;
         int[] whiteLines;
         int[] stringLines;
+        private int numberOfCommits;
+        private TimeSpan averageTimeBetweenCommits;
+        private int linesAdded;
+        private int linesDeleted;
 
         private readonly ACESContext _context;
         private readonly IConfiguration _configuration;
@@ -88,6 +92,7 @@ namespace ACES.Controllers
                                         ogWhitespaceCount += whiteLines.Count(); // increment total whitespaces count
                                         ogWatermarkCount += stringLines.Count(); // increment total watermark count
                                         CompareFile(fileContent);
+                                        GatherGithubInfo();
                                         PopulateCommitDB(studAssign.Id, "2020-02-20 12:00:00.0000000"); // change date to whatever we pull from github api
                                     }
                                 }
@@ -137,6 +142,24 @@ namespace ACES.Controllers
             _context.Commit.Add(newCommit);
             _context.SaveChanges();
         }
+
+        private void GatherGithubInfo()
+        {
+            List<String> shas = new List<string>();
+            List<DateTime> times = new List<DateTime>();
+
+            using (var httpClient = new HttpClient())
+            {
+                //Set up Header info to request files from GitHub
+                httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + "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");
+                httpClient.DefaultRequestHeaders.Add("User-Agent", "ACES");
+                httpClient.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
+                string studentRepoContents = $"{studAssign.RepositoryUrl}/contents".Replace("//github.com", "//api.github.com/repos");
+
+                string RepoContents = @"https://api.github.com/repos/AntiCheatSummer2021/Template1/commits";  //currently hard coded
+                var objRepoRequest = new HttpRequestMessage(HttpMethod.Get, RepoContents);
+
+            }
     }
 }
 
@@ -146,3 +169,82 @@ public struct CommitJSON
     public string whitespaces { get; set; }
 }
 
+// delete all past this point
+//initialize required variables
+var info = new GoTimeVM();
+List<String> shas = new List<string>();
+List<DateTime> times = new List<DateTime>();
+int linesAdded = 0;
+int linesDeleted = 0;
+List<int> listAdded = new List<int>(); //*****************************for testing only*******************
+
+            using (var httpClient = new HttpClient())
+            {
+                //Set up Header info to request files from GitHub
+                httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + "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");
+                httpClient.DefaultRequestHeaders.Add("User-Agent", "ACES");
+                httpClient.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
+                string RepoContents = @"https://api.github.com/repos/AntiCheatSummer2021/Template1/commits";  //currently hard coded
+var objRepoRequest = new HttpRequestMessage(HttpMethod.Get, RepoContents);
+
+                // Get response
+                using (HttpResponseMessage objRepoResponse = httpClient.SendAsync(objRepoRequest).Result)
+                {
+                    if (objRepoResponse.IsSuccessStatusCode)
+                    {
+                        var jsonStuff = (Newtonsoft.Json.Linq.JArray)JsonConvert.DeserializeObject(objRepoResponse.Content.ReadAsStringAsync().Result);
+info.NumCommits = jsonStuff.Count;
+
+                        for (int i = 0; i<jsonStuff.Count; i++)
+                        {
+
+                            shas.Add(jsonStuff[i]["sha"].ToString());
+                            var tempDate = jsonStuff[i]["commit"]["committer"]["date"];
+times.Add((DateTime) tempDate);
+                        }
+                        info.AverageTime = calculateAverageTime(times);
+
+                    }
+                }
+
+                int tempAdded = 0;  //***********************for testing********************************************
+                foreach (String sha in shas)
+                {
+                    RepoContents = String.Format(@"https://api.github.com/repos/AntiCheatSummer2021/Template1/commits/{0}", sha);  //hard coded plus sha
+                    objRepoRequest = new HttpRequestMessage(HttpMethod.Get, RepoContents);
+
+                    using (HttpResponseMessage objRepoResponse = httpClient.SendAsync(objRepoRequest).Result)
+                    {
+                        if (objRepoResponse.IsSuccessStatusCode)
+                        {
+                            var jsonStuff = (Newtonsoft.Json.Linq.JObject)JsonConvert.DeserializeObject(objRepoResponse.Content.ReadAsStringAsync().Result);
+tempAdded = (int) jsonStuff["stats"]["additions"];
+                            listAdded.Add(tempAdded); //for testing only**********************************************
+                            linesAdded += tempAdded;
+                            linesDeleted += (int) jsonStuff["stats"]["deletions"];
+                        }
+                    }
+                }
+                info.LinesAdded = listAdded;  //****************************testing only*******************
+                info.TotalAdded = linesAdded;
+                info.TotalDeleted = linesDeleted;
+                return View(info);
+            }
+            
+            info.NumCommits = 6969;
+            return View(info);
+                        
+        }
+
+        private TimeSpan calculateAverageTime(List<DateTime> times)
+{
+    TimeSpan timeTotal;
+    timeTotal = TimeSpan.Zero;
+
+    for (int i = 0; i < times.Count - 1; i++)  //calculate all the differences in time
+    {
+        var tempTime = times[i].Subtract(times[i + 1]);
+        timeTotal = timeTotal.Add(tempTime);
+    }
+    return timeTotal / times.Count;
+}
