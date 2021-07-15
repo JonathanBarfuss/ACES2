@@ -160,6 +160,7 @@ namespace ACES.Controllers
             _context.SaveChanges();
         }
 
+        //method to get github information for a specific students URL and save results in the class variables
         private void GatherGithubInfo(string studentURL)
         {
             List<String> shas = new List<string>();
@@ -173,7 +174,7 @@ namespace ACES.Controllers
                 httpClient.DefaultRequestHeaders.Add("User-Agent", "ACES");
                 httpClient.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
 
-                string studentRepoCommits = $"{studentURL}".Replace("/contents", "/commits");  //**********************verify correct URL***************
+                string studentRepoCommits = $"{studentURL}".Replace("/contents", "/commits");
                 var objRepoRequest = new HttpRequestMessage(HttpMethod.Get, studentRepoCommits);
 
                 using (HttpResponseMessage objRepoResponse = httpClient.SendAsync(objRepoRequest).Result)
@@ -182,21 +183,27 @@ namespace ACES.Controllers
                     {
                         var jsonInfo = (Newtonsoft.Json.Linq.JArray)JsonConvert.DeserializeObject(objRepoResponse.Content.ReadAsStringAsync().Result);
                         numberOfCommits = jsonInfo.Count;  //count the number of commits
-                        finalCommitTime = (DateTime)jsonInfo[0]["commit"]["committer"]["date"];  //get the datetime of the most recent commit*********************verify this is the last commit
+                        finalCommitTime = (DateTime)jsonInfo[0]["commit"]["committer"]["date"];  //get the datetime of the most recent commit
+                        finalCommitTime = finalCommitTime.ToLocalTime();  //convert from UTC time to local time  
 
-                        for (int i = 0; i < jsonInfo.Count; i++)
+                        for (int i = 0; i < jsonInfo.Count; i++)  //get the sha for each commit
                         {
-
                             shas.Add(jsonInfo[i]["sha"].ToString());
                             var tempDate = jsonInfo[i]["commit"]["committer"]["date"];
                             times.Add((DateTime)tempDate);
                         }
-                        averageTimeBetweenCommits = calculateAverageTime(times);
+                        if (numberOfCommits > 1)  //calculate the average time between commits if there are at least 2 commits
+                        {
+                            averageTimeBetweenCommits = calculateAverageTime(times);
+                        }
+                        
                     }
                 }
-                foreach (String sha in shas)
+                //INFO: This will loop through each commit, doing an api call for each which takes time, if determined too long use the api /compare call 
+                //to compare differences from start to finish in one call at the cost of loosing detail.  Use /compare/{starting sha}...{ending sha}
+                foreach (String sha in shas)  //for each individual commit get the lines added and deleted
                 {
-                    string studentRepoCommitURL = String.Format($"{studentRepoCommits}/{sha}");  //**************verify correct url**************
+                    string studentRepoCommitURL = String.Format($"{studentRepoCommits}/{sha}");
                     objRepoRequest = new HttpRequestMessage(HttpMethod.Get, studentRepoCommitURL);
 
                     using (HttpResponseMessage objRepoResponse = httpClient.SendAsync(objRepoRequest).Result)
@@ -224,7 +231,7 @@ namespace ACES.Controllers
                 var tempTime = times[i].Subtract(times[i + 1]);
                 timeTotal = timeTotal.Add(tempTime);
             }
-            return timeTotal / times.Count;
+            return timeTotal / (times.Count - 1);  //divide by number of time differences == count - 1
         }
     }
 }
