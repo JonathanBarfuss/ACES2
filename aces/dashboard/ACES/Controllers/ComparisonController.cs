@@ -28,7 +28,7 @@ namespace ACES.Controllers
         private TimeSpan averageTimeBetweenCommits;
         private int linesAdded;
         private int linesDeleted;
-        private DateTime finalCommit;
+        private DateTime finalCommitTime;
 
         private readonly ACESContext _context;
         private readonly IConfiguration _configuration;
@@ -114,7 +114,7 @@ namespace ACES.Controllers
                         }
                     }
                     GatherGithubInfo(studentRepoContents);
-                    PopulateCommitDB(student.Id, "2020-02-20 12:00:00.0000000"); // change date to whatever we pull from github api
+                    PopulateCommitDB(student.Id);
                 }
                 
             }
@@ -139,17 +139,21 @@ namespace ACES.Controllers
             }
         }
 
-        private void PopulateCommitDB(int id, string dateCommit)
+        private void PopulateCommitDB(int id)
         {
             var json = System.Text.Json.JsonSerializer.Serialize(new CommitJSON()
             {
                 watermarks = curWatermarkCount + "/" + ogWatermarkCount,
-                whitespaces = curWhitespaceCount + "/" + ogWhitespaceCount
+                whitespaces = curWhitespaceCount + "/" + ogWhitespaceCount,
+                NumberOfCommits = numberOfCommits,
+                LinesAdded = linesAdded,
+                LinesDeleted = linesDeleted,
+                AverageTimeBetweenCommits = averageTimeBetweenCommits
             });
             var newCommit = new Commit()
             {
                 StudentAssignmentId = id,
-                DateCommitted = Convert.ToDateTime(dateCommit),
+                DateCommitted = finalCommitTime,
                 JSONCode = json
             };
             _context.Commit.Add(newCommit);
@@ -178,7 +182,7 @@ namespace ACES.Controllers
                     {
                         var jsonInfo = (Newtonsoft.Json.Linq.JArray)JsonConvert.DeserializeObject(objRepoResponse.Content.ReadAsStringAsync().Result);
                         numberOfCommits = jsonInfo.Count;  //count the number of commits
-                        finalCommit = (DateTime)jsonInfo[0]["commit"]["committer"]["date"];  //get the datetime of the most recent commit*********************verify this is the last commit
+                        finalCommitTime = (DateTime)jsonInfo[0]["commit"]["committer"]["date"];  //get the datetime of the most recent commit*********************verify this is the last commit
 
                         for (int i = 0; i < jsonInfo.Count; i++)
                         {
@@ -192,7 +196,7 @@ namespace ACES.Controllers
                 }
                 foreach (String sha in shas)
                 {
-                    string studentRepoCommitURL = String.Format($"{studentRepoCommits}/{0}", sha);  //**************verify correct url**************
+                    string studentRepoCommitURL = String.Format($"{studentRepoCommits}/{sha}");  //**************verify correct url**************
                     objRepoRequest = new HttpRequestMessage(HttpMethod.Get, studentRepoCommitURL);
 
                     using (HttpResponseMessage objRepoResponse = httpClient.SendAsync(objRepoRequest).Result)
@@ -229,4 +233,8 @@ public struct CommitJSON
 {
     public string watermarks { get; set; }
     public string whitespaces { get; set; }
+    public int NumberOfCommits { get; set; }
+    public int LinesAdded { get; set; }
+    public int LinesDeleted { get; set; }
+    public TimeSpan AverageTimeBetweenCommits { get; set; }
 }
