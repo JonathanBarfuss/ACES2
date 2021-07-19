@@ -8,6 +8,9 @@ using ACES.Data;
 using ACES.Models;
 using System.Net.Http;
 using Newtonsoft.Json;
+//using System.IO;
+using System.Text;
+//using Newtonsoft.Json.Linq;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 
@@ -190,7 +193,7 @@ namespace ACES.Controllers
 
         #region StudentAssignments
         [HttpGet]
-        public async Task<IActionResult> StudentAssignments(int assignmentId, int courseId, string studentRepoURL) 
+        public async Task<IActionResult> StudentAssignments(int assignmentId, int courseId, string studentRepoURL, string agreeToRepoRemake) 
         {          
             if (assignmentId == 0)
             {
@@ -211,6 +214,7 @@ namespace ACES.Controllers
             string insructorAssignmentRepoUrl = assignment.RepositoryUrl.ToString(); 
             string assignmentName = $"{assignment.Name.Replace(" ", "_")}_";
             string token = _configuration["GithubToken"];
+            bool isRemake = false;
             dynamic objAssignmentJson = Newtonsoft.Json.JsonConvert.DeserializeObject(assignment.JSONCode);
        
             // Get student's email and Id:
@@ -222,8 +226,69 @@ namespace ACES.Controllers
             var studentAssignment = _context.StudentAssignment.Where(x => x.StudentId == studentId && x.AssignmentId == assignmentId).FirstOrDefault();
             if (studentAssignment != null)
             {
-                string error = String.Format("Error: Repository for assignment {0} has already been created earlier. Click Remake link for this assignment, if you want new files", assignment.Name);
-                return RedirectToAction("Index", "StudentInterface", new { message = error });
+                if (agreeToRepoRemake != "Agreed" && agreeToRepoRemake != "Override")
+                {
+                    TempData["error"] = $"Error: Repository for assignment {assignment.Name} has already been updated earlier with template file(s).";
+                    TempData["warning"] = "Click the button below to confirm. Warning: it will clear your repo from all files, including any prior code you committed:";
+                    return RedirectToAction("StudentRepoForm", "Assignments", new { assignmentId = studentAssignment.AssignmentId, repoURL = studentRepoURL });
+                }
+                else
+                {
+                    isRemake = true;
+                    if (agreeToRepoRemake != "Override")
+                    {
+                        using (var httpClient = new HttpClient())
+                        {
+                            //Set up Header info to request files for deletion from the student's GitHub repo
+                            httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+                            httpClient.DefaultRequestHeaders.Add("User-Agent", "ACES");
+                            httpClient.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
+                            string studentRepoContents = $"{studentAssignment.RepositoryUrl}/contents".Replace("//github.com", "//api.github.com/repos");
+                            var objStudentRepoRequest = new HttpRequestMessage(HttpMethod.Get, studentRepoContents);
+
+                            // Get response
+                            using (HttpResponseMessage objStudentRepoResponse = httpClient.SendAsync(objStudentRepoRequest).Result)
+                            {
+                                if (objStudentRepoResponse.IsSuccessStatusCode)
+                                {
+                                    FileInfo[] contents = JsonConvert.DeserializeObject<FileInfo[]>(objStudentRepoResponse.Content.ReadAsStringAsync().Result);
+                                    foreach (var file in contents)
+                                    {
+                                        var fileType = file.type;
+
+                                        if (file.type == "dir")
+                                        {
+                                            var directoryContentsUrl = file.url;
+                                            // future enhancement: use this URL to get the contents of the folder if there are folders in addition to files
+                                        }
+                                        else if (file.type == "file")
+                                        {
+                                            // Get file's sha from student's repository contents, and delete the file
+                                            HttpRequestMessage fileDeleteRequest = new HttpRequestMessage(HttpMethod.Delete, $"{studentRepoContents}/{file.name}");
+                                            fileDeleteRequest.Headers.Add("Authorization", "Bearer " + token);
+
+                                            var bodyDeleteFile = System.Text.Json.JsonSerializer.Serialize(new DeleteFile()
+                                            {
+                                                message = $"Deleting the file {file.name} per the student's request from their repo: {studentAssignment.RepositoryUrl}",
+                                                sha = file.sha
+                                            });
+
+                                            fileDeleteRequest.Content = new StringContent(bodyDeleteFile, Encoding.UTF8, "application/json");
+
+                                            HttpResponseMessage fileDeleteResponse = httpClient.SendAsync(fileDeleteRequest).Result;
+                                            if (!fileDeleteResponse.IsSuccessStatusCode)
+                                            {
+                                                //Display error message? Retry again?
+                                                TempData["errorDeletingFiles"] = $"Error: unable to delete files from repository {studentAssignment.RepositoryUrl}";
+                                                return RedirectToAction("StudentRepoForm", "Assignments", new { assignmentId = studentAssignment.AssignmentId, repoURL = studentRepoURL });
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             // Declare studentMarkedfiles list to start adding marked files data that later will go to StudentAssignmentJson object for storing in the database in the StudentAssignment table in the JSONCode column           
@@ -285,7 +350,7 @@ namespace ACES.Controllers
                                         #endregion
 
                                         #region Pass Gathered Info to Factory/Check Response Content
-                                        var objFactoryRequest = new HttpRequestMessage(HttpMethod.Post, "http://localhost:61946/factory"); //TODO: replace path with Brad's link to cs website, e.g. cs.weber.bradley...// should still use localhost, otherwise needs to do dns routing, going to internet, vs call does not go out?
+                                        var objFactoryRequest = new HttpRequestMessage(HttpMethod.Post, "http://localhost:61946/factory"); //TODO: replace path with Brad's link to cs website, e.g. cs.weber.bradley...// should still use localhost, otherwise needs to do dns routing, going to internet, vs call does not go out? If used outside, that app will put a full path
                                          objFactoryRequest.Content = new StringContent(fileInstructions, Encoding.UTF8, "application/json");
                                         // Check response
                                         using (HttpResponseMessage objFactoryResponse = httpClient.SendAsync(objFactoryRequest).Result)
@@ -322,8 +387,10 @@ namespace ACES.Controllers
                                 #region Upload file to student's repo
                                 // Upload each file (we are still in the files loop) to student's repo,
                                 // regardless of whether this file is customized or not requiring customization, e.g. README.md
-                                string studentPartName = studentRepoURL.Substring(studentRepoURL.LastIndexOf("/") + 1);
-                                string studentAssignmentRepoUrl = file.url.Replace("Template1", studentPartName); //TODO: replace Template1 for parcing actual name
+                                string studentPartName = studentRepoURL.Substring(studentRepoURL.LastIndexOf("github.com/") + 11);
+                                int startReplaceIndex = file.url.LastIndexOf("repos/") + 6;
+                                int lengthToReplace = file.url.LastIndexOf("/contents") - startReplaceIndex;
+                                string studentAssignmentRepoUrl = file.url.Replace(file.url.Substring(startReplaceIndex, lengthToReplace), studentPartName);
                                 HttpRequestMessage filePutToStudentRepoRequest = new HttpRequestMessage(HttpMethod.Put, studentAssignmentRepoUrl);
 
                                 filePutToStudentRepoRequest.Headers.Add("Authorization", "Bearer " + token);
@@ -336,7 +403,7 @@ namespace ACES.Controllers
                                 }
                                 else
                                 {
-                                    string error = String.Format("Error: Repository for assignment {0} has not been updated", assignment.Name);
+                                    string error = String.Format("Error: Repository for assignment {0} has not been updated, status code: {1}", assignment.Name, filePutToStudentRepoResponse.StatusCode);
                                     return RedirectToAction("Index", "StudentInterface", new { message = error });
                                 }
                                 #endregion
@@ -360,9 +427,9 @@ namespace ACES.Controllers
                             _context.StudentAssignment.Add(newStudentAssignment);
                             _context.SaveChanges();
                         }
-                        else
+                        // if Remake, just update the JSONCode, all other columns should be the same
+                        else if (isRemake)
                         {
-                            studentAssignment.RepositoryUrl = studentRepoURL;
                             studentAssignment.JSONCode = jsonString;
                             _context.SaveChanges();
                         }
@@ -414,7 +481,11 @@ namespace ACES.Controllers
         public List<Directory> subDirs;
         public List<FileData> files;
     }
-
+    public struct DeleteFile
+    {
+        public string message { get; set; }
+        public string sha { get; set; }
+    }
     public struct GetWatermarkedAssignment
     {
         public int numberOfWhitespaceCharacters { get; set; }
