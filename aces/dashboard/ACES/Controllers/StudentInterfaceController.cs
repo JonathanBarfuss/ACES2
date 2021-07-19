@@ -306,6 +306,22 @@ namespace ACES.Controllers
                                                     whitespacesLineNumbers = fileInJson.whitespaces.ToObject<int[]>(),
                                                     randomStringLineNumbers = fileInJson.randomstring.ToObject<int[]>()
                                                 });
+
+                                                // Add each watermark to the database
+                                                var newWatermark = new Watermarks
+                                                {
+
+                                                    Watermark = deserializedObject.watermark,
+                                                    StudentID = studentId,
+                                                    AssignmentID = assignmentId,
+                                                    FileName = fileInJson.name.Value,
+                                                    StudentRepoName = studentRepoURL
+
+                                                };
+
+                                                _context.Watermarks.Add(newWatermark);
+                                                _context.SaveChanges();
+
                                             }
                                             else
                                             {
@@ -379,14 +395,12 @@ namespace ACES.Controllers
                     }
                 }
             }
-
-            var assignments = await _context.Assignment.Where(x => x.CourseId == courseId).ToListAsync();
-            return View(assignments);     
+  
         }
         #endregion
     }
 
-    #region JSON Structures
+    #region JSON/Other Structures
     struct PutBody
     {
         public String message;
@@ -446,5 +460,6 @@ namespace ACES.Controllers
     {
         public List<StudentMarkedFile> files { get; set; }
     }
+
     #endregion
 }
