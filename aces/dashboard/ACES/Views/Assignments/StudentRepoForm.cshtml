@@ -17,6 +17,26 @@
     }
 }
 
+
+<html>
+
+<body>
+    <h2>Student Repository</h2>
+    <br />
+    <div class="row">
+        <div class="col-md-4">
+            <form method="post">
+                <div class="form-group">
+                    <label name="RepoURL" class="control-label">Please Enter your Repo URL:</label>
+                    <input name="RepoURL" class="form-control" />
+                </div>
+                <input name="assignmentId" value="@ViewBag.assignmentId" type="hidden" />
+                <div class="form-group">
+                    <button onclick="clickLoader()" id="submitter" type="submit" value="Submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+=======
 <h2>Student Repository</h2>
 <br />
 <div class="row">
@@ -72,7 +92,9 @@
             }
         </form>
     </div>
-</div>
+
+</body>
+</html>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
