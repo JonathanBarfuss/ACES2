@@ -42,7 +42,7 @@ namespace ACES.Controllers
         public IActionResult Index(int assignmentID)
         {
             //var studentList = assignmentID;
-
+            
             var studentSubmissions = _context.StudentAssignment.Where(i => i.AssignmentId == assignmentID);
             List<StudentAssignment> studentSubmissionsList = studentSubmissions.ToList(); 
 
@@ -118,8 +118,8 @@ namespace ACES.Controllers
                 }
                 
             }
-
-            return View();
+            
+            return RedirectToAction("ComparisonResults", "Assignments", new { id = assignmentID });
         }
 
         private void CompareFile(string fileContent)

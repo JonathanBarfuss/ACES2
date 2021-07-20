@@ -11,6 +11,7 @@ using ACES.Models.ViewModels;
 using System.Collections.Immutable;
 using System.Drawing;
 using Microsoft.EntityFrameworkCore.Internal;
+using Newtonsoft.Json;
 
 namespace ACES.Controllers
 {
@@ -49,38 +50,7 @@ namespace ACES.Controllers
                 var student = await _context.Student.FirstOrDefaultAsync(x => x.Id == sAssignment.StudentId);
                 var commits = await _context.Commit.Where(x => x.StudentAssignmentId == sAssignment.Id).ToListAsync();
                 sAssignment.NumCommits = commits.Count();
-                sAssignment.StudentName = student.FullName;
-
-                /***************************************** verify this block of code is no longer needed ******************************************
-                // Get rations
-                var watermarkAvg = 0.0;
-                var linesModifiedAvg = 0.0;
-                var timeBetweenAvg = 0.0;
-                var pointsAvg = 0;
-
-                if (commits.Count() > 0)
-                {
-                    for (var i = 0; i < commits.Count(); i++)
-                    {
-                        watermarkAvg += commits[i].NumWatermarks;
-                        linesModifiedAvg += (commits[i].LinesAdded + commits[i].LinesDeleted);
-                        if ((i - 1) > -1)
-                        {
-                            timeBetweenAvg += (commits[i].DateCommitted - commits[i - 1].DateCommitted).TotalHours;
-                        }
-                    }
-                    watermarkAvg /= commits.Count();
-                    linesModifiedAvg /= commits.Count();
-                    timeBetweenAvg /= commits.Count();
-                    pointsAvg /= commits.Count();
-                
-                }
-
-                // Otherwise they are all 0
-                //sAssignment.WatermarksRatio = watermarkAvg + "/" + sAssignment.NumWatermarks;
-                sAssignment.LinesModifiedAvg = linesModifiedAvg;
-                sAssignment.TimeBetweenAvg = timeBetweenAvg;
-                */
+                sAssignment.StudentName = student.FullName;                
             }
 
             var vm = new AssignmentStudentsVM()
@@ -94,6 +64,58 @@ namespace ACES.Controllers
             return View(vm);
         }
 
+        // GET: Assignments/ComparisonResults/int
+        public async Task<IActionResult> ComparisonResults(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var assignment = await _context.Assignment.FirstOrDefaultAsync(m => m.Id == id);  //make sure the assignment exists
+            if (assignment == null)
+            {
+                return NotFound();
+            }
+            ViewBag.AssignmentName = assignment.Name;  //store the assignment name to display in the view
+
+            //join the student assignment table with the student table and the commit table
+            var joinCommits = (from sa in _context.StudentAssignment
+                               join s in _context.Student on sa.StudentId equals s.Id
+                               join c in _context.Commit on sa.Id equals c.StudentAssignmentId
+                               select new
+                               {
+                                   assignmentId = sa.AssignmentId,
+                                   studentName = s.FullName,
+                                   jsonCode = c.JSONCode,
+                                   dateCommited = c.DateCommitted
+                               }).ToListAsync();
+
+            var compareResults = joinCommits.Result.Where(x => x.assignmentId == id);  //select only those for the desired assignment
+
+            List<CompareResultsVM> listResults = new List<CompareResultsVM>();  //create list to hold the results
+
+            foreach (var result in compareResults)  //create the view model for each result
+            {
+                var vm = new CompareResultsVM();
+                var jsonInfo = (Newtonsoft.Json.Linq.JObject)JsonConvert.DeserializeObject(result.jsonCode);
+                vm.StudentName = result.studentName;
+                vm.CommitDate = result.dateCommited;
+                vm.Watermarks = (string)jsonInfo["watermarks"];
+                vm.Whitespaces = (string)jsonInfo["whitespaces"];
+                vm.NumberOfCommits = (int)jsonInfo["NumberOfCommits"];
+                vm.LinesAdded = (int)jsonInfo["LinesAdded"];
+                vm.LinesDeleted = (int)jsonInfo["LinesDeleted"];
+                vm.AverageTime = new TimeSpan((long)jsonInfo["AverageTimeBetweenCommits"]["Ticks"]);
+
+                listResults.Add(vm);  //and the newly created view model to the list
+            }
+
+            return View(listResults);
+        }
+
+
+        // ************************************************************verify not needed*****************************************
         // GET: Assignments/AssignmentStudentCommits/5
         public async Task<IActionResult> AssignmentStudentCommits(int? id)
         {

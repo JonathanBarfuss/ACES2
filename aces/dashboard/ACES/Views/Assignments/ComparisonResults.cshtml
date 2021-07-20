@@ -1,0 +1,40 @@
+﻿@model List<ACES.Models.ViewModels.CompareResultsVM>
+    
+@{
+    ViewData["Title"] = "ComparisonResults";
+}
+
+<h1>@ViewBag.AssignmentName Comparison Results</h1>
+
+<div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Student Name</th>
+                <th>Final Commit</th>
+                <th>Watermarks</th>
+                <th>White Spaces</th>
+                <th>Commits</th>
+                <th>Average Time Between Commits</th>
+                <th>Lines Added</th>
+                <th>Lines Deleted</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var result in Model)
+            {
+            <tr>
+                <td>@result.StudentName</td>
+                <td>@result.CommitDate</td>
+                <td>@result.Watermarks</td>
+                <td>@result.Whitespaces</td>
+                <td>@result.NumberOfCommits</td>
+                <td>@result.AverageTime</td>
+                <td>@result.LinesAdded</td>
+                <td>@result.LinesDeleted</td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
