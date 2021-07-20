@@ -40,16 +40,10 @@ namespace ACES.Controllers
         }
 
         public IActionResult Index(int assignmentID)
-        {
-            //var studentList = assignmentID;
-            
+        {    
             var studentSubmissions = _context.StudentAssignment.Where(i => i.AssignmentId == assignmentID);
             List<StudentAssignment> studentSubmissionsList = studentSubmissions.ToList(); 
 
-            //Request.Cookies.TryGetValue("StudentId", out string stringid);
-            //Int32.TryParse(stringid, out int studentId);
-
-            //var studAssign = _context.StudentAssignment.FirstOrDefault(x => x.StudentId == studentId);
             string token = _configuration["GithubToken"];
 
 
@@ -128,13 +122,24 @@ namespace ACES.Controllers
 
             foreach (var line in contentLines)
             {
-                if (whitestring != "" && line.Contains(whitestring))
+                if (line.Contains("// DO NOT REMOVE THIS LINE")) // whitespace watermark is after this comment 
                 {
-                    curWhitespaceCount++;
+                    if (line.Contains(whitestring))
+                    {
+                        curWhitespaceCount++;
+                    }
                 }
-                else if (line.Contains(watermark))
+                else if (line.Contains("//wm")) // searches for //wm cause that is where the watermark would be to find if there is a wrong watermark there
                 {
-                    curWatermarkCount++;
+                    if (line.Contains(watermark))
+                    {
+                        curWatermarkCount++;
+                    }
+                    else
+                    {
+                        // THEY HAVE A WRONG WATERMARK IF IT GETS TO THIS CODE
+                    }
+                    
                 }
             }
         }
@@ -150,13 +155,23 @@ namespace ACES.Controllers
                 LinesDeleted = linesDeleted,
                 AverageTimeBetweenCommits = averageTimeBetweenCommits
             });
-            var newCommit = new Commit()
+            var studentCommit = _context.Commit.Where(i => i.StudentAssignmentId == id).FirstOrDefault();
+            if (studentCommit == null)
             {
-                StudentAssignmentId = id,
-                DateCommitted = finalCommitTime,
-                JSONCode = json
-            };
-            _context.Commit.Add(newCommit);
+                var newCommit = new Commit()
+                {
+                    StudentAssignmentId = id,
+                    DateCommitted = finalCommitTime,
+                    JSONCode = json
+                };
+                _context.Commit.Add(newCommit);
+            } 
+            else
+            {
+                studentCommit.DateCommitted = finalCommitTime;
+                studentCommit.JSONCode = json;
+            }
+            
             _context.SaveChanges();
         }
 
