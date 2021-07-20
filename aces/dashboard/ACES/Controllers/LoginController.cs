@@ -11,14 +11,24 @@ namespace ACES.Controllers
     public class LoginController : Controller
     {
         private readonly ACESContext _context;
+        private int loginError = 0;
 
         public LoginController(ACESContext context)
         {
             _context = context;
         }
 
-        public IActionResult Index(string aID)
+        public IActionResult Index(string aID, int lError) //aID is for directing students to an assignment, lError is for login errors (incorrect username or password)
         {
+            loginError = lError;
+            if(loginError == 1)
+            {
+
+                ViewBag.lblLoginError = "Invalid Email or Password";
+                return View();
+            
+            }
+            
             ViewBag.assignmentID = aID;
             return View();
         }
@@ -124,7 +134,8 @@ namespace ACES.Controllers
                 }
             }
 
-            return View();
+
+            return RedirectToAction("index", new { lError = 1});
         }
     }
 }

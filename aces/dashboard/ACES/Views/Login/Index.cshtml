@@ -21,6 +21,8 @@
                     <h3>ACES Login</h3>
                 </div>
                 <form>
+                    <asp:Label ID="lblLoginError" runat="server" AssociatedControlID="Login" style="color: red"> @ViewBag.lblLoginError</asp:Label>
+                    <br />
                     <input type="text" id="login" class="fadeIn second" name="username" placeholder="Email">
                     <input type="password" id="password" class="fadeIn third" name="password" placeholder="Password">
                     <input type="submit" class="fadeIn fourth" value="Log In">
