@@ -3,7 +3,20 @@
 @{
     ViewData["Title"] = "Student Repo Form";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    string error = (string)TempData["error"];
+    string warning = (string)TempData["warning"];
+    string errorDeletingfiles = (string)TempData["errorDeletingFiles"];
+    string labelRepo;
+    if (String.IsNullOrWhiteSpace(warning))
+    {
+        labelRepo = "Please Enter your Repo URL:";
+    }
+    else
+    {
+        labelRepo = "You entered the following Repo URL:";
+    }
 }
+
 
 <html>
 
@@ -23,6 +36,61 @@
                 </div>
             </form>
         </div>
+=======
+<h2>Student Repository</h2>
+<br />
+<div class="row">
+    <div class="col-md-10">
+        <form method="post">
+            <div class="form-group">
+                <label name="RepoURL" class="control-label">@labelRepo</label>
+                <input name="RepoURL" value="@ViewBag.repoURL" class="form-control" />
+            </div>
+            <input name="assignmentId" value="@ViewBag.assignmentId" type="hidden" />
+
+            @if (String.IsNullOrWhiteSpace(warning))
+            {
+                <div class="form-group">
+                    <input type="submit" value="Submit" class="btn btn-primary" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label"><i>Example: <b>https://github.com/InstructorClassroomSummer2021/Assignment1-JohnDoe</b></i></label>
+                </div>
+            }
+            @if (!String.IsNullOrWhiteSpace(error))
+            {
+                <label class="control-label" style="color:red"><b>@error</b></label>
+            }
+            @if (!String.IsNullOrWhiteSpace(warning))
+            {
+                <div class="form-group">
+                    <label name="Agreed" class="control-label">Click <b>Home</b> to exit this screen. Otherwise, please type <b>Agreed</b> if you want to delete your repo files and to re-add template(s) to start this assignment again:</label>
+                    <input name="Agreed" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label"><b><i>@warning</i></b></label>
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="Delete Repo Files and Paste New Template(s)" class="btn btn-primary" />
+                </div>
+            }
+            @if (!String.IsNullOrWhiteSpace(errorDeletingfiles))
+            {
+                <div class="form-group">
+                    <label class="control-label" style="color:red"><b><i>@errorDeletingfiles</i></b></label>
+                </div>
+                <div class="form-group">
+                    <label name="Agreed" class="control-label">Click <b>Home</b> to exit this screen. Otherwise, please type <b>Override</b> if you verified that your repo files are already deleted manually and you want to re-add template(s) to start this assignment again:</label>
+                    <input name="Agreed" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label"><b><i>@warning</i></b></label>
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="My Repo is empty. Paste New Template(s)" class="btn btn-primary" />
+                </div>
+            }
+        </form>
     </div>
 
 </body>

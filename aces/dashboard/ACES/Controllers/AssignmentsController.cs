@@ -235,14 +235,16 @@ namespace ACES.Controllers
 
         // Get: Assignments/StudentRepoForm
         [HttpGet]
-        public async Task<IActionResult> StudentRepoForm(int assignmentId)
+        public async Task<IActionResult> StudentRepoForm(int assignmentId, string repoURL)
         {
             var vm = new StudentRepoVM()
             {
                 assignmentId = assignmentId,
-                RepoURL = ""
+                RepoURL = "",
+                Agreed = ""
             };
             ViewBag.assignmentId = assignmentId;
+            ViewBag.repoURL = repoURL;
 
             return View(vm);
         }
@@ -250,23 +252,32 @@ namespace ACES.Controllers
         // Post: Assignments/StudentRepoForm
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> StudentRepoForm([Bind("assignmentId,RepoURL")] StudentRepoVM vm)
+        public async Task<IActionResult> StudentRepoForm([Bind("assignmentId,RepoURL,Agreed")] StudentRepoVM vm)
         {
             //get the required data from form and cookie
             string studentID;
             int assignmentID = vm.assignmentId;
-            string studentRepoURL = vm.RepoURL;
             if (Request.Cookies.ContainsKey("StudentID"))
             {
                 studentID = Request.Cookies["StudentID"];
             }
+
+            // validate student repo format
+            string studentRepoURL = vm.RepoURL;
+            if (String.IsNullOrWhiteSpace(studentRepoURL))
+            {
+                TempData["error"] = "Error: Please enter your repository";
+                return RedirectToAction("StudentRepoForm", "Assignments", new { assignmentId = assignmentID });
+            }
+
+            string agreeToRepoRemake = vm.Agreed; 
 
             //find the assignment and get the sectionID
             var assignment = _context.Assignment.Where(x => x.Id == vm.assignmentId).FirstOrDefault();
             string courseID = assignment.CourseId.ToString();
 
             //redirect to the studentAssignments function
-            return RedirectToAction("StudentAssignments", "StudentInterface", new { assignmentId = assignmentID, courseId = courseID, studentRepoURL = studentRepoURL });
+            return RedirectToAction("StudentAssignments", "StudentInterface", new { assignmentId = assignmentID, courseId = courseID, studentRepoURL = studentRepoURL, agreeToRepoRemake = agreeToRepoRemake });
         }
 
         public async Task<IActionResult> DownloadAssignment(int courseId)
