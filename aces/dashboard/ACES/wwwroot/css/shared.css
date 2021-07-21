@@ -28,3 +28,11 @@
     z-index: 5;
     opacity: 0.01;
 }
+
+.cautionHighlight {
+    background-color: yellow;
+}
+
+.dangerHighlight {
+    background-color: red;
+}

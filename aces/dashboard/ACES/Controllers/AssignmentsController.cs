@@ -101,17 +101,36 @@ namespace ACES.Controllers
                 var jsonInfo = (Newtonsoft.Json.Linq.JObject)JsonConvert.DeserializeObject(result.jsonCode);
                 vm.StudentName = result.studentName;
                 vm.CommitDate = result.dateCommited;
-                vm.Watermarks = (string)jsonInfo["watermarks"];
-                vm.Whitespaces = (string)jsonInfo["whitespaces"];
+                int watermarks = (int)jsonInfo["watermarks"];
+                int ogWatermarks = (int)jsonInfo["ogWatermarks"];
+                vm.Watermarks = watermarks.ToString() + "/" + ogWatermarks.ToString();  //display as a fraction of original watermarks
+                int whitespaces = (int)jsonInfo["whitespaces"];
+                int ogWhitespaces = (int)jsonInfo["ogWhitespaces"];
+                vm.Whitespaces = whitespaces.ToString() + "/" + ogWhitespaces.ToString();  //display as a fraction of original white spaces
                 vm.NumberOfCommits = (int)jsonInfo["NumberOfCommits"];
                 vm.LinesAdded = (int)jsonInfo["LinesAdded"];
                 vm.LinesDeleted = (int)jsonInfo["LinesDeleted"];
-                vm.AverageTime = new TimeSpan((long)jsonInfo["AverageTimeBetweenCommits"]["Ticks"]);
+                vm.AverageTime = new TimeSpan((long)jsonInfo["AverageTimespanTicks"]);  //convert ticks back into timespan
+                vm.WatermarkHighlight = determineHighlight(watermarks, ogWatermarks);
+                vm.WhitespaceHighlight = determineHighlight(whitespaces, ogWhitespaces);
+                vm.OtherWatermark = (string)jsonInfo["OtherWatermark"];
 
                 listResults.Add(vm);  //and the newly created view model to the list
             }
 
             return View(listResults);
+        }
+
+        //helper method to determine the highlight for a value
+        public string determineHighlight( int numerator, int denominator)
+        {
+            string highlight = "none";
+            if( denominator != 0)
+            {
+                if( numerator / denominator != 1) { highlight = "caution"; }
+                if ( (double)numerator / (double)denominator < 0.5 ) { highlight = "danger"; }                
+            }
+            return highlight;
         }
 
 

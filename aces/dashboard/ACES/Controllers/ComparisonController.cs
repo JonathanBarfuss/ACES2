@@ -25,10 +25,11 @@ namespace ACES.Controllers
         int[] whiteLines;
         int[] stringLines;
         private int numberOfCommits;
-        private TimeSpan averageTimeBetweenCommits;
+        private long averageTimespanTicks;
         private int linesAdded;
         private int linesDeleted;
         private DateTime finalCommitTime;
+        private string otherWatermark = "none";
 
         private readonly ACESContext _context;
         private readonly IConfiguration _configuration;
@@ -138,8 +139,9 @@ namespace ACES.Controllers
                     else
                     {
                         // THEY HAVE A WRONG WATERMARK IF IT GETS TO THIS CODE
-                    }
-                    
+                        otherWatermark = line.ToString();
+                        otherWatermark = otherWatermark.Remove(4);
+                    }                    
                 }
             }
         }
@@ -148,12 +150,15 @@ namespace ACES.Controllers
         {
             var json = System.Text.Json.JsonSerializer.Serialize(new CommitJSON()
             {
-                watermarks = curWatermarkCount + "/" + ogWatermarkCount,
-                whitespaces = curWhitespaceCount + "/" + ogWhitespaceCount,
+                watermarks = curWatermarkCount,
+                ogWatermarks = ogWatermarkCount,
+                whitespaces = curWhitespaceCount,
+                ogWhitespaces = ogWhitespaceCount,
                 NumberOfCommits = numberOfCommits,
                 LinesAdded = linesAdded,
                 LinesDeleted = linesDeleted,
-                AverageTimeBetweenCommits = averageTimeBetweenCommits
+                AverageTimespanTicks = averageTimespanTicks,
+                OtherWatermark = otherWatermark
             });
             var studentCommit = _context.Commit.Where(i => i.StudentAssignmentId == id).FirstOrDefault();
             if (studentCommit == null)
@@ -209,7 +214,11 @@ namespace ACES.Controllers
                         }
                         if (numberOfCommits > 1)  //calculate the average time between commits if there are at least 2 commits
                         {
-                            averageTimeBetweenCommits = calculateAverageTime(times);
+                            averageTimespanTicks = calculateAverageTime(times);
+                        }
+                        else
+                        {
+                            averageTimespanTicks = 0;
                         }
                         
                     }
@@ -235,8 +244,8 @@ namespace ACES.Controllers
             }
         }
 
-        //helper method to calculate the average amount of time between commits
-        private TimeSpan calculateAverageTime(List<DateTime> times)
+        //helper method to calculate the average amount of time between commits measured in Timespan Ticks
+        private long calculateAverageTime(List<DateTime> times)
         {
             TimeSpan timeTotal;
             timeTotal = TimeSpan.Zero;
@@ -246,17 +255,21 @@ namespace ACES.Controllers
                 var tempTime = times[i].Subtract(times[i + 1]);
                 timeTotal = timeTotal.Add(tempTime);
             }
-            return timeTotal / (times.Count - 1);  //divide by number of time differences == count - 1
+            timeTotal /= (times.Count - 1);  //divide by number of time differences == count - 1
+            return (long)timeTotal.Ticks;
         }
     }
 }
 
 public struct CommitJSON
 {
-    public string watermarks { get; set; }
-    public string whitespaces { get; set; }
+    public int watermarks { get; set; }
+    public int ogWatermarks { get; set; }
+    public int whitespaces { get; set; }
+    public int ogWhitespaces { get; set; }
     public int NumberOfCommits { get; set; }
     public int LinesAdded { get; set; }
     public int LinesDeleted { get; set; }
-    public TimeSpan AverageTimeBetweenCommits { get; set; }
+    public long AverageTimespanTicks { get; set; }
+    public string OtherWatermark { get; set; }
 }

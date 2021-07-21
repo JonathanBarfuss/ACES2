@@ -18,6 +18,7 @@
                 <th>Average Time Between Commits</th>
                 <th>Lines Added</th>
                 <th>Lines Deleted</th>
+                <th>Other Watermark</th>
             </tr>
         </thead>
         <tbody>
@@ -26,12 +27,42 @@
             <tr>
                 <td>@result.StudentName</td>
                 <td>@result.CommitDate</td>
-                <td>@result.Watermarks</td>
-                <td>@result.Whitespaces</td>
+                @if (result.WatermarkHighlight == "caution")
+                {
+                    <td class="cautionHighlight">@result.Watermarks</td>
+                }
+                @if (result.WatermarkHighlight == "danger")
+                {
+                    <td class="dangerHighlight">@result.Watermarks</td>
+                }
+                @if (result.WatermarkHighlight == "none")
+                {
+                    <td>@result.Watermarks</td>
+                }
+                @if (result.WhitespaceHighlight == "caution")
+                {
+                    <td class="cautionHighlight">@result.Whitespaces</td>
+                }
+                @if (result.WhitespaceHighlight == "danger")
+                {
+                    <td class="dangerHighlight">@result.Whitespaces</td>
+                }
+                @if (result.WhitespaceHighlight == "none")
+                {
+                    <td>@result.Whitespaces</td>
+                }
                 <td>@result.NumberOfCommits</td>
-                <td>@result.AverageTime</td>
+                <td>D:@result.AverageTime.Days Hr:@result.AverageTime.Hours Mn:@result.AverageTime.Minutes S:@result.AverageTime.Seconds</td>
                 <td>@result.LinesAdded</td>
                 <td>@result.LinesDeleted</td>
+                @if (result.OtherWatermark != "none")
+                {
+                    <td class="dangerHighlight">@result.OtherWatermark</td>
+                }
+                else
+                {
+                    <td>@result.OtherWatermark</td>
+                }
             </tr>
             }
         </tbody>

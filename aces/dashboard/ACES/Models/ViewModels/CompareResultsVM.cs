@@ -15,5 +15,8 @@ namespace ACES.Models.ViewModels
         public int LinesAdded { get; set; }
         public int LinesDeleted { get; set; }
         public TimeSpan AverageTime { get; set; }
+        public string OtherWatermark { get; set; }
+        public string WatermarkHighlight { get; set; }
+        public string WhitespaceHighlight { get; set; }
     }
 }
