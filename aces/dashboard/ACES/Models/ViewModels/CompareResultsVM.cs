@@ -18,5 +18,6 @@ namespace ACES.Models.ViewModels
         public string OtherWatermark { get; set; }
         public string WatermarkHighlight { get; set; }
         public string WhitespaceHighlight { get; set; }
+        public string DueDateHighlight { get; set; }
     }
 }

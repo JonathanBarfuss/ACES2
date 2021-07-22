@@ -18,7 +18,7 @@
                 <th>Average Time Between Commits</th>
                 <th>Lines Added</th>
                 <th>Lines Deleted</th>
-                <th>Other Watermark</th>
+                <th>Foreign Watermark</th>
             </tr>
         </thead>
         <tbody>
@@ -26,7 +26,14 @@
             {
             <tr>
                 <td>@result.StudentName</td>
-                <td>@result.CommitDate</td>
+                @if (result.DueDateHighlight == "caution")
+                {
+                    <td class="cautionHighlight"><div>@result.CommitDate</div><div><strong>**Past Due**</strong></div></td>
+                }
+                else
+                {
+                    <td>@result.CommitDate</td>
+                }
                 @if (result.WatermarkHighlight == "caution")
                 {
                     <td class="cautionHighlight">@result.Watermarks</td>
@@ -52,7 +59,7 @@
                     <td>@result.Whitespaces</td>
                 }
                 <td>@result.NumberOfCommits</td>
-                <td>D:@result.AverageTime.Days Hr:@result.AverageTime.Hours Mn:@result.AverageTime.Minutes S:@result.AverageTime.Seconds</td>
+                <td><div>D:@result.AverageTime.Days</div> <div>Hr:@result.AverageTime.Hours</div> <div>Mn:@result.AverageTime.Minutes</div> <div>S:@result.AverageTime.Seconds</div></td>
                 <td>@result.LinesAdded</td>
                 <td>@result.LinesDeleted</td>
                 @if (result.OtherWatermark != "none")

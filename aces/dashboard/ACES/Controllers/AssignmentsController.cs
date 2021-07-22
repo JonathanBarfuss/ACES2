@@ -114,6 +114,14 @@ namespace ACES.Controllers
                 vm.WatermarkHighlight = determineHighlight(watermarks, ogWatermarks);
                 vm.WhitespaceHighlight = determineHighlight(whitespaces, ogWhitespaces);
                 vm.OtherWatermark = (string)jsonInfo["OtherWatermark"];
+                if(result.dateCommited > assignment.DueDate)
+                {
+                    vm.DueDateHighlight = "caution";
+                }
+                else
+                {
+                    vm.DueDateHighlight = "none";
+                }
 
                 listResults.Add(vm);  //and the newly created view model to the list
             }
