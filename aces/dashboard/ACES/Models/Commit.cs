@@ -2,7 +2,7 @@
 
 namespace ACES.Models
 {
-    public class Commit
+    public class Results
     {
         public int Id { get; set; }
         public int StudentAssignmentId { get; set; }

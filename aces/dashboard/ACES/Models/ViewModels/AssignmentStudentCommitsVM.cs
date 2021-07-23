@@ -8,6 +8,6 @@ namespace ACES.Models.ViewModels
         public string StudentName { get; set; }
         //public int NumWatermarks { get; set; }
         public Assignment Assignment { get; set; }
-        public List<Commit> Commits { get; set; }
+        public List<Results> Commits { get; set; }
     }
 }

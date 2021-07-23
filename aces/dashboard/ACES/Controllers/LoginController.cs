@@ -11,14 +11,24 @@ namespace ACES.Controllers
     public class LoginController : Controller
     {
         private readonly ACESContext _context;
+        private int loginError = 0;
 
         public LoginController(ACESContext context)
         {
             _context = context;
         }
 
-        public IActionResult Index(string aID)
+        public IActionResult Index(string aID, int lError) //aID is for directing students to an assignment, lError is for login errors (incorrect username or password)
         {
+            loginError = lError;
+            if(loginError == 1)
+            {
+
+                ViewBag.lblLoginError = "Invalid Email or Password";
+                return View();
+            
+            }
+            
             ViewBag.assignmentID = aID;
             return View();
         }
@@ -92,6 +102,22 @@ namespace ACES.Controllers
 
                     if(!String.IsNullOrEmpty(assignmentID))  //if an assignment ID is provided go to that specific assignment
                     {
+                        //If student is not in the course of the specific assignment add them to that course
+                        var courseID = _context.Assignment.Find(Int32.Parse(assignmentID)).CourseId; //Gets CourseID from AssignmentID
+                        var enrolled = _context.Enrollment.Where(c => c.CourseId == courseID); //Gets all rows with this courseID
+                        var isEnrolled = enrolled.FirstOrDefault(s => s.StudentId == student.Id); //Gets row with with studentID
+                        
+                        if(isEnrolled == null) //Student is not in the course
+                        {
+                            Models.Enrollment enrollment = new Models.Enrollment
+                            {
+                                StudentId = student.Id,
+                                CourseId = courseID
+                            };
+                            _context.Enrollment.Add(enrollment);
+                            _context.SaveChanges();
+                        }
+
                         string tempurl = String.Format("/Assignments/StudentRepoForm?assignmentId={0}", assignmentID);
                         return Redirect(tempurl);
                         
@@ -108,7 +134,8 @@ namespace ACES.Controllers
                 }
             }
 
-            return View();
+
+            return RedirectToAction("index", new { lError = 1});
         }
     }
 }

@@ -9,5 +9,6 @@ namespace ACES.Models.ViewModels
     {
         public int assignmentId { get; set; }
         public string RepoURL { get; set; }
+        public string Agreed { get; set; }
     }
 }
