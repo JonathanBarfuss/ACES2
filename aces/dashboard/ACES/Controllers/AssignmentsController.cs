@@ -82,7 +82,7 @@ namespace ACES.Controllers
             //join the student assignment table with the student table and the commit table
             var joinCommits = (from sa in _context.StudentAssignment
                                join s in _context.Student on sa.StudentId equals s.Id
-                               join c in _context.Commit on sa.Id equals c.StudentAssignmentId
+                               join c in _context.Results on sa.Id equals c.StudentAssignmentId
                                select new
                                {
                                    assignmentId = sa.AssignmentId,
