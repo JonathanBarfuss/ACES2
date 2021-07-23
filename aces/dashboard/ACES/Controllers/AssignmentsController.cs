@@ -47,7 +47,7 @@ namespace ACES.Controllers
             foreach (var sAssignment in studentAssignments)
             {
                 var student = await _context.Student.FirstOrDefaultAsync(x => x.Id == sAssignment.StudentId);
-                var commits = await _context.Commit.Where(x => x.StudentAssignmentId == sAssignment.Id).ToListAsync();
+                var commits = await _context.Results.Where(x => x.StudentAssignmentId == sAssignment.Id).ToListAsync();
                 sAssignment.NumCommits = commits.Count();
                 sAssignment.StudentName = student.FullName;
 
@@ -102,7 +102,7 @@ namespace ACES.Controllers
                 return NotFound();
             }
 
-            var commits = await _context.Commit.Where(x => x.StudentAssignmentId == id).ToListAsync();
+            var commits = await _context.Results.Where(x => x.StudentAssignmentId == id).ToListAsync();
             var sAssingment = await _context.StudentAssignment.FirstOrDefaultAsync(x => x.Id == id);
             var assignment = await _context.Assignment.FirstOrDefaultAsync(x => x.Id == sAssingment.AssignmentId);
 
