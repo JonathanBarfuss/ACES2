@@ -160,16 +160,16 @@ namespace ACES.Controllers
                 AverageTimespanTicks = averageTimespanTicks,
                 OtherWatermark = otherWatermark
             });
-            var studentCommit = _context.Commit.Where(i => i.StudentAssignmentId == id).FirstOrDefault();
+            var studentCommit = _context.Results.Where(i => i.StudentAssignmentId == id).FirstOrDefault();
             if (studentCommit == null)
             {
-                var newCommit = new Commit()
+                var newCommit = new Results()
                 {
                     StudentAssignmentId = id,
                     DateCommitted = finalCommitTime,
                     JSONCode = json
                 };
-                _context.Commit.Add(newCommit);
+                _context.Results.Add(newCommit);
             } 
             else
             {
