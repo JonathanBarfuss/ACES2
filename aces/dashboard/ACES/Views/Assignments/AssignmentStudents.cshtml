@@ -17,8 +17,8 @@
         <thead>
             <tr>
                 <th>Name</th>
-                <th>Comparison Results</th>
-                <th>JSON results</th>
+                <th>Files</th>
+                <th>Repository URL</th>
                 <th></th>
             </tr>
         </thead>
@@ -27,11 +27,8 @@
             {
             <tr>
                 <td>@sAssignment.StudentName</td>
-                <td>@sAssignment.NumCommits</td>
-                <td>@sAssignment.JSONCode</td>
-                <td>
-                    <a asp-controller="Assignments" asp-action="AssignmentStudentCommits" asp-route-id="@sAssignment.Id">Commits</a>
-                </td>
+                <td>@Html.Raw(@sAssignment.Files)</td>
+                <td>@sAssignment.RepositoryUrl</td>
             </tr>
             }
         </tbody>

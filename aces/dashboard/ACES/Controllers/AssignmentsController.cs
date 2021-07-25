@@ -48,9 +48,14 @@ namespace ACES.Controllers
             foreach (var sAssignment in studentAssignments)
             {
                 var student = await _context.Student.FirstOrDefaultAsync(x => x.Id == sAssignment.StudentId);
-                var commits = await _context.Results.Where(x => x.StudentAssignmentId == sAssignment.Id).ToListAsync();
-                sAssignment.NumCommits = commits.Count();
-                sAssignment.StudentName = student.FullName;                
+                sAssignment.StudentName = student.FullName;
+
+                var jsonInfo = (Newtonsoft.Json.Linq.JObject)JsonConvert.DeserializeObject(sAssignment.JSONCode);  //use the jsonCode to get the file names
+                var lstFiles = (Newtonsoft.Json.Linq.JArray)jsonInfo["files"];
+                for (int i = 0; i < lstFiles.Count; i++)  //loop through each file and get the name
+                {
+                    sAssignment.Files += "<div>" + (string)lstFiles[i]["fileName"] + "</div>";  //add each name to the files string along with some html
+                }
             }
 
             var vm = new AssignmentStudentsVM()
@@ -139,34 +144,6 @@ namespace ACES.Controllers
                 if ( (double)numerator / (double)denominator < 0.5 ) { highlight = "danger"; }                
             }
             return highlight;
-        }
-
-
-        // ************************************************************verify not needed*****************************************
-        // GET: Assignments/AssignmentStudentCommits/5
-        public async Task<IActionResult> AssignmentStudentCommits(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var commits = await _context.Results.Where(x => x.StudentAssignmentId == id).ToListAsync();
-            var sAssingment = await _context.StudentAssignment.FirstOrDefaultAsync(x => x.Id == id);
-            var assignment = await _context.Assignment.FirstOrDefaultAsync(x => x.Id == sAssingment.AssignmentId);
-
-            var studentName = (await _context.Student.FirstOrDefaultAsync(x => x.Id == sAssingment.StudentId)).FullName;
-
-            var vm = new AssignmentStudentCommitsVM()
-            {
-                StudentAssignmentId = (int)id,
-                StudentName = studentName,
-                //NumWatermarks = sAssingment.NumWatermarks,
-                Assignment = assignment,
-                Commits = commits
-            };
-
-            return View(vm);
         }
 
         // GET: Assignments/Create
