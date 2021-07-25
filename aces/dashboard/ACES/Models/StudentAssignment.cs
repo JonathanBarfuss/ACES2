@@ -19,18 +19,18 @@ namespace ACES.Models
         public string JSONCode { get; set; }
 
         #region For Views
-        [NotMapped]
-        public int? NumCommits { get; set; }
+        //[NotMapped]
+        //public int? NumCommits { get; set; }
         [NotMapped]
         public string StudentName { get; set; }
+        //[NotMapped]
+        //public string PointsRatio { get; set; }
         [NotMapped]
-        public string PointsRatio { get; set; }
-        [NotMapped]
-        public string WatermarksRatio { get; set; }
-        [NotMapped]
-        public double LinesModifiedAvg { get; set; }
-        [NotMapped]
-        public double TimeBetweenAvg { get; set; }
+        public string Files { get; set; }
+        //[NotMapped]
+        //public double LinesModifiedAvg { get; set; }
+        //[NotMapped]
+        //public double TimeBetweenAvg { get; set; }
         #endregion
     }
 }

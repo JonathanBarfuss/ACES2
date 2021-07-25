@@ -1,0 +1,78 @@
+﻿@model List<ACES.Models.ViewModels.CompareResultsVM>
+    
+@{
+    ViewData["Title"] = "ComparisonResults";
+}
+
+<h1>@ViewBag.AssignmentName Comparison Results</h1>
+
+<div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Student Name</th>
+                <th>Final Commit</th>
+                <th>Watermarks</th>
+                <th>White Spaces</th>
+                <th>Commits</th>
+                <th>Average Time Between Commits</th>
+                <th>Lines Added</th>
+                <th>Lines Deleted</th>
+                <th>Foreign Watermark</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var result in Model)
+            {
+            <tr>
+                <td>@result.StudentName</td>
+                @if (result.DueDateHighlight == "caution")
+                {
+                    <td class="cautionHighlight"><div>@result.CommitDate</div><div><strong>**Past Due**</strong></div></td>
+                }
+                else
+                {
+                    <td>@result.CommitDate</td>
+                }
+                @if (result.WatermarkHighlight == "caution")
+                {
+                    <td class="cautionHighlight">@result.Watermarks</td>
+                }
+                @if (result.WatermarkHighlight == "danger")
+                {
+                    <td class="dangerHighlight">@result.Watermarks</td>
+                }
+                @if (result.WatermarkHighlight == "none")
+                {
+                    <td>@result.Watermarks</td>
+                }
+                @if (result.WhitespaceHighlight == "caution")
+                {
+                    <td class="cautionHighlight">@result.Whitespaces</td>
+                }
+                @if (result.WhitespaceHighlight == "danger")
+                {
+                    <td class="dangerHighlight">@result.Whitespaces</td>
+                }
+                @if (result.WhitespaceHighlight == "none")
+                {
+                    <td>@result.Whitespaces</td>
+                }
+                <td>@result.NumberOfCommits</td>
+                <td><div>D: @result.AverageTime.Days</div> <div>Hr: @result.AverageTime.Hours</div> <div>Mn: @result.AverageTime.Minutes</div> <div>S: @result.AverageTime.Seconds</div></td>
+                <td>@result.LinesAdded</td>
+                <td>@result.LinesDeleted</td>
+                @if (result.OtherWatermark != "none")
+                {
+                    <td class="dangerHighlight">@result.OtherWatermark</td>
+                }
+                else
+                {
+                    <td>@result.OtherWatermark</td>
+                }
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>
+

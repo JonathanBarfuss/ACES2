@@ -7,13 +7,18 @@
 
 <h2>@Model.AssignmentName</h2>
 <h3>Students with Submissions</h3>
+
+<input type="button" value="Compare" style="text-align: center; top: 80%" onclick="location.href='@Url.Action("Index", "Comparison", new { @Model.AssignmentId })'" />
+<p> </p>
+<input type="button" value="View Results" style="text-align: center" onclick="location.href='@Url.Action("ComparisonResults", "Assignments", new { id = @Model.AssignmentId })'" />
+
 <div>
     <table class="table">
         <thead>
             <tr>
                 <th>Name</th>
-                <th>Commits</th>
-                <th>JSON results</th>
+                <th>Files</th>
+                <th>Repository URL</th>
                 <th></th>
             </tr>
         </thead>
@@ -22,11 +27,8 @@
             {
             <tr>
                 <td>@sAssignment.StudentName</td>
-                <td>@sAssignment.NumCommits</td>
-                <td>@sAssignment.JSONCode</td>
-                <td>
-                    <a asp-controller="Assignments" asp-action="AssignmentStudentCommits" asp-route-id="@sAssignment.Id">Commits</a>
-                </td>
+                <td>@Html.Raw(@sAssignment.Files)</td>
+                <td>@sAssignment.RepositoryUrl</td>
             </tr>
             }
         </tbody>

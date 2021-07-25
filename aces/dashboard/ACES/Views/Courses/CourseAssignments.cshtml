@@ -15,6 +15,7 @@
         <thead>
             <tr>
                 <th>Assignment</th>
+                <th>Due Date</th>
                 <th>Canvas Link</th>
                 <th>JSON Criteria</th>
                 <th></th>
@@ -25,6 +26,7 @@
             {
             <tr>
                 <td>@assignment.Name</td>
+                <td>@assignment.DueDate</td>
                 <td><span class="canvasLink" id=@assignment.Id>@assignment.CanvasLink</span><button onclick="copyFunction(@assignment.Id)">Copy</button> </td>
                 <td>@assignment.JSONCode</td>
                 <td>

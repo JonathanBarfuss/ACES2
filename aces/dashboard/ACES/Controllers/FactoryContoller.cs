@@ -38,7 +38,7 @@ namespace ACES.Controllers
             watermark = GenerateWatermark(data.email, data.assignmentName);
 
             Random rnd = new Random();
-            numberOfWhitespaces = rnd.Next(25);
+            numberOfWhitespaces = rnd.Next(10,30);
             for (int i = 0; i < numberOfWhitespaces; i++){ whiteString += " "; }
 
             data.fileContent = WatermarkFile(data.fileContent);
@@ -65,13 +65,13 @@ namespace ACES.Controllers
             // Add generated whitestring
             for (int i = 0; i < whitespacesLineNumbers.Length; i++)
             {
-                contentLines[whitespacesLineNumbers[i]-1] = whiteString;
+                contentLines[whitespacesLineNumbers[i]-1] = "// DO NOT REMOVE THIS LINE" + whiteString; // adds whitespace watermark after this comment
             }
 
             // Add generated watermark
             for (int i = 0; i < randomStringLineNumbers.Length; i++)
             {
-                contentLines[randomStringLineNumbers[i]-1] = watermark;
+                contentLines[randomStringLineNumbers[i]-1] = "//wm" + watermark;
             } 
             return string.Join("\n", contentLines);
         }

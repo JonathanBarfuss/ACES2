@@ -11,6 +11,7 @@ using ACES.Models.ViewModels;
 using System.Collections.Immutable;
 using System.Drawing;
 using Microsoft.EntityFrameworkCore.Internal;
+using Newtonsoft.Json;
 
 namespace ACES.Controllers
 {
@@ -47,40 +48,14 @@ namespace ACES.Controllers
             foreach (var sAssignment in studentAssignments)
             {
                 var student = await _context.Student.FirstOrDefaultAsync(x => x.Id == sAssignment.StudentId);
-                var commits = await _context.Commit.Where(x => x.StudentAssignmentId == sAssignment.Id).ToListAsync();
-                sAssignment.NumCommits = commits.Count();
                 sAssignment.StudentName = student.FullName;
 
-                /***************************************** verify this block of code is no longer needed ******************************************
-                // Get rations
-                var watermarkAvg = 0.0;
-                var linesModifiedAvg = 0.0;
-                var timeBetweenAvg = 0.0;
-                var pointsAvg = 0;
-
-                if (commits.Count() > 0)
+                var jsonInfo = (Newtonsoft.Json.Linq.JObject)JsonConvert.DeserializeObject(sAssignment.JSONCode);  //use the jsonCode to get the file names
+                var lstFiles = (Newtonsoft.Json.Linq.JArray)jsonInfo["files"];
+                for (int i = 0; i < lstFiles.Count; i++)  //loop through each file and get the name
                 {
-                    for (var i = 0; i < commits.Count(); i++)
-                    {
-                        watermarkAvg += commits[i].NumWatermarks;
-                        linesModifiedAvg += (commits[i].LinesAdded + commits[i].LinesDeleted);
-                        if ((i - 1) > -1)
-                        {
-                            timeBetweenAvg += (commits[i].DateCommitted - commits[i - 1].DateCommitted).TotalHours;
-                        }
-                    }
-                    watermarkAvg /= commits.Count();
-                    linesModifiedAvg /= commits.Count();
-                    timeBetweenAvg /= commits.Count();
-                    pointsAvg /= commits.Count();
-                
+                    sAssignment.Files += "<div>" + (string)lstFiles[i]["fileName"] + "</div>";  //add each name to the files string along with some html
                 }
-
-                // Otherwise they are all 0
-                //sAssignment.WatermarksRatio = watermarkAvg + "/" + sAssignment.NumWatermarks;
-                sAssignment.LinesModifiedAvg = linesModifiedAvg;
-                sAssignment.TimeBetweenAvg = timeBetweenAvg;
-                */
             }
 
             var vm = new AssignmentStudentsVM()
@@ -94,30 +69,81 @@ namespace ACES.Controllers
             return View(vm);
         }
 
-        // GET: Assignments/AssignmentStudentCommits/5
-        public async Task<IActionResult> AssignmentStudentCommits(int? id)
+        // GET: Assignments/ComparisonResults/int
+        public async Task<IActionResult> ComparisonResults(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var commits = await _context.Commit.Where(x => x.StudentAssignmentId == id).ToListAsync();
-            var sAssingment = await _context.StudentAssignment.FirstOrDefaultAsync(x => x.Id == id);
-            var assignment = await _context.Assignment.FirstOrDefaultAsync(x => x.Id == sAssingment.AssignmentId);
-
-            var studentName = (await _context.Student.FirstOrDefaultAsync(x => x.Id == sAssingment.StudentId)).FullName;
-
-            var vm = new AssignmentStudentCommitsVM()
+            var assignment = await _context.Assignment.FirstOrDefaultAsync(m => m.Id == id);  //make sure the assignment exists
+            if (assignment == null)
             {
-                StudentAssignmentId = (int)id,
-                StudentName = studentName,
-                //NumWatermarks = sAssingment.NumWatermarks,
-                Assignment = assignment,
-                Commits = commits
-            };
+                return NotFound();
+            }
+            ViewBag.AssignmentName = assignment.Name;  //store the assignment name to display in the view
 
-            return View(vm);
+            //join the student assignment table with the student table and the commit table
+            var joinCommits = (from sa in _context.StudentAssignment
+                               join s in _context.Student on sa.StudentId equals s.Id
+                               join c in _context.Results on sa.Id equals c.StudentAssignmentId
+                               select new
+                               {
+                                   assignmentId = sa.AssignmentId,
+                                   studentName = s.FullName,
+                                   jsonCode = c.JSONCode,
+                                   dateCommited = c.DateCommitted
+                               }).ToListAsync();
+
+            var compareResults = joinCommits.Result.Where(x => x.assignmentId == id);  //select only those for the desired assignment
+
+            List<CompareResultsVM> listResults = new List<CompareResultsVM>();  //create list to hold the results
+
+            foreach (var result in compareResults)  //create the view model for each result
+            {
+                var vm = new CompareResultsVM();
+                var jsonInfo = (Newtonsoft.Json.Linq.JObject)JsonConvert.DeserializeObject(result.jsonCode);
+                vm.StudentName = result.studentName;
+                vm.CommitDate = result.dateCommited;
+                int watermarks = (int)jsonInfo["watermarks"];
+                int ogWatermarks = (int)jsonInfo["ogWatermarks"];
+                vm.Watermarks = watermarks.ToString() + "/" + ogWatermarks.ToString();  //display as a fraction of original watermarks
+                int whitespaces = (int)jsonInfo["whitespaces"];
+                int ogWhitespaces = (int)jsonInfo["ogWhitespaces"];
+                vm.Whitespaces = whitespaces.ToString() + "/" + ogWhitespaces.ToString();  //display as a fraction of original white spaces
+                vm.NumberOfCommits = (int)jsonInfo["NumberOfCommits"];
+                vm.LinesAdded = (int)jsonInfo["LinesAdded"];
+                vm.LinesDeleted = (int)jsonInfo["LinesDeleted"];
+                vm.AverageTime = new TimeSpan((long)jsonInfo["AverageTimespanTicks"]);  //convert ticks back into timespan
+                vm.WatermarkHighlight = determineHighlight(watermarks, ogWatermarks);
+                vm.WhitespaceHighlight = determineHighlight(whitespaces, ogWhitespaces);
+                vm.OtherWatermark = (string)jsonInfo["OtherWatermark"];
+                if(result.dateCommited > assignment.DueDate)
+                {
+                    vm.DueDateHighlight = "caution";
+                }
+                else
+                {
+                    vm.DueDateHighlight = "none";
+                }
+
+                listResults.Add(vm);  //and the newly created view model to the list
+            }
+
+            return View(listResults);
+        }
+
+        //helper method to determine the highlight for a value
+        public string determineHighlight( int numerator, int denominator)
+        {
+            string highlight = "none";
+            if( denominator != 0)
+            {
+                if( numerator / denominator != 1) { highlight = "caution"; }
+                if ( (double)numerator / (double)denominator < 0.5 ) { highlight = "danger"; }                
+            }
+            return highlight;
         }
 
         // GET: Assignments/Create
