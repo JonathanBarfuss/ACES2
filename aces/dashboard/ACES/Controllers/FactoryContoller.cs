@@ -19,6 +19,7 @@ namespace ACES.Controllers
         private string watermark;
         private int numberOfWhitespaces;
         string whiteString = "";
+        bool replaceInsteadOfInsert = false;
         int[] whitespacesLineNumbers;
         int[] randomStringLineNumbers;
         private List<string> whitespaces = new List<string>();
@@ -34,6 +35,7 @@ namespace ACES.Controllers
             var emailAddress = new System.Net.Mail.MailAddress(data.email);
             whitespacesLineNumbers = data.whitespacesLineNumbers;
             randomStringLineNumbers = data.randomStringLineNumbers;
+            replaceInsteadOfInsert = data.replaceInsteadOfInsert;
 
             watermark = GenerateWatermark(data.email, data.assignmentName);
 
@@ -65,13 +67,27 @@ namespace ACES.Controllers
             // Add generated whitestring
             for (int i = 0; i < whitespacesLineNumbers.Length; i++)
             {
-                contentLines[whitespacesLineNumbers[i]-1] = "// DO NOT REMOVE THIS LINE" + whiteString; // adds whitespace watermark after this comment
+                if (replaceInsteadOfInsert)
+                {
+                    contentLines[whitespacesLineNumbers[i] - 1] = "// DO NOT REMOVE THIS LINE" + whiteString; // adds whitespace watermark after this comment
+                }
+                else
+                {
+                    contentLines[whitespacesLineNumbers[i] - 1] = "\n// DO NOT REMOVE THIS LINE" + whiteString; // adds whitespace watermark after this comment
+                }
             }
 
             // Add generated watermark
             for (int i = 0; i < randomStringLineNumbers.Length; i++)
             {
-                contentLines[randomStringLineNumbers[i]-1] = "//wm" + watermark;
+                if (replaceInsteadOfInsert)
+                {
+                    contentLines[randomStringLineNumbers[i] - 1] = "//wm" + watermark;
+                }
+                else
+                {
+                    contentLines[randomStringLineNumbers[i] - 1] = "\n//wm" + watermark;
+                }
             } 
             return string.Join("\n", contentLines);
         }
