@@ -4,8 +4,21 @@
     ViewData["Title"] = "Edit";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+<head>
+    <link href="~/css/watermark.css" rel="stylesheet" />
+</head>
+
 
 <h2>Edit Assignment</h2>
+
+<img id="imageGuide" src="~/images/WatermarkGuide.PNG" alt="Watermark Guide" width="300" height="200" hidden="hidden">
+<input type="button" value="Watermark Guide" onclick="ShowGuide()" />
+<div id="myModal" class="modal">
+    <span class="close" onclick="document.getElementById('myModal').style.display='none'">&times;</span>
+    <img class="modal-content" id="img01">
+    <div id="caption"></div>
+</div>
+
 
 <hr />
 <div class="row">
@@ -31,7 +44,7 @@
             <input name="CourseId" value="@ViewBag.CourseId" type="hidden" />  <!--Section ID shouldn't be something that can be changed, hidden value passed-->
             <div class="form-group">
                 <label asp-for="JSONCode" class="control-label"></label>
-                <textarea asp-for="JSONCode" class="form-control" rows="4"></textarea>
+                <textarea class="form-control" rows="15">@ViewBag.JSON</textarea>
                 <span asp-validation-for="JSONCode" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -59,5 +72,6 @@
 </div>
 
 @section Scripts {
+    <script src="~/js/watermark.js"></script>
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
