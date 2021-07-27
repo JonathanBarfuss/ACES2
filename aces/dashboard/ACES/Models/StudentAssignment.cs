@@ -12,25 +12,15 @@ namespace ACES.Models
         public int StudentId { get; set; }
         public int AssignmentId { get; set; }
         public string RepositoryUrl { get; set; }
-        /// <summary>
-        /// This represents the number of watermarks a students personal assignment should have. 
-        /// It is compared with Commit.NumWatermarks to see if they have tampered with the code.
-        /// </summary>
         public string JSONCode { get; set; }
 
         #region For Views
-        //[NotMapped]
-        //public int? NumCommits { get; set; }
         [NotMapped]
         public string StudentName { get; set; }
-        //[NotMapped]
-        //public string PointsRatio { get; set; }
+
         [NotMapped]
         public string Files { get; set; }
-        //[NotMapped]
-        //public double LinesModifiedAvg { get; set; }
-        //[NotMapped]
-        //public double TimeBetweenAvg { get; set; }
+
         #endregion
     }
 }
