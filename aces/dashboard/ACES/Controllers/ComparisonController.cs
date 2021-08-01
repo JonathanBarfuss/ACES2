@@ -110,6 +110,7 @@ namespace ACES.Controllers
                     }
                     GatherGithubInfo(studentRepoContents);
                     PopulateCommitDB(student.Id);
+                    otherWatermark = "none";  //reset the otherWatermark
                 }
                 
             }
@@ -140,7 +141,7 @@ namespace ACES.Controllers
                     {
                         // THEY HAVE A WRONG WATERMARK IF IT GETS TO THIS CODE
                         otherWatermark = line.ToString();
-                        otherWatermark = otherWatermark.Remove(4);
+                        otherWatermark = otherWatermark.Replace("//wm", "");
                     }                    
                 }
             }
