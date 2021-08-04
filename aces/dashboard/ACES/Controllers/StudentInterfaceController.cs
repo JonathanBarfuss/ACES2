@@ -8,9 +8,6 @@ using ACES.Data;
 using ACES.Models;
 using System.Net.Http;
 using Newtonsoft.Json;
-//using System.IO;
-using System.Text;
-//using Newtonsoft.Json.Linq;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 
@@ -228,7 +225,7 @@ namespace ACES.Controllers
             {
                 if (agreeToRepoRemake != "Agreed" && agreeToRepoRemake != "Override")
                 {
-                    TempData["error"] = $"Error: Repository for assignment {assignment.Name} has already been updated earlier with template file(s).";
+                    TempData["error"] = "This Repo already has the assignment files. Click Home to exit.";
                     TempData["warning"] = "Click the button below to confirm. Warning: it will clear your repo from all files, including any prior code you committed:";
                     return RedirectToAction("StudentRepoForm", "Assignments", new { assignmentId = studentAssignment.AssignmentId, repoURL = studentRepoURL });
                 }
