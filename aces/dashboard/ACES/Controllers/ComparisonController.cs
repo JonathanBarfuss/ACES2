@@ -57,10 +57,14 @@ namespace ACES.Controllers
 
                 foreach (var student in studentSubmissionsList)
                 {
-                    ogWatermarkCount = 0;
+                    ogWatermarkCount = 0;  //initialize variables
                     ogWhitespaceCount = 0;
                     curWatermarkCount = 0;
                     curWhitespaceCount = 0;
+                    otherWatermark = "none";
+                    linesAdded = 0;
+                    linesDeleted = 0;
+
                     dynamic json = JsonConvert.DeserializeObject(student.JSONCode);
 
                     string studentRepoContents = $"{student.RepositoryUrl}/contents".Replace("//github.com", "//api.github.com/repos");
@@ -110,7 +114,7 @@ namespace ACES.Controllers
                     }
                     GatherGithubInfo(studentRepoContents);
                     PopulateCommitDB(student.Id);
-                    otherWatermark = "none";  //reset the otherWatermark
+                    
                 }
                 
             }
@@ -236,8 +240,7 @@ namespace ACES.Controllers
                         if (objRepoResponse.IsSuccessStatusCode)
                         {
                             var jsonStuff = (Newtonsoft.Json.Linq.JObject)JsonConvert.DeserializeObject(objRepoResponse.Content.ReadAsStringAsync().Result);
-                            int tempAdded = (int)jsonStuff["stats"]["additions"];
-                            linesAdded += tempAdded;
+                            linesAdded += (int)jsonStuff["stats"]["additions"];
                             linesDeleted += (int)jsonStuff["stats"]["deletions"];
                         }
                     }

@@ -1,0 +1,37 @@
+﻿@model List<ACES.Models.ViewModels.CompareDetailsVM>
+
+@{
+    ViewData["Title"] = "ComparisonDetails";
+}
+
+<h1>@ViewBag.StudentName</h1>
+<h3>@ViewBag.AssignmentName</h3>
+<h4>Repo URL: <a href="@ViewBag.RepoUrl">@ViewBag.RepoUrl</a></h4>
+<br />
+<div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>CommitDate</th>
+                <th>Message</th>
+                <th>File</th>
+                <th>Additions</th>
+                <th>Deletions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var detail in Model)
+            {
+                <tr>
+                    <td>@detail.CommitDate</td>
+                    <td>@detail.Message</td>
+                    <td>@detail.FileName</td>
+                    <td>@detail.Additions</td>
+                    <td>@detail.Deletions</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<br />
+<br />

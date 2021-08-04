@@ -22,7 +22,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var result in Model)
+           @foreach (var result in Model)
             {
             <tr>
                 <td>@result.StudentName</td>
@@ -70,6 +70,12 @@
                 {
                     <td>@result.OtherWatermark</td>
                 }
+                <td>
+                    @{ 
+                        string detailURL = String.Format("/Assignments/ComparisonDetails?id={0}&studentAssignmentId={1}", ViewBag.AssignmentID, result.StudentAssignmentId);
+                    }
+                    <a href="@detailURL">Details</a>
+                </td>
             </tr>
             }
         </tbody>

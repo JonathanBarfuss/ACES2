@@ -13,16 +13,20 @@ using System.Drawing;
 using Microsoft.EntityFrameworkCore.Internal;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Microsoft.Extensions.Configuration;
+using System.Net.Http;
 
 namespace ACES.Controllers
 {
     public class AssignmentsController : Controller
     {
         private readonly ACESContext _context;
+        private readonly IConfiguration _configuration;
 
-        public AssignmentsController(ACESContext context)
+        public AssignmentsController(ACESContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         // GET: Assignments
@@ -84,6 +88,7 @@ namespace ACES.Controllers
                 return NotFound();
             }
             ViewBag.AssignmentName = assignment.Name;  //store the assignment name to display in the view
+            ViewBag.AssignmentID = id;
 
             //join the student assignment table with the student table and the commit table
             var joinCommits = (from sa in _context.StudentAssignment
@@ -91,6 +96,7 @@ namespace ACES.Controllers
                                join c in _context.Results on sa.Id equals c.StudentAssignmentId
                                select new
                                {
+                                   studentAssignmentId = sa.Id,
                                    assignmentId = sa.AssignmentId,
                                    studentName = s.FullName,
                                    jsonCode = c.JSONCode,
@@ -106,6 +112,7 @@ namespace ACES.Controllers
                 var vm = new CompareResultsVM();
                 var jsonInfo = (Newtonsoft.Json.Linq.JObject)JsonConvert.DeserializeObject(result.jsonCode);
                 vm.StudentName = result.studentName;
+                vm.StudentAssignmentId = result.studentAssignmentId;
                 vm.CommitDate = result.dateCommited;
                 int watermarks = (int)jsonInfo["watermarks"];
                 int ogWatermarks = (int)jsonInfo["ogWatermarks"];
@@ -147,8 +154,93 @@ namespace ACES.Controllers
             return highlight;
         }
 
-        // GET: Assignments/Create
-        public IActionResult Create(int? courseId)
+        // GET: Assignments/ComparisonDetails/
+        public async Task<IActionResult> ComparisonDetails(int id, int studentAssignmentId)
+        {
+            if (id == 0)
+            {
+                return NotFound();
+            }
+            var assignment = await _context.Assignment.FirstOrDefaultAsync(m => m.Id == id);
+            var studentAssignment = await _context.StudentAssignment.FirstOrDefaultAsync(x => x.Id == studentAssignmentId);
+            var student = await _context.Student.FirstOrDefaultAsync(x => x.Id == studentAssignment.StudentId);
+
+            ViewBag.AssignmentName = assignment.Name;
+            ViewBag.StudentName = student.FullName;
+            string studentURL = studentAssignment.RepositoryUrl;
+            ViewBag.RepoUrl = studentURL;
+
+            List<String> shas = new List<string>();
+            List<CompareDetailsVM> details = new List<CompareDetailsVM>();
+            string token = _configuration["GithubToken"];
+
+            using (var httpClient = new HttpClient())
+            {
+                //Set up Header info to request files from GitHub
+                httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+                httpClient.DefaultRequestHeaders.Add("User-Agent", "ACES");
+                httpClient.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
+
+                string studentRepoCommits = $"{studentURL}/commits".Replace("//github.com", "//api.github.com/repos");
+                string studentRepoCommitsLimit = studentRepoCommits + "?per_page=31";   //?per_page parameter sets the number of results, default 30 max 100
+                var objRepoRequest = new HttpRequestMessage(HttpMethod.Get, studentRepoCommitsLimit);  //if you want to use default limit of 30 just use studentRepoCommits as the second parameter
+
+                using (HttpResponseMessage objRepoResponse = httpClient.SendAsync(objRepoRequest).Result)
+                {
+                    if (objRepoResponse.IsSuccessStatusCode)
+                    {
+                        var jsonInfo = (Newtonsoft.Json.Linq.JArray)JsonConvert.DeserializeObject(objRepoResponse.Content.ReadAsStringAsync().Result);
+
+                        for (int i = 0; i < jsonInfo.Count; i++)  //get the sha for each commit
+                        {
+                            shas.Add(jsonInfo[i]["sha"].ToString());
+                        }
+                    }
+                }
+
+                foreach (String sha in shas)  //for each individual commit get the lines added and deleted
+                {
+                    string studentRepoCommitURL = String.Format($"{studentRepoCommits}/{sha}");
+                    objRepoRequest = new HttpRequestMessage(HttpMethod.Get, studentRepoCommitURL);
+
+                    using (HttpResponseMessage objRepoResponse = httpClient.SendAsync(objRepoRequest).Result)
+                    {
+                        if (objRepoResponse.IsSuccessStatusCode)
+                        {                            
+                            var jsonResponse = (Newtonsoft.Json.Linq.JObject)JsonConvert.DeserializeObject(objRepoResponse.Content.ReadAsStringAsync().Result);
+                            var files = (Newtonsoft.Json.Linq.JArray)jsonResponse["files"];
+                            if (files.Count == 0)  //if there are no files use this to gather the info
+                            {
+                                CompareDetailsVM detail = new CompareDetailsVM();
+                                DateTime tempDate = (DateTime)jsonResponse["commit"]["committer"]["date"];
+                                detail.CommitDate = tempDate.ToLocalTime();
+                                detail.Message = (string)jsonResponse["commit"]["message"];
+                                detail.FileName = "No Files";
+                                detail.Additions = (int)jsonResponse["stats"]["additions"];
+                                detail.Deletions = (int)jsonResponse["stats"]["deletions"];
+                                details.Add(detail);
+                            }
+                            for (int i = 0; i < files.Count; i++)  //if there are files use this to gather the info
+                            {
+                                CompareDetailsVM detail = new CompareDetailsVM();
+                                DateTime tempDate = (DateTime)jsonResponse["commit"]["committer"]["date"];
+                                detail.CommitDate = tempDate.ToLocalTime();
+                                detail.Message = (string)jsonResponse["commit"]["message"];
+                                detail.FileName = (string)files[i]["filename"];
+                                detail.Additions = (int)files[i]["additions"];
+                                detail.Deletions = (int)files[i]["deletions"];
+                                details.Add(detail);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return View(details);
+        }
+
+            // GET: Assignments/Create
+            public IActionResult Create(int? courseId)
         {
             string defaultJSON = "{\"files\":[{\"name\": \"\",\"lines\": 0,\"whitespaces\": [\n\n],\"randomstring\": [\n\n]}]}"; // template for json
 
@@ -295,7 +387,11 @@ namespace ACES.Controllers
 
             // validate student repo format
             string studentRepoURL = vm.RepoURL;
-            if (String.IsNullOrWhiteSpace(studentRepoURL))
+            if (studentRepoURL.EndsWith(".git"))  //if the student has the .git prefix just remove it
+            {
+                studentRepoURL = studentRepoURL.Replace(".git", "");
+            }
+            if (String.IsNullOrWhiteSpace(studentRepoURL))  //if no data was entered return an error message
             {
                 TempData["error"] = "Error: Please enter your repository";
                 return RedirectToAction("StudentRepoForm", "Assignments", new { assignmentId = assignmentID });
