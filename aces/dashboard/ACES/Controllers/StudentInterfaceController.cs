@@ -308,6 +308,7 @@ namespace ACES.Controllers
                     if (objInstructorRepoResponse.IsSuccessStatusCode)
                     {
                         #region Get Files From Instructor's Repository/Prep for sending to Factory
+                        string whiteComment;
                         FileInfo[] contents = JsonConvert.DeserializeObject<FileInfo[]>(objInstructorRepoResponse.Content.ReadAsStringAsync().Result);
                         foreach (var file in contents)
                         {
@@ -336,12 +337,20 @@ namespace ACES.Controllers
                                         // If yes, send the file to factory with Json object.
                                         #region Gather Needed Info to Pass to Factory
                                         bool replaceInsteadOfInsert = fileInJson.replaceInsteadOfInsert != null && fileInJson.replaceInsteadOfInsert.Value == 1;
+                                        if(fileInJson.comment == null)
+                                        {
+                                            whiteComment = "no comment";
+                                        } else
+                                        {
+                                            whiteComment = fileInJson.comment.Value;
+                                        }
                                         var fileInstructions = System.Text.Json.JsonSerializer.Serialize(new PostAddWatermark()
                                         {
                                             email = studentEmail,
                                             assignmentName = assignmentName,
                                             fileName = fileInJson.name.Value,
                                             replaceInsteadOfInsert = replaceInsteadOfInsert,
+                                            comment = whiteComment,
                                             whitespacesLineNumbers = fileInJson.whitespaces.ToObject<int[]>(),
                                             randomStringLineNumbers = fileInJson.randomstring.ToObject<int[]>(),
                                             fileContent = content
@@ -366,6 +375,7 @@ namespace ACES.Controllers
                                                     fileName = fileInJson.name.Value,
                                                     numberOfLinesInFile = (int)fileInJson.lines.Value,
                                                     watermark = deserializedObject.watermark,
+                                                    comment = deserializedObject.comment,
                                                     numberOfWhitespaceCharacters = deserializedObject.numberOfWhitespaceCharacters,
                                                     whitespacesLineNumbers = fileInJson.whitespaces.ToObject<int[]>(),
                                                     randomStringLineNumbers = fileInJson.randomstring.ToObject<int[]>()
@@ -501,6 +511,7 @@ namespace ACES.Controllers
     }
     public struct GetWatermarkedAssignment
     {
+        public string comment { get; set; }
         public int numberOfWhitespaceCharacters { get; set; }
         public string watermark { get; set; }
         public string markedFileContent { get; set; }
@@ -512,16 +523,18 @@ namespace ACES.Controllers
         public string assignmentName { get; set; }
         public string fileName { get; set; }
         public bool replaceInsteadOfInsert { get; set; }
+        public string comment { get; set; }
         public int[] whitespacesLineNumbers { get; set; }
         public int[] randomStringLineNumbers { get; set; }
         public string fileContent { get; set; }
     }
 
     public struct StudentMarkedFile
-    {
+    { 
         public string fileName { get; set; }
         public int numberOfLinesInFile { get; set; }
         public string watermark { get; set; }
+        public string comment { get; set; }
         public int numberOfWhitespaceCharacters { get; set; }
         public int[] whitespacesLineNumbers { get; set; }
         public int[] randomStringLineNumbers { get; set; }
