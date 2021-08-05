@@ -200,7 +200,8 @@ namespace ACES.Controllers
                 httpClient.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
 
                 string studentRepoCommits = $"{studentURL}".Replace("/contents", "/commits");
-                var objRepoRequest = new HttpRequestMessage(HttpMethod.Get, studentRepoCommits);
+                string studentRepoCommitsLimit = studentRepoCommits + "?per_page=40";   //?per_page parameter sets the number of results, default 30 max 100
+                var objRepoRequest = new HttpRequestMessage(HttpMethod.Get, studentRepoCommitsLimit);
 
                 using (HttpResponseMessage objRepoResponse = httpClient.SendAsync(objRepoRequest).Result)
                 {
@@ -213,7 +214,8 @@ namespace ACES.Controllers
 
                         for (int i = 0; i < jsonInfo.Count; i++)  //get the sha for each commit
                         {
-                            shas.Add(jsonInfo[i]["sha"].ToString());
+                            //**TODO: for now all commits are saved for testing, in the future remove all that were added by the "anticheatbot" to only keep the student's commits** 
+                            shas.Add(jsonInfo[i]["sha"].ToString()); 
                             var tempDate = jsonInfo[i]["commit"]["committer"]["date"];
                             times.Add((DateTime)tempDate);
                         }
@@ -229,7 +231,8 @@ namespace ACES.Controllers
                     }
                 }
                 //INFO: This will loop through each commit, doing an api call for each which takes time, if determined too long use the api /compare call 
-                //to compare differences from start to finish in one call at the cost of loosing detail.  Use /compare/{starting sha}...{ending sha}
+                //to compare differences from start to finish in one call at the cost of loosing detail.  Use /compare/{starting sha}...{ending sha} or
+                //move the lines added and lines deleted code to the details, or have the values appear asynchronously as they are calculated
                 foreach (String sha in shas)  //for each individual commit get the lines added and deleted
                 {
                     string studentRepoCommitURL = String.Format($"{studentRepoCommits}/{sha}");

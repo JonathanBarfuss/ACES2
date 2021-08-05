@@ -182,7 +182,7 @@ namespace ACES.Controllers
                 httpClient.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
 
                 string studentRepoCommits = $"{studentURL}/commits".Replace("//github.com", "//api.github.com/repos");
-                string studentRepoCommitsLimit = studentRepoCommits + "?per_page=31";   //?per_page parameter sets the number of results, default 30 max 100
+                string studentRepoCommitsLimit = studentRepoCommits + "?per_page=40";   //?per_page parameter sets the number of results, default 30 max 100
                 var objRepoRequest = new HttpRequestMessage(HttpMethod.Get, studentRepoCommitsLimit);  //if you want to use default limit of 30 just use studentRepoCommits as the second parameter
 
                 using (HttpResponseMessage objRepoResponse = httpClient.SendAsync(objRepoRequest).Result)
