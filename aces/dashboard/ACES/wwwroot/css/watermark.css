@@ -95,3 +95,9 @@
         width: 100%;
     }
 }
+
+#template {
+    float: right;
+    display: inline-block;
+    width: 48.5%;
+}

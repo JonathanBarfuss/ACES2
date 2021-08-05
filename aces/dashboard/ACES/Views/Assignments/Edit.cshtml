@@ -44,7 +44,7 @@
             <input name="CourseId" value="@ViewBag.CourseId" type="hidden" />  <!--Section ID shouldn't be something that can be changed, hidden value passed-->
             <div class="form-group">
                 <label asp-for="JSONCode" class="control-label"></label>
-                <textarea class="form-control" rows="15">@ViewBag.JSON</textarea>
+                <textarea asp-for="JSONCode" class="form-control" rows="15"></textarea>
                 <span asp-validation-for="JSONCode" class="text-danger"></span>
             </div>
             <div class="form-group">

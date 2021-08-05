@@ -20,6 +20,7 @@ namespace ACES.Controllers
         private int numberOfWhitespaces;
         string whiteString = "";
         bool replaceInsteadOfInsert = false;
+        string comment;
         int[] whitespacesLineNumbers;
         int[] randomStringLineNumbers;
         private List<string> whitespaces = new List<string>();
@@ -36,6 +37,13 @@ namespace ACES.Controllers
             whitespacesLineNumbers = data.whitespacesLineNumbers;
             randomStringLineNumbers = data.randomStringLineNumbers;
             replaceInsteadOfInsert = data.replaceInsteadOfInsert;
+            if (data.comment == "no comment")
+            {
+                comment = "DO NOT DELETE THIS LINE";
+            } else
+            {
+                comment = data.comment;
+            }
 
             watermark = GenerateWatermark(data.email, data.assignmentName);
 
@@ -48,6 +56,7 @@ namespace ACES.Controllers
             // can change GetWatermarkedAssignment to have whatever variables you need it to return. It is at the bottom of the StudentInterfaceController
             var json = System.Text.Json.JsonSerializer.Serialize(new GetWatermarkedAssignment()
             {
+                comment = comment,
                 numberOfWhitespaceCharacters = numberOfWhitespaces,
                 watermark = watermark,
                 markedFileContent = data.fileContent
@@ -69,11 +78,11 @@ namespace ACES.Controllers
             {
                 if (replaceInsteadOfInsert)
                 {
-                    contentLines[whitespacesLineNumbers[i] - 1] = "// DO NOT REMOVE THIS LINE" + whiteString; // adds whitespace watermark after this comment
+                    contentLines[whitespacesLineNumbers[i] - 1] = "// "+ comment + whiteString; // adds whitespace watermark after this comment
                 }
                 else
                 {
-                    contentLines[whitespacesLineNumbers[i] - 1] = "\n// DO NOT REMOVE THIS LINE" + whiteString; // adds whitespace watermark after this comment
+                    contentLines[whitespacesLineNumbers[i] - 1] = "\n// " + comment + whiteString; // adds whitespace watermark after this comment
                 }
             }
 

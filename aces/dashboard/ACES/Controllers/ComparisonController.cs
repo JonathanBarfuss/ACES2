@@ -24,6 +24,7 @@ namespace ACES.Controllers
         private int curWhitespaceCount;
         int[] whiteLines;
         int[] stringLines;
+        private string comment;
         private int numberOfCommits;
         private long averageTimespanTicks;
         private int linesAdded;
@@ -96,6 +97,7 @@ namespace ACES.Controllers
                                             {
                                                 whitestring += " ";
                                             }
+                                            comment = fileInJson.comment.Value;
                                             watermark = fileInJson.watermark.Value;
                                             whiteLines = fileInJson.whitespacesLineNumbers.ToObject<int[]>();
                                             stringLines = fileInJson.randomStringLineNumbers.ToObject<int[]>();
@@ -113,12 +115,9 @@ namespace ACES.Controllers
                         }
                     }
                     GatherGithubInfo(studentRepoContents);
-                    PopulateCommitDB(student.Id);
-                    
+                    PopulateResultsDB(student.Id);
                 }
-                
             }
-            
             return RedirectToAction("ComparisonResults", "Assignments", new { id = assignmentID });
         }
 
@@ -128,7 +127,7 @@ namespace ACES.Controllers
 
             foreach (var line in contentLines)
             {
-                if (line.Contains("// DO NOT REMOVE THIS LINE")) // whitespace watermark is after this comment 
+                if (line.Contains(comment)) // whitespace watermark is after this comment 
                 {
                     if (line.Contains(whitestring))
                     {
@@ -151,7 +150,7 @@ namespace ACES.Controllers
             }
         }
 
-        private void PopulateCommitDB(int id)
+        private void PopulateResultsDB(int id)
         {
             var json = System.Text.Json.JsonSerializer.Serialize(new CommitJSON()
             {
