@@ -31,6 +31,7 @@ namespace ACES.Controllers
         private int linesDeleted;
         private DateTime finalCommitTime;
         private string otherWatermark = "none";
+        private int watermarkMatchID = 0;
 
         private readonly ACESContext _context;
         private readonly IConfiguration _configuration;
@@ -145,6 +146,9 @@ namespace ACES.Controllers
                         // THEY HAVE A WRONG WATERMARK IF IT GETS TO THIS CODE
                         otherWatermark = line.ToString();
                         otherWatermark = otherWatermark.Replace("//wm", "");
+                        watermarkMatchID = _context.Watermarks.Where(w => w.Watermark == otherWatermark)
+                            .FirstOrDefault().Id;
+
                     }                    
                 }
             }
@@ -162,7 +166,8 @@ namespace ACES.Controllers
                 LinesAdded = linesAdded,
                 LinesDeleted = linesDeleted,
                 AverageTimespanTicks = averageTimespanTicks,
-                OtherWatermark = otherWatermark
+                OtherWatermark = otherWatermark,
+                WatermarkMatchID = watermarkMatchID
             });
             var studentCommit = _context.Results.Where(i => i.StudentAssignmentId == id).FirstOrDefault();
             if (studentCommit == null)
@@ -278,4 +283,5 @@ public struct CommitJSON
     public int LinesDeleted { get; set; }
     public long AverageTimespanTicks { get; set; }
     public string OtherWatermark { get; set; }
+    public int WatermarkMatchID { get; set; }
 }

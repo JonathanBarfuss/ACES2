@@ -19,6 +19,7 @@
                 <th>Lines Added</th>
                 <th>Lines Deleted</th>
                 <th>Foreign Watermark</th>
+                <th>Details</th>
             </tr>
         </thead>
         <tbody>
@@ -64,14 +65,22 @@
                 <td>@result.LinesDeleted</td>
                 @if (result.OtherWatermark != "none")
                 {
-                    <td class="dangerHighlight">@result.OtherWatermark</td>
+
+                    string otherWatermarkURL = String.Format("/Assignments/OtherWatermarkDetails?id={0}", result.OtherWatermarkID);
+
+                    //<td class="dangerHighlight">@result.OtherWatermark</td>
+                    <td class="dangerHighlight"><a href="@otherWatermarkURL">@result.OtherWatermark</a></td>
                 }
                 else
                 {
+                    //For Testing
+                    //string otherWatermarkURL = String.Format("/Assignments/OtherWatermarkDetails?id=18");
+                    //<td class="dangerHighlight"><a href="@otherWatermarkURL">@result.OtherWatermark</a></td>
                     <td>@result.OtherWatermark</td>
+
                 }
                 <td>
-                    @{ 
+                    @{
                         string detailURL = String.Format("/Assignments/ComparisonDetails?id={0}&studentAssignmentId={1}", ViewBag.AssignmentID, result.StudentAssignmentId);
                     }
                     <a href="@detailURL">Details</a>

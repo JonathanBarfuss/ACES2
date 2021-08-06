@@ -1,0 +1,29 @@
+﻿@model List<ACES.Models.ViewModels.OtherWatermarkDetailsVM>
+
+@{
+    ViewData["Title"] = "OtherWaterMarkDetails";
+}
+
+
+<h4>Repo of Foreign WaterMark</h4>
+<div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Repo</th>
+                <th>Watermark</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var detail in Model)
+            {
+                <tr>
+                    <td><a href="@detail.StudentRepoName">@detail.StudentRepoName</a></td>
+                    <td>@detail.Watermark</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<br />
+<br />

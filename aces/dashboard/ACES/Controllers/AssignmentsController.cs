@@ -127,6 +127,7 @@ namespace ACES.Controllers
                 vm.WatermarkHighlight = determineHighlight(watermarks, ogWatermarks);
                 vm.WhitespaceHighlight = determineHighlight(whitespaces, ogWhitespaces);
                 vm.OtherWatermark = (string)jsonInfo["OtherWatermark"];
+                vm.OtherWatermarkID = (int)jsonInfo["WatermarkMatchID"];
                 if(result.dateCommited > assignment.DueDate)
                 {
                     vm.DueDateHighlight = "caution";
@@ -140,6 +141,28 @@ namespace ACES.Controllers
             }
 
             return View(listResults);
+        }
+
+        public async Task<IActionResult> OtherWatermarkDetails(int? id)
+        {
+            var result = await _context.Watermarks.FirstOrDefaultAsync(m => m.Id == id);
+            if (result == null)
+            {
+                return NotFound();
+            }
+
+            List<OtherWatermarkDetailsVM> listdetail = new List<OtherWatermarkDetailsVM>();
+            var vm = new OtherWatermarkDetailsVM();
+
+            vm.Watermark = result.Watermark;
+            vm.StudentID = result.StudentID;
+            vm.AssignmentID = result.AssignmentID;
+            vm.FileName = result.FileName;
+            vm.StudentRepoName = result.StudentRepoName;
+
+            listdetail.Add(vm);
+
+            return View(listdetail);
         }
 
         //helper method to determine the highlight for a value
