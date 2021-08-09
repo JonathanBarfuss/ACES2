@@ -262,12 +262,9 @@ namespace ACES.Controllers
             return View(details);
         }
 
-            // GET: Assignments/Create
-            public IActionResult Create(int? courseId)
+        // GET: Assignments/Create
+        public IActionResult Create(int? courseId)
         {
-            string defaultJSON = "{\"files\":[{\"name\": \"\",\"lines\": 0,\"whitespaces\": [\n\n],\"randomstring\": [\n\n]}]}"; // template for json
-
-            ViewBag.JSON = JValue.Parse(defaultJSON).ToString(Formatting.Indented);
             ViewBag.CourseId = courseId;
             return View();
         }
@@ -308,7 +305,8 @@ namespace ACES.Controllers
                 return NotFound();
             }
 
-            ViewBag.JSON = JValue.Parse(assignment.JSONCode).ToString(Formatting.Indented);
+
+            assignment.JSONCode = JValue.Parse(assignment.JSONCode).ToString(Formatting.Indented);
             ViewBag.CourseId = assignment.CourseId;
             ViewBag.From = from; // This helps take us back to CourseAssignments if that's where we came from
             return View(assignment);
