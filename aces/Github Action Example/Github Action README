@@ -1,7 +1,0 @@
-This is a simple hello world program.
-
-This program when pushed will go through and print hello world in the github action page.
-It also will run on a ubunto server. 
-
-Will only work if you set up an cmake action in github. This is done by clicking on actions
-then click set up for a c or c++ file.
