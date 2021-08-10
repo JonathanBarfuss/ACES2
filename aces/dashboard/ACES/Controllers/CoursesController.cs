@@ -81,6 +81,7 @@ namespace ACES.Controllers
             if (ModelState.IsValid)
             {
                 course.InstructorId = int.Parse(Request.Cookies["InstructorID"]);
+                course.IsCourseActive = true;
                 _context.Add(course);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
