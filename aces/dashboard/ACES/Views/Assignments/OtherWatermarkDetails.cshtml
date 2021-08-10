@@ -5,19 +5,26 @@
 }
 
 
-<h4>Repo of Foreign WaterMark</h4>
+<h4>Foreign WaterMark Information</h4>
 <div>
     <table class="table">
         <thead>
             <tr>
+                <th>Student</th>
+                <th>Course</th>
+                <th>Assignment</th>
                 <th>Repo</th>
                 <th>Watermark</th>
+
             </tr>
         </thead>
         <tbody>
             @foreach (var detail in Model)
             {
                 <tr>
+                    <td>@detail.StudentName</td>
+                    <td>@detail.Course</td>
+                    <td>@detail.AssignmentName</td>
                     <td><a href="@detail.StudentRepoName">@detail.StudentRepoName</a></td>
                     <td>@detail.Watermark</td>
                 </tr>

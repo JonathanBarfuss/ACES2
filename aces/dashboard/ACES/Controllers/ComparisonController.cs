@@ -64,6 +64,7 @@ namespace ACES.Controllers
                     curWatermarkCount = 0;
                     curWhitespaceCount = 0;
                     otherWatermark = "none";
+                    watermarkMatchID = 0;
                     linesAdded = 0;
                     linesDeleted = 0;
 

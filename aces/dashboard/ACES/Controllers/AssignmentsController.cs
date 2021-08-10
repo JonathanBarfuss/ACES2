@@ -151,6 +151,10 @@ namespace ACES.Controllers
                 return NotFound();
             }
 
+            var student = await _context.Student.FirstOrDefaultAsync(s => s.Id == result.StudentID);
+            var assignment = await _context.Assignment.FirstOrDefaultAsync(s => s.Id == result.AssignmentID);
+            var course = await _context.Course.FirstOrDefaultAsync(c => c.Id == assignment.CourseId);
+
             List<OtherWatermarkDetailsVM> listdetail = new List<OtherWatermarkDetailsVM>();
             var vm = new OtherWatermarkDetailsVM();
 
@@ -159,6 +163,11 @@ namespace ACES.Controllers
             vm.AssignmentID = result.AssignmentID;
             vm.FileName = result.FileName;
             vm.StudentRepoName = result.StudentRepoName;
+            vm.StudentName = student.FirstName + " " + student.LastName;
+            vm.AssignmentName = assignment.Name;
+            vm.Course = course.CourseName;
+            
+
 
             listdetail.Add(vm);
 
