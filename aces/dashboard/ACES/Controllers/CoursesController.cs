@@ -157,6 +157,25 @@ namespace ACES.Controllers
             return View(course);
         }
 
+        public async Task<IActionResult> Archive(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var course = await _context.Course
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (course == null)
+            {
+                return NotFound();
+            }
+
+            return View(course);
+        }
+
+
+
         public async Task<IActionResult> AddStudent(int? id)
         {
             if (id == null)
@@ -176,6 +195,16 @@ namespace ACES.Controllers
         {
             var course = await _context.Course.FindAsync(id);
             _context.Course.Remove(course);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost, ActionName("Archive")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ArchiveConfirmed(int id)
+        {
+            var course = await _context.Course.FindAsync(id);
+            course.IsCourseActive = false;
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
