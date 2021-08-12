@@ -144,7 +144,7 @@ The examples are shown in the demo listed at the beginning of this README file.
 
 **Note about ACES version changes**: The original design (Version 1 Summer 2020) included use of Docker. The second version removed the Docker option as it requires an upgrade to Windows Professional or Enterprise, and most of the students on the team did not have the upgraded Windows version. The first version also used a separate python solution for the Factory container that is responsible for watermarking files. The second version combined this functionality under the same ACES solution converting Factory's python part into C#. By implementing the API call from StudentInterfaceController.cs to the FactoryController.cs the second version preserves the option to call FactoryController.cs in the future directly if desired. The option for ACES to work with GitHub Classroom was implemented per the client's preference to allow instructors to use existing Classroom features.
 
-**TODO**: Add ACES Process Flow pics?
+![ProcessFlow UML] (Images/ACESProcessFlow.pdf)
 
 ## Authors
 
