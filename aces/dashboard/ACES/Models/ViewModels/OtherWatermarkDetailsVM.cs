@@ -15,6 +15,8 @@ namespace ACES.Models.ViewModels
         public string StudentName { get; set; }
         public string AssignmentName { get; set; }
         public string Course { get; set; }
+        //public string CourseDate { get; set; } //Needs to be added to Course Model, Controller, and View
+        public string InstructorName { get; set; }
 
     }
 }

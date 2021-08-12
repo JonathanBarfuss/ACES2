@@ -154,6 +154,7 @@ namespace ACES.Controllers
             var student = await _context.Student.FirstOrDefaultAsync(s => s.Id == result.StudentID);
             var assignment = await _context.Assignment.FirstOrDefaultAsync(s => s.Id == result.AssignmentID);
             var course = await _context.Course.FirstOrDefaultAsync(c => c.Id == assignment.CourseId);
+            var instructor = await _context.Instructor.FirstOrDefaultAsync(i => i.Id == course.InstructorId);
 
             List<OtherWatermarkDetailsVM> listdetail = new List<OtherWatermarkDetailsVM>();
             var vm = new OtherWatermarkDetailsVM();
@@ -165,7 +166,9 @@ namespace ACES.Controllers
             vm.StudentRepoName = result.StudentRepoName;
             vm.StudentName = student.FirstName + " " + student.LastName;
             vm.AssignmentName = assignment.Name;
+            vm.InstructorName = instructor.FirstName + " " + instructor.LastName;
             vm.Course = course.CourseName;
+            //vm.Course = course.CourseDate.toString();
             
 
 
