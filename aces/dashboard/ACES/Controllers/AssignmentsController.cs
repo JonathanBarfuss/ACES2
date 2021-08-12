@@ -291,7 +291,7 @@ namespace ACES.Controllers
                 await _context.SaveChangesAsync(); var newId = (from x in _context.Assignment //get the generated assignmentId
                                                                 select x.Id).Max();
 
-                string canvasLink = String.Format(@"http://{0}/?aID={1}", Request.Host ,newId);  //TODO: when hosted on the server change the url to the correct
+                string canvasLink = String.Format(@"http://{0}/?aID={1}", Request.Host, newId);
                 assignment.CanvasLink = canvasLink;
                 _context.Update(assignment);
                 await _context.SaveChangesAsync();
