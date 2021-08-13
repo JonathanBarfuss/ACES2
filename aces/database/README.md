@@ -22,4 +22,4 @@ the one we used to run the database on titan server.  To test the database on yo
   },
 **End Example**
 
-Replace the Server=ERICPC\\SQLEXPRESS2 with Server={your local database path};  be sure to use \\ instead of \ for an escape character.  
+Replace the Server=ERICPC\\SQLEXPRESS2 with Server={your local database path};  be sure to use double \\ instead of \ for an escape character.  
