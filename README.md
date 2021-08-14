@@ -53,7 +53,7 @@ To authorize API calls, the **anticheatbot** GitHub account was created with a p
 Change the values currently marked as **BradHasIt** in the template. Brad will provide database credentials and GitHub token to replace **BradHasIt** values. The credentials should not be stored on GitHub for security purposes so that unauthorized users do not have access to the database or the token for API calls.
 
 ### Step 4: Connect to Titan's AntiCheat database 
-If needed, use database credentials from appsettings.json file to connect to the Titan's AntiCheat database in SQL Server Management Studio. For the database schema, relationships chart, database backup script and database README files visit [Database folder](aces/database/)
+If needed, use database credentials from appsettings.json file to connect to the Titan's AntiCheat database in SQL Server Management Studio. For the database schema, relationships chart, database backup script and database README files visit [Database folder](aces/database/).
 
 ### Step 5: Start IIS Express
 Once you update all credentials, you can start **IIS Express** to run the project locally. When the dashboard opens in the browser, you can either log in as an existing instructor (bradleypeterson@weber.edu mypass111) for testing and debugging purposes or set up a new profile. The existing user credentials should be deleted from the database before going live. 
