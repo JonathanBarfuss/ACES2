@@ -22,8 +22,15 @@ To authorize API calls, the **anticheatbot** GitHub account was created with a p
 
 ![Anticheatbot](Images/Anticheatbot.PNG)
 
+### Step 1: Install Necessary Software
+- Install Visual Studio
+- Install SQL Server Management Studio
 
-After you clone the bradleypeterson/ACES2 repository, the **appsettings.json** file will need to be added on your local machine to the project's folder at the location shown below.
+### Step 2: Clone the Repository from GitHub
+- Clone the bradleypeterson/ACES2 repository from GitHub
+
+### Step 3: Set appsettings.json file
+- After you clone the bradleypeterson/ACES2 repository, the **appsettings.json** file will need to be added on your local machine to the project's folder at the location shown below.
 
 ### appsettings.json template
 {
@@ -43,8 +50,12 @@ After you clone the bradleypeterson/ACES2 repository, the **appsettings.json** f
 
 ![AppSettings](Images/AppSettings.PNG)
 
-Change the values currently marked as **BradHasIt** in the template. Brad will provide database credentials and GitHub token to replace **BradHasIt** values. The credentials should not be stored on GitHub for security purposes so that unauthorized users do not have access to the database or the token for API calls. 
+Change the values currently marked as **BradHasIt** in the template. Brad will provide database credentials and GitHub token to replace **BradHasIt** values. The credentials should not be stored on GitHub for security purposes so that unauthorized users do not have access to the database or the token for API calls.
 
+### Step 4: Connect to Titan's AntiCheat database 
+If needed, use database credentials from appsettings.json file to connect to the Titan's AntiCheat database in SQL Server Management Studio. For the database schema, relationships chart, database backup script and database README files visit ![Database folder](aces/database/)
+
+### Step 5: Start IIS Express
 Once you update all credentials, you can start **IIS Express** to run the project locally. When the dashboard opens in the browser, you can either log in as an existing instructor (bradleypeterson@weber.edu mypass111) for testing and debugging purposes or set up a new profile. The existing user credentials should be deleted from the database before going live. 
 
 ![BradLogin](Images/BradLogin.PNG)
@@ -148,6 +159,12 @@ For the chart of the more detailed ACES process flow, go to [Process Flow UML](I
 
 ## Authors
 
+### Version 1 - original (bradleypeterson/ACES) Capstone Project Summer 2020:
+* @Aoshua
+* @TannerL
+* @Morgan-Jensen
+* @loganrios
+
 ### Version 2 - current (bradleypeterson/ACES2) Capstone Project Summer 2021:
 * @EricPeterson4665
 * @DylanThomasWSU
@@ -155,8 +172,26 @@ For the chart of the more detailed ACES process flow, go to [Process Flow UML](I
 * @TuckerGarner
 * @DevLisichka
 
-### Version 1 - original (bradleypeterson/ACES) Capstone Project Summer 2020:
-* @Aoshua
-* @TannerL
-* @Morgan-Jensen
-* @loganrios
+### Business Requirements Implemented: 
+
+### Tier 1
+Tier 1 covers the core functions such as ACES watermarking the code and interacting with Github (pulling original code and committing watermarked code). Instructors will be able to get information about the student's code, such as, remaining watermark count and watermark comparison, last github commit date, etc.
+
+#### ACES can:
+- pull source code from Instructor’s repo
+- customize student’s files by implementing JSON column instructions, such as adding watermarks, white spaces
+- commit watermarked code to Student’s repo
+- Provide confirmation message based on the Github response and direct student to their assignment repo if successful
+
+#### Instructor can:
+- create account/login to ACES
+- create courses for students to join, e.g. CS 2420
+- create assignments
+ view remaining watermarks of students committed code
+- customize watermarking using JSON
+- press button to get the report on student’s assignment anti-cheating evaluation (watermarks and last commit date)
+
+#### Student can:
+- create account/login to ACES
+- join courses, e.g. CS 2420
+- update their repos with watermarked files
