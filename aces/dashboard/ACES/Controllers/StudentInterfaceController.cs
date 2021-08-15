@@ -198,14 +198,6 @@ namespace ACES.Controllers
                 return View(courseAssignments);
             }
 
-            //TODO: modify to validate (first check for empty repo entry, second check for invalid repo)
-            //TODO: and to display error to a student to enter the valid repo string, also provide an example above the field!
-            if (studentRepoURL == null)
-            {
-                studentRepoURL = "https://github.com/AntiCheatSummer2021/assignment4-ShaneyPooh";
-                //studentRepoURL = "https://github.com/AntiCheatSummer2021/brad-assignment-ShaneyPooh";
-            }
-
             // Get assignment's url and name from Assignments table:
             var assignment = _context.Assignment.Where(x => x.Id == assignmentId).FirstOrDefault();
             string insructorAssignmentRepoUrl = assignment.RepositoryUrl.ToString();
@@ -358,7 +350,7 @@ namespace ACES.Controllers
                                         #endregion
 
                                         #region Pass Gathered Info to Factory/Check Response Content
-                                        var objFactoryRequest = new HttpRequestMessage(HttpMethod.Post, "http://localhost:61946/factory"); //TODO: replace path with Brad's link to cs website, e.g. cs.weber.bradley...// should still use localhost, otherwise needs to do dns routing, going to internet, vs call does not go out? If used outside, that app will put a full path
+                                        var objFactoryRequest = new HttpRequestMessage(HttpMethod.Post, "http://localhost:61946/factory"); 
                                          objFactoryRequest.Content = new StringContent(fileInstructions, Encoding.UTF8, "application/json");
                                         // Check response
                                         using (HttpResponseMessage objFactoryResponse = httpClient.SendAsync(objFactoryRequest).Result)
