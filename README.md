@@ -153,7 +153,49 @@ specifying if there is a watermark match with another student's assignment.
 
 The examples are shown in the demo listed at the beginning of this README file.
 
-**Note about ACES version changes**: The original design (Version 1 Summer 2020) included use of Docker. The second version removed the Docker option as it requires an upgrade to Windows Professional or Enterprise, and most of the students on the team did not have the upgraded Windows version. The first version also used a separate python solution for the Factory container that is responsible for watermarking files. The second version combined this functionality under the same ACES solution converting Factory's python part into C#. By implementing the API call from StudentInterfaceController.cs to the FactoryController.cs the second version preserves the option to call FactoryController.cs in the future directly if desired. The option for ACES to work with GitHub Classroom was implemented per the client's preference to allow instructors to use existing Classroom features.
+## Backend Configuration description
+
+### Watermarking Process Flow
+
+### Step 1: Get the files from the Instructor Assignment's Repository in GitHub.
+
+When the student follows the Canvas assignment link to ACES and enters their empty GitHub repository name, the sub StudentAssignments in the StudentInterfaceController.cs file accesses the instructor's repo specified for this assignment in the Assignment table. It gets the contents of the entire repository with the help of the anticheatbot's personal access token.
+
+![GetRepoContents](Images/GetRepoContents.PNG)
+
+### Step 2: Prep the files for the factory if required.
+
+Going through each file in the downloaded contents, the sub StudentAssignments checks if this file is specified in the JSON Criteria provided by the instructor for this assignment. If it is, the sub prepares the data to pass to the FactoryController.cs file.
+
+![PrepForFactory](Images/PrepForFactory.PNG)
+
+### Step 3: Pass the files to the factory.
+
+Pass the needed information for watermarking to the factory.  
+
+![PassToFactory](Images/PassToFactory.PNG)
+
+### Step 4: Watermark the files.
+
+Generate watermark according JSON criteria, watermark the files, and pass the data back to StudentInterfaceController.cs.
+
+![WatermarkFiles](Images/WatermarkFiles.PNG)
+
+### Step 5: Upload files to the student's repo.
+
+Pass the needed information for watermarking to the factory.  
+
+![UploadFilesToStudent](Images/UploadFilesToStudent.PNG)
+
+### Step 6: Update database.
+
+Update the database with relevant inforamtion after watermaking the files.
+
+![UpdateDatabaseWithWatermark](Images/UpdateDatabaseWithWatermark.PNG)
+
+
+### Note about ACES version changes:
+The original design (Version 1 Summer 2020) included use of Docker. The second version removed the Docker option as it requires an upgrade to Windows Professional or Enterprise, and most of the students on the team did not have the upgraded Windows version. The first version also used a separate python solution for the Factory container that is responsible for watermarking files. The second version combined this functionality under the same ACES solution converting Factory's python part into C#. By implementing the API call from StudentInterfaceController.cs to the FactoryController.cs the second version preserves the option to call FactoryController.cs in the future directly if desired. The option for ACES to work with GitHub Classroom was implemented per the client's preference to allow instructors to use existing Classroom features.
 
 For the chart of the more detailed ACES process flow, go to [Process Flow UML](Images/ACESProcessFlow.pdf)
 
