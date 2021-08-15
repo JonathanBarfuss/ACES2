@@ -155,7 +155,6 @@ specifying if there is a watermark match with another student's assignment.
 
 The examples are shown in the demo listed at the beginning of this README file.
 
-## Backend Configuration description
 
 ### Watermarking Process Flow
 
