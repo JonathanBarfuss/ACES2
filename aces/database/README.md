@@ -1,5 +1,7 @@
 To create the database execute the AntiCheatDatabaseScript.sql
+
 **IMPORTANT**
+
 For the script to work the FILENAME for both PRIMARY and LOG must be set for the correct path on the server.
 
 **Example**
@@ -22,4 +24,4 @@ the one used to run the database on titan server.  To test the database on your 
   },
 **End Example**
 
-Replace the Server=ERICPC\\SQLEXPRESS2 with Server={your local database path};  (be sure to use double \\ instead of \ for an escape character).  
+Replace the Server=ERICPC\\SQLEXPRESS2 with Server={your local database path};  (be sure to use double \\ instead of one \ for an escape character).  
