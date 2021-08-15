@@ -69,8 +69,6 @@ namespace ACES.Controllers
         #region WatermarkFile
         private string WatermarkFile(string fileContent)
         {   
-            //TODO: instead of array probably better to use list, or stringbuilder to insert, etc.
-            // should validate first, line count and maybe name on first line?
             string[] contentLines = fileContent.Split("\n");
 
             // Add generated whitestring
