@@ -13,6 +13,8 @@ The current functionality allows ACES to utilize **RESTful API calls** to:
 
 ### The demo of the web application functionality is provided at the following [YouTube link](https://youtu.be/PE8wAIxhHzA).
 
+### For the chart of the more detailed ACES process flow, go to [Process Flow UML](Images/ACESProcessFlow.pdf)
+
 ## Getting Started
 
 #### These instructions will help you set the project up and running on your local machine for development and testing purposes.
@@ -192,9 +194,6 @@ Pass the needed information for watermarking to the factory.
 Update the database with relevant inforamtion after watermaking the files.
 
 ![UpdateDatabaseWithWatermark](Images/UpdateDatabaseWithWatermark.PNG)
-
-
-### For the chart of the more detailed ACES process flow, go to [Process Flow UML](Images/ACESProcessFlow.pdf)
 
 
 ### Note about ACES version changes:
