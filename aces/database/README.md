@@ -13,8 +13,8 @@ GO
 
 Most paths will be similar but the ...\MSSQL15.SQLEXPRESS2\... was specific to test the script on my local database.
 
-After the database is installed the "ConnectionStrings:" in appsettings.json must be updated to connect to the database.  By default the connection string will be
-the one we used to run the database on titan server.  To test the database on your local machine the connection string will be like the following example:
+After the database is installed the "ConnectionStrings:" in appsettings.json must be updated to connect to the database.  The connection string in the current code will be
+the one used to run the database on titan server.  To test the database on your local machine the connection string will be like the following example:
 
 **Example**
 "ConnectionStrings": {
@@ -22,4 +22,4 @@ the one we used to run the database on titan server.  To test the database on yo
   },
 **End Example**
 
-Replace the Server=ERICPC\\SQLEXPRESS2 with Server={your local database path};  be sure to use double \\ instead of \ for an escape character.  
+Replace the Server=ERICPC\\SQLEXPRESS2 with Server={your local database path};  (be sure to use double \\ instead of \ for an escape character).  
