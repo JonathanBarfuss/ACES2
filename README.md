@@ -194,7 +194,7 @@ Update the database with relevant inforamtion after watermaking the files.
 ![UpdateDatabaseWithWatermark](Images/UpdateDatabaseWithWatermark.PNG)
 
 
-For the chart of the more detailed ACES process flow, go to [Process Flow UML](Images/ACESProcessFlow.pdf)
+### For the chart of the more detailed ACES process flow, go to [Process Flow UML](Images/ACESProcessFlow.pdf)
 
 
 ### Note about ACES version changes:
