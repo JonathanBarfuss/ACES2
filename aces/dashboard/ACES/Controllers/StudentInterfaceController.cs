@@ -191,7 +191,7 @@ namespace ACES.Controllers
         #region StudentAssignments
         [HttpGet]
         public async Task<IActionResult> StudentAssignments(int assignmentId, int courseId, string studentRepoURL, string agreeToRepoRemake) 
-        {          
+        {
             if (assignmentId == 0)
             {
                 var courseAssignments = await _context.Assignment.Where(x => x.CourseId == courseId).ToListAsync();
@@ -301,6 +301,7 @@ namespace ACES.Controllers
                     {
                         #region Get Files From Instructor's Repository/Prep for sending to Factory
                         string whiteComment;
+                        string existingWatermark;
                         FileInfo[] contents = JsonConvert.DeserializeObject<FileInfo[]>(objInstructorRepoResponse.Content.ReadAsStringAsync().Result);
                         foreach (var file in contents)
                         {
@@ -328,6 +329,20 @@ namespace ACES.Controllers
                                     {
                                         // If yes, send the file to factory with Json object.
                                         #region Gather Needed Info to Pass to Factory
+                                        var watermarkQuery = from w in _context.Watermarks
+                                                        where w.StudentID == studentId
+                                                        where w.AssignmentID == assignmentId
+                                                        where w.FileName == file.name
+                                                        select w;
+                                        var watermarkEntry = watermarkQuery.FirstOrDefault();
+                                        if(watermarkEntry != null)
+                                        {
+                                            existingWatermark = watermarkEntry.Watermark;
+                                        }
+                                        else
+                                        {
+                                            existingWatermark = "no watermark";
+                                        }
                                         bool replaceInsteadOfInsert = fileInJson.replaceInsteadOfInsert != null && fileInJson.replaceInsteadOfInsert.Value == 1;
                                         if(fileInJson.comment == null)
                                         {
@@ -345,7 +360,8 @@ namespace ACES.Controllers
                                             comment = whiteComment,
                                             whitespacesLineNumbers = fileInJson.whitespaces.ToObject<int[]>(),
                                             randomStringLineNumbers = fileInJson.randomstring.ToObject<int[]>(),
-                                            fileContent = content
+                                            fileContent = content,
+                                            watermark = existingWatermark
                                         });
                                         #endregion
 
@@ -373,19 +389,23 @@ namespace ACES.Controllers
                                                     randomStringLineNumbers = fileInJson.randomstring.ToObject<int[]>()
                                                 });
 
-                                                // Add each watermark to the database
-                                                var newWatermark = new Watermarks
+                                                if(watermarkEntry == null) // only add to table if there isn't an existing watermark
                                                 {
+                                                    // Add each watermark to the database
+                                                    var newWatermark = new Watermarks
+                                                    {
 
-                                                    Watermark = deserializedObject.watermark,
-                                                    StudentID = studentId,
-                                                    AssignmentID = assignmentId,
-                                                    FileName = fileInJson.name.Value,
-                                                    StudentRepoName = studentRepoURL
+                                                        Watermark = deserializedObject.watermark,
+                                                        StudentID = studentId,
+                                                        AssignmentID = assignmentId,
+                                                        FileName = fileInJson.name.Value,
+                                                        StudentRepoName = studentRepoURL
 
-                                                };
+                                                    };
 
-                                                _context.Watermarks.Add(newWatermark);
+                                                    _context.Watermarks.Add(newWatermark);
+                                                }
+                                                
                                                 _context.SaveChanges();
 
                                             }
@@ -519,6 +539,7 @@ namespace ACES.Controllers
         public int[] whitespacesLineNumbers { get; set; }
         public int[] randomStringLineNumbers { get; set; }
         public string fileContent { get; set; }
+        public string watermark { get; set; }
     }
 
     public struct StudentMarkedFile

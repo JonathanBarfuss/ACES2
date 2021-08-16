@@ -30,14 +30,14 @@ namespace ACES.Controllers
 
         #region FactoryCreate
         [HttpPost("factory")]
-        public string FactoryCreate([FromBody] PostAddWatermark data)
+        public string FactoryCreate([FromBody] PostAddWatermark data) // data variable carries over from the StudentInterfaceController, can add fields if needed in that file in PostAddWatermark struct
         {
             HttpResponseMessage response = new HttpResponseMessage();
             var emailAddress = new System.Net.Mail.MailAddress(data.email);
             whitespacesLineNumbers = data.whitespacesLineNumbers;
             randomStringLineNumbers = data.randomStringLineNumbers;
             replaceInsteadOfInsert = data.replaceInsteadOfInsert;
-            if (data.comment == "no comment")
+            if (data.comment == "no comment") // assign comment if the professor provided one
             {
                 comment = "DO NOT DELETE THIS LINE";
             } else
@@ -45,10 +45,18 @@ namespace ACES.Controllers
                 comment = data.comment;
             }
 
-            watermark = GenerateWatermark(data.email, data.assignmentName);
+            if(data.watermark == "no watermark") // assign/create watermark if one existed or not
+            {
+                watermark = GenerateWatermark(data.email, data.assignmentName);
+            }
+            else
+            {
+                watermark = data.watermark;
+            }
+            
 
             Random rnd = new Random();
-            numberOfWhitespaces = rnd.Next(10,30);
+            numberOfWhitespaces = rnd.Next(10,30); // generating a random number of whitespaces to put after the comment
             for (int i = 0; i < numberOfWhitespaces; i++){ whiteString += " "; }
 
             data.fileContent = WatermarkFile(data.fileContent);
