@@ -110,7 +110,7 @@ namespace ACES.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,CourseName,InstructorId")] Course course)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,CourseName,InstructorId,IsCourseActive")] Course course)
         {
             if (id != course.Id)
             {
