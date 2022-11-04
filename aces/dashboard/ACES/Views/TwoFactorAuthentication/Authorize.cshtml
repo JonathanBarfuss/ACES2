@@ -1,0 +1,30 @@
+﻿@{
+    Layout = null; // This makes the login not inherit _Layout.cshtml
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ACES Login</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link href="~/css/login.css" rel="stylesheet" />
+</head>
+<body>
+    <style>
+    </style>
+    <div class="wrapper fadeInDown">
+        <div id="formContent">
+            <div class="fadeIn first" style="padding-top: 25px;">
+                <h3>Two Factor Authentication</h3>
+            </div>
+            <form method="post">
+                <input type="text" name="inputCode" placeholder="Input Security Code" autofocus /><br />
+                <input type="submit" class="fadeIn fourth" value="Submit" style="margin-top: 20px;" />
+            </form>
+
+            <input type="button" value="Back to Login Screen" class="fadeIn fifth" style="text-align: center; top: 80%" onclick="location.href='@Url.Action("Index", "Login")'" />
+        </div>
+    </div>
+</body>
+</html>

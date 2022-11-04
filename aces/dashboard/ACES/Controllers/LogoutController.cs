@@ -36,6 +36,10 @@ namespace ACES.Controllers
                 student = students.Where(x => x.Email == SEmail).FirstOrDefault();
             }
       
+            if (Request.Cookies.ContainsKey("TwoFactorEnabled"))
+            {
+                Response.Cookies.Delete("TwoFactorEnabled");
+            }
 
             if (instructor != null)
             {

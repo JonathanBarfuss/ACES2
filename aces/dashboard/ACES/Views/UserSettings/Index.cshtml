@@ -1,0 +1,40 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "User Settings";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    //TODO: add user settings. Only one currently planned so far: display whether or not 2FA is enabled and have a link that will allow them to enable/disable 2FA
+    bool TwoFactorEnabled = false;
+    if (Context.Request.Cookies.ContainsKey("TwoFactorEnabled"))
+    {
+        TwoFactorEnabled = true;
+    }
+}
+
+<link href="~/css/settings.css" rel="stylesheet" />
+
+<div class="wrapper fadeInDown">
+    <div class="fadeIn first" style="padding-top: 25px;">
+        <h2 style="padding-bottom: 20px;">User Settings</h2>
+        <hr />
+        <h4>Two Factor Authentication</h4>
+    </div>
+    @{
+        if (TwoFactorEnabled)
+        {
+            <div class="settingGroup">
+                <input type="button" value="✓" class="fadeIn fifth radioImitation" id="checked" onclick="location.href='@Url.Action("Disable", "TwoFactorAuthentication")'" style="float: left"/>
+                <input type="button" value="Disable" class="fadeIn fifth labelButton" style="text-align: center; top: 80%" onclick="location.href='@Url.Action("Disable", "TwoFactorAuthentication")'" style="float: right"/>
+            </div>
+        }
+        else
+        {
+            <div class="settingGroup">
+                <input type="button" value=" " class="fadeIn fifth radioImitation" id="unchecked" onclick="location.href='@Url.Action("Enable", "TwoFactorAuthentication")'" style="float: left"/>
+                <input type="button" value="Enable" class="fadeIn fifth labelButton" style="text-align: center; top: 80%" onclick="location.href='@Url.Action("Enable", "TwoFactorAuthentication")'" style="float: right"/>
+            </div>
+        }
+    }
+    <hr />
+</div>
