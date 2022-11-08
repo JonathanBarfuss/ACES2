@@ -25,6 +25,7 @@ namespace ACES.Controllers
             {
 
                 ViewBag.lblLoginError = "Invalid Email or Password";
+                //Response.Cookies.Append("IsLoggedIn", 0.ToString());
                 return View();
 
             }
@@ -104,6 +105,7 @@ namespace ACES.Controllers
                         Response.Cookies.Delete("InstructorEmail");
                     }
                     Response.Cookies.Append("StudentID", student.Id.ToString());
+                    Response.Cookies.Append("IsLoggedIn", 1.ToString());
                     student.IsLoggedIn = true;
                     _context.SaveChanges();
 

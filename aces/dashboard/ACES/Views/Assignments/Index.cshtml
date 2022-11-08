@@ -1,5 +1,10 @@
 ﻿@model IEnumerable<ACES.Models.Assignment>
 
+@if (Context.Request.Cookies["IsLoggedIn"].ToString() != "1")
+{
+    <meta http-equiv="refresh" content="0; url=../Login/" />
+}
+
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -26,23 +31,24 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.RepositoryUrl)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CourseId)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Tweak</a> |
-                <!-- <a asp-action="Details" asp-route-id="@item.Id">Details</a> | ************Not implemented in controller, not needed-->
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.RepositoryUrl)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CourseId)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Tweak</a> |
+                    <!-- <a asp-action="Details" asp-route-id="@item.Id">Details</a> | ************Not implemented in controller, not needed-->
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
