@@ -84,6 +84,7 @@ namespace ACES.Controllers
                         Response.Cookies.Delete("StudentEmail");
                     }
                     Response.Cookies.Append("InstructorID", instructor.Id.ToString());
+                    Response.Cookies.Append("IsLoggedIn", 1.ToString());
                     if (instructor.IsLoggedIn == false)
                     {
                         instructor.IsLoggedIn = true;
