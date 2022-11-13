@@ -22,7 +22,7 @@ namespace ACES.Controllers
         [HttpGet]
         public ActionResult Enable()
         {
-            TwoFactorAuthenticationUser user = new TwoFactorAuthenticationUser();
+            CombinedUsers user = new CombinedUsers();
             Instructor instructor = new Instructor();
             Student student = new Student();
             if (Request.Cookies["StudentEmail"] != null)
@@ -57,7 +57,7 @@ namespace ACES.Controllers
         [HttpPost]
         public ActionResult Enable(string inputCode)
         {
-            TwoFactorAuthenticationUser user = new TwoFactorAuthenticationUser();
+            CombinedUsers user = new CombinedUsers();
             Instructor instructor = new Instructor();
             Student student = new Student();
             if (Request.Cookies["StudentEmail"] != null)
@@ -103,7 +103,7 @@ namespace ACES.Controllers
         [HttpPost]
         public IActionResult Disable(string inputCode)
         {
-            TwoFactorAuthenticationUser user = new TwoFactorAuthenticationUser();
+            CombinedUsers user = new CombinedUsers();
             Instructor instructor = new Instructor();
             Student student = new Student();
             if (Request.Cookies["StudentEmail"] != null)
@@ -148,7 +148,7 @@ namespace ACES.Controllers
         [HttpPost]
         public IActionResult Authorize(string inputCode)
         {
-            TwoFactorAuthenticationUser user = new TwoFactorAuthenticationUser();
+            CombinedUsers user = new CombinedUsers();
             Instructor instructor = new Instructor();
             Student student = new Student();
             if (Request.Cookies["StudentEmail"] != null)
@@ -178,7 +178,9 @@ namespace ACES.Controllers
             }
 
 
-            Response.Cookies.Append("TwoFactorEnabled", "True");
+            Response.Cookies.Append("TwoFactorEnabled", "True"); // currently, this cookie is how we are tracking how the enable/disable two factor authentication button in user settings will behave
+
+            // now that the user has completed their authentication, take them to the landing page they are supposed to go to
             if (instructor != null)
             {
                 if (instructor.IsLoggedIn == false)
@@ -234,7 +236,7 @@ namespace ACES.Controllers
 
         }
 
-        private static string TwoFactorKey(TwoFactorAuthenticationUser user)
+        private static string TwoFactorKey(CombinedUsers user)
         {
             //TODO: should we implement our cryptography and/or salt in the generation of this key?
             return $"{user.Id}+{user.Email}";

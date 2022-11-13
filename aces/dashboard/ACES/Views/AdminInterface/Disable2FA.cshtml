@@ -1,0 +1,33 @@
+﻿@model List<ACES.Models.CombinedUsers>
+
+@{
+    ViewData["Title"] = "Disable2FA";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Your Courses</h2>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th style="padding-left: 30px">Course</th>
+            <th style="padding-left: 30px">Total Assignments</th>
+            <th style="padding-left: 30px">Total Students</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td style="padding-left: 30px">@user.Email</td>
+                <td style="padding-left: 300px">
+                    <a asp-action="Disable2FA" asp-route-id="@user.Email, @user.UserType">Disable</a> |
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

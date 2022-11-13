@@ -85,10 +85,11 @@ namespace ACES.Controllers
                     Response.Cookies.Append("InstructorID", instructor.Id.ToString());
 
                     // take user to two factor authentication page if they have enabled two factor authentication
-                    if (false) //TODO: change this to be "if instructor.TwoFactorEnabled" once that is implemented
+                    if (true) //TODO: change this to be "if instructor.TwoFactorEnabled" once that is implemented
                     {
                         return RedirectToAction("Authorize", "TwoFactorAuthentication");
                     }
+                    // take user to designated landing page if they have not enabled two factor authentication
                     if (instructor.IsLoggedIn == false)
                     {
                         instructor.IsLoggedIn = true;
@@ -112,7 +113,7 @@ namespace ACES.Controllers
                     Response.Cookies.Append("StudentID", student.Id.ToString());
 
                     // take user to two factor authentication page if they have enabled two factor authentication
-                    if (false) //TODO: change this to be "if student.TwoFactorEnabled" once that is implemented
+                    if (true) //TODO: change this to be "if student.TwoFactorEnabled" once that is implemented
                     {
                         if (!String.IsNullOrEmpty(assignmentID))
                         {
@@ -120,6 +121,7 @@ namespace ACES.Controllers
                         }
                         return RedirectToAction("Authorize", "TwoFactorAuthentication");
                     }
+                    // take user to designated landing page if they have not enabled two factor authentication
                     student.IsLoggedIn = true;
                     _context.SaveChanges();
 
