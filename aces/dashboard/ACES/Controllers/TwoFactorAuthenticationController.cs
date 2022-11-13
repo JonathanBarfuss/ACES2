@@ -185,6 +185,7 @@ namespace ACES.Controllers
             {
                 if (instructor.IsLoggedIn == false)
                 {
+                    Response.Cookies.Append("IsLoggedIn", 1.ToString());
                     instructor.IsLoggedIn = true;
                     _context.SaveChanges();
                 }
@@ -192,6 +193,7 @@ namespace ACES.Controllers
             }
             else if (student != null)
             {
+                Response.Cookies.Append("IsLoggedIn", 1.ToString());
                 student.IsLoggedIn = true;
                 _context.SaveChanges();
 

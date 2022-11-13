@@ -1,5 +1,10 @@
 ﻿@model ACES.Models.Course
 
+@if (Context.Request.Cookies["IsLoggedIn"].ToString() != "1")
+{
+    <meta http-equiv="refresh" content="0; url=../Login/" />
+}
+
 @{
     ViewData["Title"] = "Create";
     Layout = "~/Views/Shared/_Layout.cshtml";

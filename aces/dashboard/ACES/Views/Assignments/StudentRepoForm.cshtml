@@ -1,5 +1,10 @@
 ﻿@model ACES.Models.ViewModels.StudentRepoVM
 
+@if (Context.Request.Cookies["IsLoggedIn"].ToString() != "1")
+{
+    <meta http-equiv="refresh" content="0; url=../Login/" />
+}
+
 @{
     ViewData["Title"] = "Student Repo Form";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -10,11 +15,11 @@
     if (String.IsNullOrWhiteSpace(warning))
     {
         labelRepo = "Please Enter your Repo URL (E.g., https://github.com/InstructorClassroom/Assignment1-JohnDoe):";
-            }
-            else
-            {
-                labelRepo = String.Empty;
-            }
+    }
+    else
+    {
+        labelRepo = String.Empty;
+    }
 }
 
 <h2>Student Repository</h2>
@@ -45,8 +50,8 @@
                     <input name="Agreed" class="form-control" />
                 </div>
                 @*<div class="form-group">
-                    <label class="control-label"><b><i>@warning</i></b></label>
-                </div>*@
+                        <label class="control-label"><b><i>@warning</i></b></label>
+                    </div>*@
                 <div class="form-group">
                     <input type="submit" value="Delete All Repo Files and Start Over" class="btn btn-primary" />
                 </div>
