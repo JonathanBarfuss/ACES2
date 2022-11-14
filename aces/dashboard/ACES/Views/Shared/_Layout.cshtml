@@ -44,6 +44,25 @@
                         }
                     </ul>
                 </div>
+                <a class="nav-link" asp-area="" asp-controller="StudentInterface" asp-action="Index">
+                </a>
+                @if (isFaculty)
+                {
+                    var userstud = Context.Request.Cookies["InstructorEmail"];
+                    if (userstud != null)
+                    {
+                        <a>Welcome, @userstud.ToString()</a>
+                    }
+                }
+                @if (!isFaculty)
+                {
+                    var userstud = Context.Request.Cookies["StudentEmail"];
+                    if (userstud != null)
+                    {
+                        <a>Welcome, @userstud.ToString()</a>
+                    }
+                }
+                <a class="nav-link" asp-area="" asp-controller="UserSettings" asp-action="Index">User Settings</a>
                 <a class="nav-link" asp-area="" asp-controller="Logout" asp-action="Index">Logout</a>
             </div>
         </nav>

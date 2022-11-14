@@ -1,5 +1,10 @@
 ﻿@model IEnumerable<ACES.Models.Assignment>
 
+@if (Context.Request.Cookies["IsLoggedIn"].ToString() != "1")
+{
+    <meta http-equiv="refresh" content="0; url=../Login/" />
+}
+
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
