@@ -4,8 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ACES.Data;
+using ACES.Models;
+using ACES.Models.ViewModels;
+using ACES.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace ACES.Controllers
 {
@@ -13,10 +18,12 @@ namespace ACES.Controllers
     {
         private readonly ACESContext _context;
         private int loginError = 0;
+        private readonly EmailService mailService;
 
-        public PasswordResetController(ACESContext context)
+        public PasswordResetController(ACESContext context, IOptions<EmailSettings> mailSettings)
         {
             _context = context;
+            this.mailService = new EmailService(mailSettings);
         }
 
         public IActionResult Index(int lError) //lError is for login errors (incorrect username or password)
@@ -39,6 +46,86 @@ namespace ACES.Controllers
             }
 
             return View();
+        }
+
+        [HttpGet]
+        public IActionResult ForgotPassword(int lError)
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordVM model)
+        {
+            if (ModelState.IsValid)
+            {
+
+
+                var instructors = _context.Instructor.ToList();
+                var students = _context.Student.ToList();
+
+                var instructor = instructors.Where(x => x.Email == model.Email).FirstOrDefault();
+                var student = students.Where(x => x.Email == model.Email).FirstOrDefault();
+                if (instructor != null)
+                {
+                    //var token = await userManager.GeneratePasswordResetTokenAsync(instructor);
+                    var token = "CoolTokenName" + instructor.FirstName;
+
+                    var passwordResetLink = Url.Action("AttemptPasswordReset", "PasswordReset",
+                        new { email = model.Email, token = token }, Request.Scheme);
+
+                    //Send Email
+                    try
+                    {
+                        //EmailService mailService = new EmailService(new EmailSettings());
+                        Email request = new Email();
+                        request.ToEmail = instructor.Email;
+                        request.Subject = "ACES Password Reset";
+                        request.Body = passwordResetLink;
+                        await mailService.SendEmailAsync(request);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw;
+                    }
+
+                    return View("ForgotPasswordConfirmation");
+                }
+                else if (student != null)
+                {
+
+                    //var token = await userManager.GeneratePasswordResetTokenAsync(student);
+                    var token = "CoolTokenName" + student.FirstName;
+
+                    var passwordResetLink = Url.Action("AttemptPasswordReset", "PasswordReset",
+                        new { email = model.Email, token = token }, Request.Scheme);
+
+                    //Send Email
+                    try
+                    {
+                        //EmailService mailService = new EmailService(new EmailSettings());
+                        Email request = new Email();
+                        request.ToEmail = student.Email;
+                        request.Subject = "ACES Password Reset";
+                        request.Body = passwordResetLink;
+                        await mailService.SendEmailAsync(request);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw;
+                    }
+
+                    return View("ForgotPasswordConfirmation");
+
+                }
+                else
+                {
+                    return View("ForgotPasswordConfirmation");
+                }
+
+            }
+
+            return View(model);
         }
 
         public IActionResult AttemptPasswordReset(string username, string newPassword, string repeatPassword)
