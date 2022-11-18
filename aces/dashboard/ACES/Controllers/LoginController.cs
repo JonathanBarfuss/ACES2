@@ -85,12 +85,17 @@ namespace ACES.Controllers
                     }
                     Response.Cookies.Append("InstructorID", instructor.Id.ToString());
 
-                    // take user to two factor authentication page if they have enabled two factor authentication
+                    // take instructor to two factor authentication page if they have enabled two factor authentication
                     if (false) //TODO: change this to be "if instructor.TwoFactorEnabled" once that is implemented
                     {
                         return RedirectToAction("Authorize", "TwoFactorAuthentication");
                     }
-                    // take user to designated landing page if they have not enabled two factor authentication
+                    // if instructor is set up as an admin, set a cookie that will allow them to access the admin pages
+                    if (false)
+                    {
+                        Response.Cookies.Append("IsAdmin", "true");
+                    }
+                    // take instructor to designated landing page if they have not enabled two factor authentication
                     Response.Cookies.Append("IsLoggedIn", 1.ToString());
                     if (instructor.IsLoggedIn == false)
                     {
@@ -114,7 +119,7 @@ namespace ACES.Controllers
                     }
                     Response.Cookies.Append("StudentID", student.Id.ToString());
 
-                    // take user to two factor authentication page if they have enabled two factor authentication
+                    // take student to two factor authentication page if they have enabled two factor authentication
                     if (false) //TODO: change this to be "if student.TwoFactorEnabled" once that is implemented
                     {
                         if (!String.IsNullOrEmpty(assignmentID))
@@ -123,7 +128,7 @@ namespace ACES.Controllers
                         }
                         return RedirectToAction("Authorize", "TwoFactorAuthentication");
                     }
-                    // take user to designated landing page if they have not enabled two factor authentication
+                    // take student to designated landing page if they have not enabled two factor authentication
                     Response.Cookies.Append("IsLoggedIn", 1.ToString());
                     student.IsLoggedIn = true;
                     _context.SaveChanges();

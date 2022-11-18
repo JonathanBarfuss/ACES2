@@ -26,12 +26,6 @@ namespace ACES.Controllers
 
         private readonly IConfiguration _configuration;
 
-        // GET: StudentInterface/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
         private bool StudentExists(int id)
         {
             return _context.Student.Any(e => e.Id == id);
@@ -42,12 +36,17 @@ namespace ACES.Controllers
             return _context.Instructor.Any(e => e.Id == id);
         }
 
-        public async Task<IActionResult> Disable2FA(string? userEmail, string? userType)
+        public async Task<IActionResult> Index()
+        {
+            return View();
+        }
+        public async Task<IActionResult> Disable2FA(string? userEmail, string? userType, int? userId)
         {
             //if (!Request.Cookies.ContainsKey("StudentID"))
             //{
             //    return RedirectToAction("Index", "Login");
             //}
+
 
             var instructors = await _context.Instructor.ToListAsync(); // get the list of instructor accounts
             var students = await _context.Student.ToListAsync();  //get the list of student accounts
@@ -59,14 +58,27 @@ namespace ACES.Controllers
                 temp.Id = instructor.Id;
                 temp.Email = instructor.Email;
                 temp.UserType = "Instructor";
-                userList.Add(temp);
+                userList.Add(new CombinedUsers(instructor.Id, instructor.Email, "Instructor"));
             }
             foreach (var student in students)
             {
                 temp.Id = student.Id;
                 temp.Email = student.Email;
                 temp.UserType = "Student";
-                userList.Add(temp);
+                userList.Add(new CombinedUsers(student.Id, student.Email, "Student"));
+            }
+
+            if (userEmail != null)
+            {
+                ViewBag.selectedUserEmail = userEmail;
+            }
+            if (userType != null)
+            {
+                ViewBag.selectedUserType = userType;
+            }
+            if (userId != null)
+            {
+                ViewBag.selectedUserId = userId; 
             }
 
 

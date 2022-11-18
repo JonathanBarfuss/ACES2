@@ -7,6 +7,14 @@ namespace ACES.Models
 {
     public class CombinedUsers
     {
+        public CombinedUsers(int id, string email, string userType)
+        {
+            Id = id;
+            Email = email;
+            UserType = userType;
+        }
+        public CombinedUsers() { }
+
         public int Id { get; set; }
 
         public string Email { get; set; }

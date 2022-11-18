@@ -7,12 +7,14 @@ using ACES.Data;
 using Google.Authenticator;
 using ACES.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
 
 namespace ACES.Controllers
 {
     public class TwoFactorAuthenticationController : Controller
     {
         private readonly ACESContext _context;
+        private int authError = 0;
 
         public TwoFactorAuthenticationController(ACESContext context)
         {
@@ -20,8 +22,13 @@ namespace ACES.Controllers
         }
 
         [HttpGet]
-        public ActionResult Enable()
+        public ActionResult Enable(int aError = 0)
         {
+            authError = aError;
+            if (authError == 1)
+            {
+                ViewBag.lblAuthError = "Invalid auth token";
+            }
             CombinedUsers user = new CombinedUsers();
             Instructor instructor = new Instructor();
             Student student = new Student();
@@ -84,9 +91,9 @@ namespace ACES.Controllers
 
             TwoFactorAuthenticator twoFactor = new TwoFactorAuthenticator();
             bool isValid = twoFactor.ValidateTwoFactorPIN(TwoFactorKey(user), inputCode);
-            if (!isValid) // if they enter the key wrong, redirect them to the same page so they can try again (might want to figure out how to add an error message, so they know this is the case)
+            if (!isValid) // if they enter the key wrong, redirect them to the same page so they can try again
             {
-                return RedirectToAction("Enable", "TwoFactorAuthentication");
+                return RedirectToAction("Enable", "TwoFactorAuthentication", new { aError = 1 });
             }
 
             Response.Cookies.Append("TwoFactorEnabled", "True");
@@ -95,8 +102,13 @@ namespace ACES.Controllers
         }
 
         [HttpGet]
-        public IActionResult Disable()
+        public IActionResult Disable(int aError = 0)
         {
+            authError = aError;
+            if (authError == 1)
+            {
+                ViewBag.lblAuthError = "Invalid auth token";
+            }
             return View();
         }
 
@@ -128,9 +140,9 @@ namespace ACES.Controllers
 
             TwoFactorAuthenticator twoFactor = new TwoFactorAuthenticator();
             bool isValid = twoFactor.ValidateTwoFactorPIN(TwoFactorKey(user), inputCode);
-            if (!isValid) // if they enter the key wrong, redirect them to the same page so they can try again (might want to figure out how to add an error message, so they know this is the case)
+            if (!isValid) // if they enter the key wrong, redirect them to the same page so they can try again 
             {
-                return RedirectToAction("Disable", "TwoFactorAuthentication");
+                return RedirectToAction("Disable", "TwoFactorAuthentication", new { aError = 1 });
             }
 
 
@@ -140,8 +152,13 @@ namespace ACES.Controllers
         }
 
         [HttpGet]
-        public IActionResult Authorize()
+        public IActionResult Authorize(int aError = 0)
         {
+            authError = aError;
+            if (authError == 1)
+            {
+                ViewBag.lblAuthError = "Invalid auth token, try again";
+            }
             return View();
         }
 
@@ -172,9 +189,9 @@ namespace ACES.Controllers
 
             TwoFactorAuthenticator twoFactor = new TwoFactorAuthenticator();
             bool isValid = twoFactor.ValidateTwoFactorPIN(TwoFactorKey(user), inputCode);
-            if (!isValid) // if they enter the key wrong, redirect them to the same page so they can try again (might want to figure out how to add an error message, so they know this is the case)
+            if (!isValid) // if they enter the key wrong, redirect them to the same page so they can try again
             {
-                return RedirectToAction("Authorize", "TwoFactorAuthentication");
+                return RedirectToAction("Authorize", "TwoFactorAuthentication", new { aError = 1 });
             }
 
 
@@ -188,6 +205,11 @@ namespace ACES.Controllers
                     Response.Cookies.Append("IsLoggedIn", 1.ToString());
                     instructor.IsLoggedIn = true;
                     _context.SaveChanges();
+                    // if instructor is set up as an admin, set a cookie that will allow them to access the admin pages
+                    if (false)
+                    {
+                        Response.Cookies.Append("IsAdmin", "true");
+                    }
                 }
                 return RedirectToAction("Index", "Courses", new { instructorId = instructor.Id });
             }

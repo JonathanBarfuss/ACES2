@@ -15,6 +15,11 @@
         isFaculty = true;
     }
 
+    bool isAdmin = false;
+    if (Context.Request.Cookies.ContainsKey("IsAdmin"))
+    {
+        isAdmin = true;
+    }
 }
 
 <body>
@@ -61,6 +66,10 @@
                     {
                         <a>Welcome, @userstud.ToString()</a>
                     }
+                }
+                @if (isAdmin)
+                {
+                    <a class="nav-link" asp-area="" asp-controller="AdminInterface" asp-action="Index">Admin Settings</a>
                 }
                 <a class="nav-link" asp-area="" asp-controller="UserSettings" asp-action="Index">User Settings</a>
                 <a class="nav-link" asp-area="" asp-controller="Logout" asp-action="Index">Logout</a>
