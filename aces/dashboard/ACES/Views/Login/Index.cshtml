@@ -29,7 +29,7 @@
                     <input type="text" id="login" class="fadeIn second" name="username" placeholder="Email">
                     <input type="password" id="password" class="fadeIn third" name="password" placeholder="Password">
                     <input type="submit" class="fadeIn fourth" value="Log In">
-                    <input type="button" value="Forgot Password" class="fadeIn fifth" style="text-align: center; top: 80%" onclick="location.href='@Url.Action("Index", "PasswordReset")'" />
+                    <input type="button" value="Forgot Password" class="fadeIn fifth" style="text-align: center; top: 80%" onclick="location.href='@Url.Action("ForgotPassword", "PasswordReset")'" />
                     <input type="button" value="Sign-up" class="fadeIn fifth" style="text-align: center; top: 80%" onclick="location.href='@Url.Action("Index", "Signup")'" />
                     <input type="hidden" id="assignmentID" name="assignmentID" value=@ViewBag.assignmentID />
                 </form>

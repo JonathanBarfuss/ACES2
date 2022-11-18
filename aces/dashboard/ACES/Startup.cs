@@ -1,4 +1,6 @@
 using ACES.Data;
+using ACES.Models;
+using MailKit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +25,8 @@ namespace ACES
             services.AddControllersWithViews();
             services.AddDbContext<ACESContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("ACESContext")));
+            services.Configure<EmailSettings>(Configuration.GetSection("MailSettings"));
+            services.AddTransient<Services.IEmailService, Services.EmailService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
