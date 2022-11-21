@@ -1,0 +1,37 @@
+﻿@{
+    Layout = null; // This makes the login not inherit _Layout.cshtml
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ACES Login</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link href="~/css/login.css" rel="stylesheet" />
+</head>
+<body>
+    <style>
+    </style>
+    @using (Html.BeginForm("AttemptPasswordReset", "PasswordReset", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        <div class="wrapper fadeInDown">
+            <div id="formContent">
+                <div class="fadeIn first" style="padding-top: 25px;">
+                    <h3>ACES Password Reset</h3>
+                </div>
+                <form>
+                    <asp:Label ID="lblLoginError" runat="server" AssociatedControlID="Login" style="color: red"> @ViewBag.lblLoginError</asp:Label>
+                    <br />
+                    <input type="text" id="login" class="fadeIn second" name="username" placeholder="Email">
+                    <input type="password" id="password1" class="fadeIn third" name="newPassword" placeholder="New Password">
+                    <input type="password" id="password2" class="fadeIn third" name="repeatPassword" placeholder="Repeat New Password">
+                    <input type="submit" class="fadeIn fourth" value="Change Password">
+                </form>
+            </div>
+        </div>
+    }
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

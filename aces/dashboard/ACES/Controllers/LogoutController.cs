@@ -36,13 +36,24 @@ namespace ACES.Controllers
                 student = students.Where(x => x.Email == SEmail).FirstOrDefault();
             }
       
+            if (Request.Cookies.ContainsKey("TwoFactorEnabled"))
+            {
+                Response.Cookies.Delete("TwoFactorEnabled");
+            }
 
             if (instructor != null)
             {
-
+                if (Request.Cookies.ContainsKey("IsAdmin"))
+                {
+                    Response.Cookies.Delete("IsAdmin");
+                }
                 instructor.IsLoggedIn = false;
                 Response.Cookies.Delete("InstructorID");
                 Response.Cookies.Delete("InstructorEmail");
+                Response.Cookies.Delete("IsLoggedIn");
+                var cookie = Request.Cookies["StudentEmail"];
+                if (cookie != null)
+                    Response.Cookies.Delete("StudentEmail");
 
             }
             else if (student != null)
@@ -51,6 +62,10 @@ namespace ACES.Controllers
                 student.IsLoggedIn = false;
                 Response.Cookies.Delete("StudentID");
                 Response.Cookies.Delete("StudentEmail");
+                Response.Cookies.Delete("IsLoggedIn");
+                var cookie = Request.Cookies["InstructorEmail"];
+                if (cookie != null)
+                    Response.Cookies.Delete("InstructorEmail");
 
             }
 

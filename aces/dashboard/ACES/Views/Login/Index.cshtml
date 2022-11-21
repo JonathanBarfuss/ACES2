@@ -1,5 +1,8 @@
 ﻿@{
     Layout = null; // This makes the login not inherit _Layout.cshtml
+    var cookie = Context.Request.Cookies["IsLoggedIn"]; // This creates a cookie that tracks if the user is logged in
+    if (cookie == null)                                 // It is set to 0 if not logged in, and 1 if logged in
+        Context.Response.Cookies.Append("IsLoggedIn", 0.ToString());
 }
 <!DOCTYPE html>
 <html>
@@ -26,6 +29,7 @@
                     <input type="text" id="login" class="fadeIn second" name="username" placeholder="Email">
                     <input type="password" id="password" class="fadeIn third" name="password" placeholder="Password">
                     <input type="submit" class="fadeIn fourth" value="Log In">
+                    <input type="button" value="Forgot Password" class="fadeIn fifth" style="text-align: center; top: 80%" onclick="location.href='@Url.Action("ForgotPassword", "PasswordReset")'" />
                     <input type="button" value="Sign-up" class="fadeIn fifth" style="text-align: center; top: 80%" onclick="location.href='@Url.Action("Index", "Signup")'" />
                     <input type="hidden" id="assignmentID" name="assignmentID" value=@ViewBag.assignmentID />
                 </form>

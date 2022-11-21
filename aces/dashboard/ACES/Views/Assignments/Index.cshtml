@@ -1,5 +1,10 @@
 ﻿@model List<ACES.Models.Assignment>
 
+@if (Context.Request.Cookies["IsLoggedIn"].ToString() != "1")
+{
+    <meta http-equiv="refresh" content="0; url=../Login/" />
+}
+
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -7,9 +12,11 @@
 
 <h2>Your Courses</h2>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
+@if (Context.Request.Cookies["IsLoggedIn"].ToString() == "1")
+{
+    <p>
+        <a asp-action="Create">Create New</a>
+    </p>
 <table class="table">
     <thead>
         <tr>
@@ -20,6 +27,7 @@
         </tr>
     </thead>
     <tbody>
+
 @foreach (var assignment in Model) {
         <tr>
             <td style="padding-left: 30px">@assignment.Name</td>
@@ -35,3 +43,5 @@
 }
     </tbody>
 </table>
+
+}

@@ -1,0 +1,49 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Enable Two Factor Authentication";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    //TODO implement the ability to enable 2FA from UI here
+}
+
+<link href="~/css/login.css" rel="stylesheet" />
+
+@*<div class="wrapper fadeInDown">
+    <div class="fadeIn first" style="padding-top: 25px;">
+        <h2 style="padding-bottom: 20px;">User Settings</h2>
+        <hr />
+        <h4>Two Factor Authentication</h4>
+    </div>
+    <h2>Enable Two Factor Authentication</h2>
+
+    <form method="post">
+        <img src="@ViewBag.BarcodeImageUrl" /><br />
+        Setup code: @ViewBag.SetupCode<br />
+        Input security code: <input name="inputCode" /><br />
+        <input type="submit" class="fadeIn fifth labelButton" />
+    </form>
+
+    <input type="button" value="Back to User Settings" class="fadeIn fifth" style="text-align: center; top: 80%" onclick="location.href='@Url.Action("Index", "UserSettings")'" />
+</div>*@
+
+<div class="wrapper fadeInDown">
+    <div id="formContent">
+        <div class="fadeIn first" style="padding-top: 25px;">
+            <h3>Enable Two Factor Authentication</h3>
+        </div>
+        <form method="post">
+            <h6 style="color: red; font-weight: bold">**Note, if you lose your phone or delete your 2FA app by accident, contact system admin for help**</h6>
+            <p>Use a 2FA app on your phone to either scan the QR code or manually enter the setup code below into the 2FA app</p>
+            <img src="@ViewBag.BarcodeImageUrl" /><br />
+            Setup code: @ViewBag.SetupCode<br />
+
+            <p style="margin-top: 30px;">Then, enter the security code that appears on your device to finalize the pairing</p>
+            <asp:Label runat="server" style="color: red"> @ViewBag.lblAuthError</asp:Label>
+            <input type="text" name="inputCode" placeholder="Input Security Code" autofocus/><br />
+            <input type="submit" class="fadeIn fourth" value="Submit" style="margin-top: 20px;" />
+        </form>
+
+        <input type="button" value="Back to User Settings" class="fadeIn fifth" style="text-align: center; top: 80%" onclick="location.href='@Url.Action("Index", "UserSettings")'" />
+    </div>
+</div>

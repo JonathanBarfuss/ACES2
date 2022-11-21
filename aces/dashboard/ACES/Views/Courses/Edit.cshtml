@@ -12,7 +12,10 @@
     <div class="col-md-4">
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <!--Need to find a way to remove these hidden fields for security reasons, but they are here because the Course Edit Post call didn't have these values-->
             <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="InstructorId" />
+            <input type="hidden" asp-for="IsCourseActive" />
             <div class="form-group">
                 <label asp-for="CourseName" class="control-label"></label>
                 <input asp-for="CourseName" class="form-control" />
