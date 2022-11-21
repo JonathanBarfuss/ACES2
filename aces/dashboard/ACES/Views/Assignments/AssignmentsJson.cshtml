@@ -1,0 +1,56 @@
+﻿@model ACES.Models.ViewModels.AssignmentJsonVM
+
+@{
+    ViewData["Title"] = "Assignment Json";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>@Model.AssignmentName Json watermarks</h2>
+
+<div>
+    <p>
+        <a asp-controller="JSON" asp-action="Create" asp-route-assignmentId="@Model.AssignmentId">Create New</a>
+    </p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>File Name</th>
+                <th>Line Numbers</th>
+                <th>Replace watermark</th>
+                <th>Comment</th>
+                <th>Whitespace Lines</th>
+                <th>Random String Lines</th>                
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var json in Model.Json)
+            {
+            <tr>
+                <td>@json.FileName</td>
+                <td>@json.LineNumbers</td>
+                <td>@json.ReplaceWatermark</td>
+                <td>@json.Comment</td>
+                <td>@json.WhitespaceLines</td>
+                <td>@json.RandomStringLines</td>                                                      
+                                                                                     
+            </tr>            
+            }
+        </tbody>
+    </table>
+</div>
+<div class="form-group">
+    <a asp-controller="JSON" asp-action="Delete" asp-route-id="@Model.AssignmentId"/>
+     <input type="submit" value="Delete All" class="btn btn-primary"
+     @{ 
+         if(@Model.Json.ToArray().Length < 1) 
+         { 
+             @:disabled="disabled" 
+         } 
+     } 
+     />
+</div>
+<div>        
+    <a asp-controller="Courses" asp-action="CourseAssignments" asp-route-id="@Model.CourseId">Back to List</a>    
+</div>
+

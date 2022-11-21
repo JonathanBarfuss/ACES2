@@ -1,0 +1,66 @@
+﻿@model IEnumerable<ACES.Models.JSON>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Json Files</h2>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.FileName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LineNumbers)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ReplaceWatermark)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Comment)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.WhitespaceLines)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.RandomStringLines)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.FileName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LineNumbers)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ReplaceWatermark)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Comment)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.WhitespaceLines)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.RandomStringLines)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Tweak</a> |
+                <!-- <a asp-action="Details" asp-route-id="@item.Id">Details</a> | ************Not implemented in controller, not needed-->
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

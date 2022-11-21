@@ -19,6 +19,7 @@
                 <th>Canvas Link</th>
                 <th>JSON Criteria</th>
                 <th></th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -30,9 +31,15 @@
                 <td><span class="canvasLink" id=@assignment.Id>@assignment.CanvasLink</span><button onclick="copyFunction(@assignment.Id)">Copy</button> </td>
                 <td>@assignment.JSONCode</td>
                 <td>
-                    <a asp-controller="Assignments" asp-action="Edit" asp-route-id="@assignment.Id" asp-route-from="courses">Tweak</a> |
-                    <a asp-controller="Assignments" asp-action="AssignmentStudents" asp-route-id="@assignment.Id">Student Submissions</a> |
-                    <a asp-controller="Assignments" asp-action="Delete" asp-route-id="@assignment.Id">Delete</a>
+                    <a asp-controller="Assignments" asp-action="Edit" asp-route-id="@assignment.Id" asp-route-from="courses">Edit</a> | <br>
+                    <a asp-controller="Assignments" asp-action="AssignmentStudents" asp-route-id="@assignment.Id">Student Submissions</a> | <br>
+                    <a asp-controller="Assignments" asp-action="Delete" asp-route-id="@assignment.Id">Delete</a>                                                          
+                </td>
+                <td>
+                    <div class="form-group">
+                        <a asp-controller="Assignments" asp-action="AssignmentsJson" asp-route-Id="@assignment.Id" />
+                        <input type="submit" value="Watermark" class="btn btn-primary" />
+                    </div>
                 </td>
             </tr>
             }

@@ -4,14 +4,16 @@ using ACES.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ACES.Migrations
 {
     [DbContext(typeof(ACESContext))]
-    partial class ACESContextModelSnapshot : ModelSnapshot
+    [Migration("20221015033003_new")]
+    partial class @new
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -29,22 +31,37 @@ namespace ACES.Migrations
                     b.Property<string>("CanvasLink")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Comment")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("CourseId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("DueDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("FileName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("JSONCode")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("JSONFiles")
+                    b.Property<string>("LineNumbers")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("RandomStringLines")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("ReplaceWatermark")
+                        .HasColumnType("bit");
+
                     b.Property<string>("RepositoryUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("WhitespaceLines")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -119,39 +136,6 @@ namespace ACES.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Instructor");
-                });
-
-            modelBuilder.Entity("ACES.Models.JSON", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("AssignmentId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Comment")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FileName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LineNumbers")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RandomStringLines")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("ReplaceWatermark")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("WhitespaceLines")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("JSON");
                 });
 
             modelBuilder.Entity("ACES.Models.Results", b =>
