@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using Newtonsoft.Json.Linq;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ACES.Models
 {
@@ -16,7 +17,7 @@ namespace ACES.Models
 
         [DisplayName("JSON Criteria")]
         public string JSONCode { get; set; }
-        
+        [NotMapped]
         public string JSONFiles { get; set; }
 
         public int CourseId { get; set; }
