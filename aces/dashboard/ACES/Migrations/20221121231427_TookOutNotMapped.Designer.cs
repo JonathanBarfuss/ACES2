@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ACES.Migrations
 {
     [DbContext(typeof(ACESContext))]
-    [Migration("20221108004720_newest")]
-    partial class newest
+    [Migration("20221121231427_TookOutNotMapped")]
+    partial class TookOutNotMapped
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -38,6 +38,9 @@ namespace ACES.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("JSONCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("JSONFiles")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")

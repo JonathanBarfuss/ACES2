@@ -38,6 +38,9 @@ namespace ACES.Migrations
                     b.Property<string>("JSONCode")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("JSONFiles")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 

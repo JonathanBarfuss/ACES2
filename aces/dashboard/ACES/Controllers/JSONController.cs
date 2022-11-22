@@ -91,24 +91,22 @@ namespace ACES.Controllers
 
                 JObject fileJson = new JObject(
                     new JProperty("name", fileName),
-                    new JProperty("lines", lineNumbers),
+                    new JProperty("lines", Int32.Parse(lineNumbers)),
                     new JProperty("replaceInsteadOfInsert", replaceWatermark),
                     new JProperty("comment", comment),
                     new JProperty("whitespaces",
-                        new JArray(from l in whiteLines select l)),
+                        new JArray(from l in whiteLines select Int32.Parse(l))),
                     new JProperty("randomstring",
-                        new JArray(from r in randomLines select r)));   
-                Console.WriteLine("fileJson {0}", fileJson.ToString());
+                        new JArray(from r in randomLines select Int32.Parse(r))));   
+                Console.WriteLine("fileJson {0}", fileJson);
                 
                 assignment.JSONFiles = assignment.JSONFiles + fileJson;               
 
                 JObject jsonObjects = new JObject(
                     new JProperty("files",
-                    new JArray(assignment.JSONFiles)));                
+                    new JArray(assignment.JSONFiles)));
 
-                string temp = (string)JsonConvert.SerializeObject(jsonObjects);
-                string temp2 = temp.Replace("\\", "");
-                assignment.JSONCode = temp2.Replace("rn", "");
+                assignment.JSONCode = (string)JsonConvert.SerializeObject(jsonObjects);               
 
                 await _context.SaveChangesAsync();
                 _context.Update(json);
