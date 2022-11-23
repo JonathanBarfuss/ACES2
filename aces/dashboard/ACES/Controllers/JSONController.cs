@@ -114,62 +114,7 @@ namespace ACES.Controllers
                 return RedirectToAction("CourseAssignments", "Courses", new { id = assignment.CourseId });
             }
             return View(json);
-        }
-
-        // GET: JSON/Edit/5
-        public async Task<IActionResult> Edit(int? id, string from = "")
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var json = await _context.JSON.FindAsync(id);
-            if (json == null)
-            {
-                return NotFound();
-            }
-
-            ViewBag.AssignmentId = json.AssignmentId;
-            ViewBag.From = from; // This helps take us back to CourseAssignments if that's where we came from
-            return View(json);
-        }
-
-        // POST: JSON/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,FileName,LineNumbers,ReplaceWatermark,Comment,WhitespaceLines,RandomStringLines,AssignmentId")] JSON json)
-        {
-            if (id != json.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(json);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!JsonExists(json.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                //return RedirectToAction(nameof(Index));  //use this if you would rather go to the list of all assignments
-                return RedirectToAction("AssignmentsJson", "Assignments", new { id = json.AssignmentId });
-            }
-            return View(json);
-        }
+        }        
 
         // GET: JSON/Delete/5
         public async Task<IActionResult> Delete(int? id)
@@ -179,8 +124,7 @@ namespace ACES.Controllers
                 return NotFound();
             }
 
-            var json = await _context.JSON
-                .FirstOrDefaultAsync(m => m.AssignmentId == id);
+            var json = await _context.JSON.Where(x => x.AssignmentId == id).ToListAsync();
             if (json == null)
             {
                 return NotFound();
