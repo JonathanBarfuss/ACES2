@@ -1,6 +1,8 @@
 ﻿@{
     Layout = null; // This makes the login not inherit _Layout.cshtml
 }
+@model ACES.Models.ViewModels.ResetPasswordVM
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -20,14 +22,29 @@
                 <div class="fadeIn first" style="padding-top: 25px;">
                     <h3>ACES Password Reset</h3>
                 </div>
+                <div asp-validation-summary="All" class="text-danger"></div>
+                <input asp-for="Token" type="hidden" />
+                <input asp-for="Email" type="hidden" />
                 <form>
                     <asp:Label ID="lblLoginError" runat="server" AssociatedControlID="Login" style="color: red"> @ViewBag.lblLoginError</asp:Label>
-                    <br />
-                    <input type="text" id="login" class="fadeIn second" name="username" placeholder="Email">
-                    <input type="password" id="password1" class="fadeIn third" name="newPassword" placeholder="New Password">
-                    <input type="password" id="password2" class="fadeIn third" name="repeatPassword" placeholder="Repeat New Password">
+                    <div>
+                        <input type="password" asp-for="Password" class="fadeIn second" placeholder="New Password" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                    <div>
+                        <input type="password" asp-for="ConfirmPassword" class="fadeIn third" placeholder="Confirm Password" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                    </div>
                     <input type="submit" class="fadeIn fourth" value="Change Password">
                 </form>
+                <!--<form>
+                    <asp:Label ID="lblLoginError" runat="server" AssociatedControlID="Login" style="color: red"> @ViewBag.lblLoginError</asp:Label>
+                    <br />-->
+                    <!--<input type="text" id="login" class="fadeIn second" name="username" placeholder="Email">-->
+                    <!--<input type="password" id="password1" class="fadeIn third" name="newPassword" placeholder="New Password">
+                    <input type="password" id="password2" class="fadeIn third" name="repeatPassword" placeholder="Repeat New Password">
+                    <input type="submit" class="fadeIn fourth" value="Change Password">
+                </form>-->
             </div>
         </div>
     }

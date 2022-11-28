@@ -71,7 +71,7 @@ namespace ACES.Controllers
                     //var token = await userManager.GeneratePasswordResetTokenAsync(instructor);
                     var token = "CoolTokenName" + instructor.FirstName;
 
-                    var passwordResetLink = Url.Action("AttemptPasswordReset", "PasswordReset",
+                    var passwordResetLink = Url.Action("Index", "PasswordReset",
                         new { email = model.Email, token = token }, Request.Scheme);
 
                     //Send Email
@@ -97,7 +97,7 @@ namespace ACES.Controllers
                     //var token = await userManager.GeneratePasswordResetTokenAsync(student);
                     var token = "CoolTokenName" + student.FirstName;
 
-                    var passwordResetLink = Url.Action("AttemptPasswordReset", "PasswordReset",
+                    var passwordResetLink = Url.Action("Index", "PasswordReset",
                         new { email = model.Email, token = token }, Request.Scheme);
 
                     //Send Email
@@ -128,12 +128,24 @@ namespace ACES.Controllers
             return View(model);
         }
 
-        public IActionResult AttemptPasswordReset(string username, string newPassword, string repeatPassword)
+        [HttpGet]
+        public IActionResult AttemptPasswordReset(string token, string email)
+        {
+            if (token == null || email == null)
+            {
+                return View("Index");
+            }
+            return View("Index");
+        }
+
+        [HttpPost]
+        public IActionResult AttemptPasswordReset(ResetPasswordVM model/*string token, string username, string newPassword, string repeatPassword*/)
         {
             //Validate there is input
-            if (username == null || newPassword == null || repeatPassword == null)
+            if (model.Email == null || model.Password == null || model.ConfirmPassword == null || model.Token == null)
             {
-                return RedirectToAction("Index", "PasswordReset", new { lError = 1 });
+                //return RedirectToAction("Index", "PasswordReset", new { lError = 1 });
+                return View("Index");
             }
 
             // Get lists of students and instructors
@@ -141,8 +153,8 @@ namespace ACES.Controllers
             var students = _context.Student.ToList();
 
             // Choose student or instructor based on the email
-            var instructor = instructors.Where(x => x.Email == username).FirstOrDefault();
-            var student = students.Where(x => x.Email == username).FirstOrDefault();
+            var instructor = instructors.Where(x => x.Email == model.Email).FirstOrDefault();
+            var student = students.Where(x => x.Email == model.Email).FirstOrDefault();
             if (instructor != null)
             {
                 Response.Cookies.Append("InstructorEmail", instructor.Email.ToString());
@@ -161,13 +173,14 @@ namespace ACES.Controllers
             if (instructor != null)
             {
                 //Validate the passwords are equivalent
-                if (newPassword != repeatPassword)
+                if (model.Password != model.ConfirmPassword)
                 {
-                    return RedirectToAction("Index", "PasswordReset", new { lError = 2 });
+                    //return RedirectToAction("Index", "PasswordReset", new { lError = 2 });
+                    return View("Index");
                 }
 
                 string salty = RandomString(36);
-                instructor.Password = Services.Cryptographer.ComputeSha256Hash(newPassword + salty);
+                instructor.Password = Services.Cryptographer.ComputeSha256Hash(model.Password + salty);
                 instructor.Salt = salty;
                 _context.SaveChanges();
 
@@ -176,20 +189,22 @@ namespace ACES.Controllers
             else if (student != null)
             {
                 //Validate the passwords are equivalent
-                if (newPassword != repeatPassword)
+                if (model.Password != model.ConfirmPassword)
                 {
-                    return RedirectToAction("Index", "PasswordReset", new { lError = 2 });
+                    //return RedirectToAction("Index", "PasswordReset", new { lError = 2 });
+                    return View("Index");
                 }
 
                 string salty = RandomString(36);
-                student.Password = Services.Cryptographer.ComputeSha256Hash(newPassword + salty);
+                student.Password = Services.Cryptographer.ComputeSha256Hash(model.Password + salty);
                 student.Salt = salty;
                 _context.SaveChanges();
 
                 return RedirectToAction("Index", "Login");
             }
 
-            return RedirectToAction("Index", "PasswordReset", new { lError = 1 });
+            //return RedirectToAction("Index", "PasswordReset", new { lError = 1 });
+            return View("Index");
         }
 
         // creates a random string for salt
