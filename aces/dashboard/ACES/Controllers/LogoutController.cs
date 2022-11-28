@@ -43,7 +43,10 @@ namespace ACES.Controllers
 
             if (instructor != null)
             {
-
+                if (Request.Cookies.ContainsKey("IsAdmin"))
+                {
+                    Response.Cookies.Delete("IsAdmin");
+                }
                 instructor.IsLoggedIn = false;
                 Response.Cookies.Delete("InstructorID");
                 Response.Cookies.Delete("InstructorEmail");

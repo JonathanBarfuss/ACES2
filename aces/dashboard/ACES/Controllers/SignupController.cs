@@ -56,8 +56,7 @@ namespace ACES.Controllers
                     Response.Cookies.Delete("StudentID");
                     Response.Cookies.Delete("StudentEmail");
                 }
-                Response.Cookies.Append("InstructorID", newInstructor.Id.ToString());
-                return RedirectToAction("Index", "Courses", new { instructorId = newInstructor.Id });
+                return RedirectToAction("Index", "Login", new { lError = 2 }); // since the instructor is not approved yet, redirect them to the login screen with the corresponding message
             }
             else
             {

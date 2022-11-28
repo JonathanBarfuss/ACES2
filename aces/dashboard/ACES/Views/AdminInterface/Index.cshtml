@@ -1,5 +1,55 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    ViewData["Title"] = "Admin Page";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
+<link href="~/css/settings.css" rel="stylesheet" />
+@{
+
+    bool isAdmin = false;
+    if (Context.Request.Cookies.ContainsKey("IsAdmin"))
+    {
+        isAdmin = true;
+    }
+}
+
+@if (isAdmin)
+{
+    <div class="wrapper fadeInDown">
+        <div class="fadeIn first" style="padding-top: 25px;">
+            <h2 style="padding-bottom: 20px;">Admin Settings</h2>
+            <hr />
+        </div>
+        <input type="button" value="Force Disable 2FA For Users" class="fadeIn fifth labelButton" style="text-align: center; top: 80%" onclick="location.href='@Url.Action("Disable2FA")'" />
+        <input type="button" value="Approve Professor Accounts" class="fadeIn fifth labelButton" style="text-align: center; top: 80%" onclick="location.href='@Url.Action("ApproveProfessor")'" />
+        <hr />
+    </div>
+}
+@if (!isAdmin)
+{
+    <style>
+        input[type="button"]
+        {
+            border: none;
+            color: white;
+            background-color: white;
+            outline: none;
+        }
+        input[type="button"]:focus
+        {
+            border: none;
+            color: white;
+            background-color: white;
+            outline: none;
+        }
+        input[type="button"]:focus-visible
+        {
+            border: none;
+            color: white;
+            background-color: white;
+            outline: none;
+        }
+    </style>
+    <input type="button" onfocus="location.href='@Url.Action("Index", "Logout")'" autofocus />
+}
+

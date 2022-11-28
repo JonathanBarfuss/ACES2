@@ -29,6 +29,10 @@ namespace ACES.Controllers
                 return View();
 
             }
+            else if (loginError == 2)
+            {
+                ViewBag.lblLoginError = "Please talk to an admin (Brad Peterson) to approve your account for instructor priveledges";
+            }
 
             ViewBag.assignmentID = aID;
             return View();
@@ -83,14 +87,24 @@ namespace ACES.Controllers
                         Response.Cookies.Delete("StudentID");
                         Response.Cookies.Delete("StudentEmail");
                     }
-                    Response.Cookies.Append("InstructorID", instructor.Id.ToString());
 
-                    // take user to two factor authentication page if they have enabled two factor authentication
-                    if (false) //TODO: change this to be "if instructor.TwoFactorEnabled" once that is implemented
+                    // prevent the instructor logging in if they have not been approved by an admin yet
+                    if (!instructor.IsApproved)
+                    {
+                        return RedirectToAction("index", new { lError = 2 });
+                    }
+                    Response.Cookies.Append("InstructorID", instructor.Id.ToString());
+                    // take instructor to two factor authentication page if they have enabled two factor authentication
+                    if (instructor.TwoFactorEnabled)
                     {
                         return RedirectToAction("Authorize", "TwoFactorAuthentication");
                     }
-                    // take user to designated landing page if they have not enabled two factor authentication
+                    // if instructor is set up as an admin, set a cookie that will allow them to access the admin pages
+                    if (instructor.IsAdmin)
+                    {
+                        Response.Cookies.Append("IsAdmin", "true");
+                    }
+                    // take instructor to designated landing page if they have not enabled two factor authentication
                     Response.Cookies.Append("IsLoggedIn", 1.ToString());
                     if (instructor.IsLoggedIn == false)
                     {
@@ -114,8 +128,8 @@ namespace ACES.Controllers
                     }
                     Response.Cookies.Append("StudentID", student.Id.ToString());
 
-                    // take user to two factor authentication page if they have enabled two factor authentication
-                    if (false) //TODO: change this to be "if student.TwoFactorEnabled" once that is implemented
+                    // take student to two factor authentication page if they have enabled two factor authentication
+                    if (student.TwoFactorEnabled)
                     {
                         if (!String.IsNullOrEmpty(assignmentID))
                         {
@@ -123,7 +137,7 @@ namespace ACES.Controllers
                         }
                         return RedirectToAction("Authorize", "TwoFactorAuthentication");
                     }
-                    // take user to designated landing page if they have not enabled two factor authentication
+                    // take student to designated landing page if they have not enabled two factor authentication
                     Response.Cookies.Append("IsLoggedIn", 1.ToString());
                     student.IsLoggedIn = true;
                     _context.SaveChanges();

@@ -7,12 +7,14 @@ using ACES.Data;
 using Google.Authenticator;
 using ACES.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
 
 namespace ACES.Controllers
 {
     public class TwoFactorAuthenticationController : Controller
     {
         private readonly ACESContext _context;
+        private int authError = 0;
 
         public TwoFactorAuthenticationController(ACESContext context)
         {
@@ -20,8 +22,13 @@ namespace ACES.Controllers
         }
 
         [HttpGet]
-        public ActionResult Enable()
+        public ActionResult Enable(int aError = 0)
         {
+            authError = aError;
+            if (authError == 1)
+            {
+                ViewBag.lblAuthError = "Invalid auth token";
+            }
             CombinedUsers user = new CombinedUsers();
             Instructor instructor = new Instructor();
             Student student = new Student();
@@ -84,19 +91,33 @@ namespace ACES.Controllers
 
             TwoFactorAuthenticator twoFactor = new TwoFactorAuthenticator();
             bool isValid = twoFactor.ValidateTwoFactorPIN(TwoFactorKey(user), inputCode);
-            if (!isValid) // if they enter the key wrong, redirect them to the same page so they can try again (might want to figure out how to add an error message, so they know this is the case)
+            if (!isValid) // if they enter the key wrong, redirect them to the same page so they can try again
             {
-                return RedirectToAction("Enable", "TwoFactorAuthentication");
+                return RedirectToAction("Enable", "TwoFactorAuthentication", new { aError = 1 });
             }
 
             Response.Cookies.Append("TwoFactorEnabled", "True");
-            //user.TwoFactorEnabled = true; //TODO: this needs to reflect in the database
+            if (instructor.Email != null) // since I allocated the memory early instead of declaring it as var, I need to check the properties instead of the object itself
+            {
+                instructor.TwoFactorEnabled = true;
+                _context.SaveChanges();
+            }
+            else if (student.Email != null) // since I allocated the memory early instead of declaring it as var, I need to check the properties instead of the object itself
+            {
+                student.TwoFactorEnabled = true;
+                _context.SaveChanges();
+            }
             return RedirectToAction("Index", "UserSettings");
         }
 
         [HttpGet]
-        public IActionResult Disable()
+        public IActionResult Disable(int aError = 0)
         {
+            authError = aError;
+            if (authError == 1)
+            {
+                ViewBag.lblAuthError = "Invalid auth token";
+            }
             return View();
         }
 
@@ -128,20 +149,34 @@ namespace ACES.Controllers
 
             TwoFactorAuthenticator twoFactor = new TwoFactorAuthenticator();
             bool isValid = twoFactor.ValidateTwoFactorPIN(TwoFactorKey(user), inputCode);
-            if (!isValid) // if they enter the key wrong, redirect them to the same page so they can try again (might want to figure out how to add an error message, so they know this is the case)
+            if (!isValid) // if they enter the key wrong, redirect them to the same page so they can try again 
             {
-                return RedirectToAction("Disable", "TwoFactorAuthentication");
+                return RedirectToAction("Disable", "TwoFactorAuthentication", new { aError = 1 });
             }
 
 
             Response.Cookies.Delete("TwoFactorEnabled");
-            //user.TwoFactorEnabled = false; //TODO: this needs to reflect in the database
+            if (instructor.Email != null) // since I allocated the memory early instead of declaring it as var, I need to check the properties instead of the object itself
+            {
+                instructor.TwoFactorEnabled = false;
+                _context.SaveChanges();
+            }
+            else if (student.Email != null) // since I allocated the memory early instead of declaring it as var, I need to check the properties instead of the object itself
+            {
+                student.TwoFactorEnabled = false;
+                _context.SaveChanges();
+            }
             return RedirectToAction("Index", "UserSettings");
         }
 
         [HttpGet]
-        public IActionResult Authorize()
+        public IActionResult Authorize(int aError = 0)
         {
+            authError = aError;
+            if (authError == 1)
+            {
+                ViewBag.lblAuthError = "Invalid auth token, try again";
+            }
             return View();
         }
 
@@ -172,26 +207,31 @@ namespace ACES.Controllers
 
             TwoFactorAuthenticator twoFactor = new TwoFactorAuthenticator();
             bool isValid = twoFactor.ValidateTwoFactorPIN(TwoFactorKey(user), inputCode);
-            if (!isValid) // if they enter the key wrong, redirect them to the same page so they can try again (might want to figure out how to add an error message, so they know this is the case)
+            if (!isValid) // if they enter the key wrong, redirect them to the same page so they can try again
             {
-                return RedirectToAction("Authorize", "TwoFactorAuthentication");
+                return RedirectToAction("Authorize", "TwoFactorAuthentication", new { aError = 1 });
             }
 
 
             Response.Cookies.Append("TwoFactorEnabled", "True"); // currently, this cookie is how we are tracking how the enable/disable two factor authentication button in user settings will behave
 
             // now that the user has completed their authentication, take them to the landing page they are supposed to go to
-            if (instructor != null)
+            if (instructor.Email != null) // since I allocated the memory early instead of declaring it as var, I need to check the properties instead of the object itself
             {
                 if (instructor.IsLoggedIn == false)
                 {
                     Response.Cookies.Append("IsLoggedIn", 1.ToString());
                     instructor.IsLoggedIn = true;
                     _context.SaveChanges();
+                    // if instructor is set up as an admin, set a cookie that will allow them to access the admin pages
+                    if (instructor.IsAdmin)
+                    {
+                        Response.Cookies.Append("IsAdmin", "true");
+                    }
                 }
                 return RedirectToAction("Index", "Courses", new { instructorId = instructor.Id });
             }
-            else if (student != null)
+            else if (student.Email != null) // since I allocated the memory early instead of declaring it as var, I need to check the properties instead of the object itself
             {
                 Response.Cookies.Append("IsLoggedIn", 1.ToString());
                 student.IsLoggedIn = true;

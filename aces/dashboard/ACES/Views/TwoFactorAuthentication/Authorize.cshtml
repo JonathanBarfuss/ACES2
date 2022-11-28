@@ -19,6 +19,7 @@
                 <h3>Two Factor Authentication</h3>
             </div>
             <form method="post">
+                <asp:Label runat="server" style="color: red"> @ViewBag.lblAuthError</asp:Label>
                 <input type="text" name="inputCode" placeholder="Input Security Code" autofocus /><br />
                 <input type="submit" class="fadeIn fourth" value="Submit" style="margin-top: 20px;" />
             </form>
