@@ -50,6 +50,9 @@ namespace ACES.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     CourseName = table.Column<string>(nullable: true),
+                    CourseNumber = table.Column<string>(nullable: true),
+                    CRN = table.Column<int>(nullable: true),
+                    AcademicYear = table.Column<string>(nullable: true),
                     InstructorId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>

@@ -6,6 +6,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Migrations\20221122044735_Course.cs" />
+    <Compile Remove="Migrations\20221122044735_Course.Designer.cs" />
+    <Compile Remove="Migrations\20221122050057_Course2.cs" />
+    <Compile Remove="Migrations\20221122050057_Course2.Designer.cs" />
+    <Compile Remove="Migrations\20221122050229_Course.cs" />
+    <Compile Remove="Migrations\20221122050229_Course.Designer.cs" />
+    <Compile Remove="Migrations\20221122050500_Course.cs" />
+    <Compile Remove="Migrations\20221122050500_Course.Designer.cs" />
+    <Compile Remove="Migrations\20221122052339_Course.cs" />
+    <Compile Remove="Migrations\20221122052339_Course.Designer.cs" />
+    <Compile Remove="Migrations\20221123074928_Course.cs" />
+    <Compile Remove="Migrations\20221123074928_Course.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="GoogleAuthenticator" Version="3.0.0" />
     <PackageReference Include="MailKit" Version="3.4.2" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.7" />
