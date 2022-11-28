@@ -36,11 +36,11 @@ namespace ACES.Controllers
             return _context.Instructor.Any(e => e.Id == id);
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             return View();
         }
-        public async Task<IActionResult> Disable2FA(string? userEmail, string? userType, int? userId)
+        public async Task<IActionResult> Disable2FA(string? userEmail, string? userType, string? message)
         {
             //if (!Request.Cookies.ContainsKey("StudentID"))
             //{
@@ -50,42 +50,43 @@ namespace ACES.Controllers
 
             var instructors = await _context.Instructor.ToListAsync(); // get the list of instructor accounts
             var students = await _context.Student.ToListAsync();  //get the list of student accounts
+            if (userEmail != null && userType != null)
+            {
+                if (userType == "Instructor")
+                {
+                    var instructor = instructors.Where(x => x.Email == userEmail).FirstOrDefault();
+                    instructor.TwoFactorEnabled = false;
+                    _context.SaveChanges();
+                }
+                else if (userType == "Student")
+                {
+                    var student = students.Where(x => x.Email == userEmail).FirstOrDefault();
+                    student.TwoFactorEnabled = false;
+                    _context.SaveChanges();
+                }
+            }
 
             List<CombinedUsers> userList = new List<CombinedUsers>();
-            CombinedUsers temp = new CombinedUsers();
             foreach (var instructor in instructors)
             {
-                temp.Id = instructor.Id;
-                temp.Email = instructor.Email;
-                temp.UserType = "Instructor";
-                userList.Add(new CombinedUsers(instructor.Id, instructor.Email, "Instructor"));
+                userList.Add(new CombinedUsers(instructor.Id, instructor.Email, "Instructor", instructor.TwoFactorEnabled));
             }
             foreach (var student in students)
             {
-                temp.Id = student.Id;
-                temp.Email = student.Email;
-                temp.UserType = "Student";
-                userList.Add(new CombinedUsers(student.Id, student.Email, "Student"));
+                userList.Add(new CombinedUsers(student.Id, student.Email, "Student", student.TwoFactorEnabled));
             }
 
-            if (userEmail != null)
+
+            if (message != null)
             {
-                ViewBag.selectedUserEmail = userEmail;
-            }
-            if (userType != null)
-            {
-                ViewBag.selectedUserType = userType;
-            }
-            if (userId != null)
-            {
-                ViewBag.selectedUserId = userId; 
+                ViewBag.Message = message;
             }
 
 
             return View(userList);
         }
 
-        public async Task<IActionResult> ApproveProfessor(string? message)
+        public async Task<IActionResult> ApproveProfessor(string? userEmail, bool? deny, string? message)
         {
             //if (!Request.Cookies.ContainsKey("StudentID"))
             //{
@@ -94,10 +95,39 @@ namespace ACES.Controllers
 
             var instructors = await _context.Instructor.ToListAsync(); // get the list of instructor accounts (to be changed to list of accounts that signed up as instructors and need to be confirmed)
 
+            if (userEmail != null)
+            {
+                var instructor = instructors.Where(x => x.Email == userEmail).FirstOrDefault();
+                if (deny == true) // if the deny button was pressed instead of the approve button, delete the entry
+                {
+                    _context.Remove(instructor);
+                }
+                instructor.IsApproved = true; // always set instructor to approved, even if it was deleted, so that the list properly updates
+                _context.SaveChanges();
+
+            }
+
             List<Instructor> instructorList = new List<Instructor>();
             foreach (var instructor in instructors)
             {
-                instructorList.Add(instructor);
+                if (!instructor.IsApproved)
+                {
+                    instructorList.Add(instructor);
+                }
+            }
+
+            
+            if (message != null)
+            {
+                ViewBag.Message = message;
+                if (instructorList.Count == 0) // making sure the sucess message is not overwritten if the last instructor is approved
+                {
+                    ViewBag.message += ", There are no instructors awaiting approval";
+                }
+            }
+            else if (instructorList.Count == 0)
+            {
+                ViewBag.message = "There are no instructors awaiting approval";
             }
             return View(instructorList);
         }

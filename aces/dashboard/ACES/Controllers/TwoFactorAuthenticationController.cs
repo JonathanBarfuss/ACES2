@@ -97,7 +97,16 @@ namespace ACES.Controllers
             }
 
             Response.Cookies.Append("TwoFactorEnabled", "True");
-            //user.TwoFactorEnabled = true; //TODO: this needs to reflect in the database
+            if (instructor.Email != null) // since I allocated the memory early instead of declaring it as var, I need to check the properties instead of the object itself
+            {
+                instructor.TwoFactorEnabled = true;
+                _context.SaveChanges();
+            }
+            else if (student.Email != null) // since I allocated the memory early instead of declaring it as var, I need to check the properties instead of the object itself
+            {
+                student.TwoFactorEnabled = true;
+                _context.SaveChanges();
+            }
             return RedirectToAction("Index", "UserSettings");
         }
 
@@ -147,7 +156,16 @@ namespace ACES.Controllers
 
 
             Response.Cookies.Delete("TwoFactorEnabled");
-            //user.TwoFactorEnabled = false; //TODO: this needs to reflect in the database
+            if (instructor.Email != null) // since I allocated the memory early instead of declaring it as var, I need to check the properties instead of the object itself
+            {
+                instructor.TwoFactorEnabled = false;
+                _context.SaveChanges();
+            }
+            else if (student.Email != null) // since I allocated the memory early instead of declaring it as var, I need to check the properties instead of the object itself
+            {
+                student.TwoFactorEnabled = false;
+                _context.SaveChanges();
+            }
             return RedirectToAction("Index", "UserSettings");
         }
 
@@ -198,7 +216,7 @@ namespace ACES.Controllers
             Response.Cookies.Append("TwoFactorEnabled", "True"); // currently, this cookie is how we are tracking how the enable/disable two factor authentication button in user settings will behave
 
             // now that the user has completed their authentication, take them to the landing page they are supposed to go to
-            if (instructor != null)
+            if (instructor.Email != null) // since I allocated the memory early instead of declaring it as var, I need to check the properties instead of the object itself
             {
                 if (instructor.IsLoggedIn == false)
                 {
@@ -206,14 +224,14 @@ namespace ACES.Controllers
                     instructor.IsLoggedIn = true;
                     _context.SaveChanges();
                     // if instructor is set up as an admin, set a cookie that will allow them to access the admin pages
-                    if (false)
+                    if (instructor.IsAdmin)
                     {
                         Response.Cookies.Append("IsAdmin", "true");
                     }
                 }
                 return RedirectToAction("Index", "Courses", new { instructorId = instructor.Id });
             }
-            else if (student != null)
+            else if (student.Email != null) // since I allocated the memory early instead of declaring it as var, I need to check the properties instead of the object itself
             {
                 Response.Cookies.Append("IsLoggedIn", 1.ToString());
                 student.IsLoggedIn = true;
