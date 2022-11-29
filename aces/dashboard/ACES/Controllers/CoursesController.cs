@@ -55,10 +55,16 @@ namespace ACES.Controllers
             }
 
             var assignments = await _context.Assignment.Where(x => x.CourseId == id).ToListAsync();
+            var courseNumber = _context.Course.FirstOrDefault(y => y.Id == id).CourseNumber;
+            var academicYear = _context.Course.FirstOrDefault(z => z.Id == id).AcademicYear;
+            var cRN = _context.Course.FirstOrDefault(a => a.Id == id).CRN;
             var vm = new CourseAssignmentsVM()
             {
                 CourseId = id.Value,
                 CouseName = courseName,
+                CourseNumber = courseNumber,
+                AcademicYear = academicYear,
+                CRN = cRN,
                 Assignments = assignments
             };
 
@@ -76,7 +82,7 @@ namespace ACES.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,CourseName")] Course course)
+        public async Task<IActionResult> Create([Bind("Id,CourseName,CourseNumber,AcademicYear,CRN")] Course course)
         {
             if (ModelState.IsValid)
             {
@@ -110,7 +116,7 @@ namespace ACES.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,CourseName,InstructorId,IsCourseActive")] Course course)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,CourseName,CourseNumber,AcademicYear,CRN,InstructorId,IsCourseActive")] Course course)
         {
             if (id != course.Id)
             {

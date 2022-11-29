@@ -15,6 +15,9 @@ namespace ACES.Models
         public string Password { get; set; }
         public string Salt { get; set; }
         public bool IsLoggedIn { get; set; }
+        public bool TwoFactorEnabled { get; set; }
+        public bool IsApproved { get; set; }
+        public bool IsAdmin { get; set; }
 
         [NotMapped]
         public string FullName

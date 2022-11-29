@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+
     <Compile Remove="Views\NewFolder1\**" />
     <Compile Remove="Views\NewFolder2\**" />
     <Compile Remove="Views\NewFolder3\**" />
@@ -43,6 +44,18 @@
 
   <ItemGroup>
     <Content Remove="Views\Json\Edit.cshtml" />
+    <Compile Remove="Migrations\20221122044735_Course.cs" />
+    <Compile Remove="Migrations\20221122044735_Course.Designer.cs" />
+    <Compile Remove="Migrations\20221122050057_Course2.cs" />
+    <Compile Remove="Migrations\20221122050057_Course2.Designer.cs" />
+    <Compile Remove="Migrations\20221122050229_Course.cs" />
+    <Compile Remove="Migrations\20221122050229_Course.Designer.cs" />
+    <Compile Remove="Migrations\20221122050500_Course.cs" />
+    <Compile Remove="Migrations\20221122050500_Course.Designer.cs" />
+    <Compile Remove="Migrations\20221122052339_Course.cs" />
+    <Compile Remove="Migrations\20221122052339_Course.Designer.cs" />
+    <Compile Remove="Migrations\20221123074928_Course.cs" />
+    <Compile Remove="Migrations\20221123074928_Course.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

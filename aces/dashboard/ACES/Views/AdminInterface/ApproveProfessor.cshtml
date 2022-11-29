@@ -1,5 +1,72 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model List<ACES.Models.Instructor>
+
 @{
+    ViewData["Title"] = "Disable2FA";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@{
+
+    bool isAdmin = false;
+    if (Context.Request.Cookies.ContainsKey("IsAdmin"))
+    {
+        isAdmin = true;
+    }
+}
+
+@if (isAdmin)
+{
+    <h2>Approve/Deny Professor Accounts</h2>
+
+    <asp:Label ID="message" runat="server" AssociatedControlID="Login" style="color: darkgreen"> @ViewBag.message</asp:Label>
+    <table class="table">
+        <thead>
+            <tr>
+                <th style="padding-left: 30px">Instructor Email</th>
+                <th style="padding-left: 30px">Instructor Name</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td style="padding-left: 30px">@user.Email</td>
+                    <td style="padding-left: 60px">@user.FullName</td>
+                    <td style="padding-left: 300px">
+                        <input type="button" value="Approve" onclick="location.href='@Url.Action("ApproveProfessor", new {userEmail = user.Email, message = "Instructor sucessfully approved"})'" />
+                    </td>
+                    <td style="padding-left:-10px">
+                        <input type="button" value="Deny" onclick="location.href='@Url.Action("ApproveProfessor", new {userEmail = user.Email, deny = true, message = "Instructor sucessfully denied"})'" />
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@if (!isAdmin)
+{
+    <style>
+        input[type="button"]
+        {
+            border: none;
+            color: white;
+            background-color: white;
+            outline: none;
+        }
+        input[type="button"]:focus
+        {
+            border: none;
+            color: white;
+            background-color: white;
+            outline: none;
+        }
+        input[type="button"]:focus-visible
+        {
+            border: none;
+            color: white;
+            background-color: white;
+            outline: none;
+        }
+    </style>
+    <input type="button" onfocus="location.href='@Url.Action("Index", "Logout")'" autofocus />
 }

@@ -12,6 +12,11 @@ namespace ACES.Models
         public int Id { get; set; }
         [DisplayName("Course Name")]
         public string CourseName { get; set; }
+        [DisplayName("Course Number")]
+        public string CourseNumber { get; set; }
+        public int CRN { get; set; }
+        [DisplayName("Academic Year")]
+        public string AcademicYear { get; set; }
         public int InstructorId { get; set; }
         public bool IsCourseActive { get; set; }
 

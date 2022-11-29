@@ -4,30 +4,73 @@
     ViewData["Title"] = "Disable2FA";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+@{
 
-<h2>Force Disable 2FA For Users</h2>
-<asp:Label runat="server" style="color: red"> @ViewBag.selectedUserEmail</asp:Label>
-<br/>
-<asp:Label runat="server" style="color: red"> @ViewBag.selectedUserType</asp:Label>
-<br/>
-<asp:Label runat="server" style="color: red"> @ViewBag.selectedUserId</asp:Label>
-<br/>
-<table class="table">
-    <thead>
-        <tr>
-            <th style="padding-left: 30px">User Email</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var user in Model)
-        {
+    bool isAdmin = false;
+    if (Context.Request.Cookies.ContainsKey("IsAdmin"))
+    {
+        isAdmin = true;
+    }
+}
+
+@if (isAdmin) 
+{
+    <h2>Force Disable 2FA For Users</h2>
+    
+    <asp:Label ID="message" runat="server" AssociatedControlID="Login" style="color: darkgreen"> @ViewBag.message</asp:Label>
+    <table class="table">
+        <thead>
             <tr>
-                <td style="padding-left: 30px">@user.Email</td>
-                <td style="padding-left: 300px">
-                    <a asp-action="Disable2FA" asp-route-userEmail="@user.Email" asp-route-userType="@user.UserType" asp-route-userId="@user.Id">Disable</a> |
-                </td>
+                <th style="padding-left: 30px">User Email</th>
+                <th style="padding-left: 30px">User Type</th>
+                <th></th>
             </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td style="padding-left: 30px">@user.Email</td>
+                    <td style="padding-left: 30px">@user.UserType</td>
+                    <td style="padding-left: 300px">
+                        @if (user.TwoFactorEnabled == true)
+                        {
+                            <input type="button" value="Disable" onclick="location.href='@Url.Action("Disable2FA", new {userEmail = user.Email, userType = user.UserType, message = "2FA Sucessfully Disabled"})'"/>
+                        }
+                        else
+                        {
+                            <input type="button" value="Disable" onclick="location.href='@Url.Action("Disable2FA", new { message = "2FA Was Already Disabled"})'" />
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@if (!isAdmin)
+{
+    <style>
+        input[type="button"]
+        {
+            border: none;
+            color: white;
+            background-color: white;
+            outline: none;
         }
-    </tbody>
-</table>
+        input[type="button"]:focus
+        {
+            border: none;
+            color: white;
+            background-color: white;
+            outline: none;
+        }
+        input[type="button"]:focus-visible
+        {
+            border: none;
+            color: white;
+            background-color: white;
+            outline: none;
+        }
+    </style>
+    <input type="button" onfocus="location.href='@Url.Action("Index", "Logout")'" autofocus />
+}
