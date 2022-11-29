@@ -1,0 +1,47 @@
+﻿@model List<ACES.Models.JSON>
+
+@{
+    ViewData["Title"] = "Delete";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Delete</h2>
+
+<h3>Are you sure you want to delete these Watermarks?</h3>
+<div>
+        
+    <table class="table">
+        <thead>
+            <tr>
+                <th>File Name</th>
+                <th>Line Numbers</th>
+                <th>Replace watermark</th>
+                <th>Comment</th>
+                <th>Whitespace Lines</th>
+                <th>Random String Lines</th>                
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var json in Model)
+            {
+            <tr>
+                <td>@json.FileName</td>
+                <td>@json.LineNumbers</td>
+                <td>@json.ReplaceWatermark</td>
+                <td>@json.Comment</td>
+                <td>@json.WhitespaceLines</td>
+                <td>@json.RandomStringLines</td>                                                      
+                                                                                     
+            </tr>            
+            }
+        </tbody>
+    </table>
+    
+    
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="@Model[0].AssignmentId" />
+        <input type="submit" value="Delete" class="btn btn-danger" /> |
+        <a asp-controller="Assignments" asp-action="AssignmentsJson" asp-route-id="@Model[0].AssignmentId">Back to List</a>
+    </form>
+</div>

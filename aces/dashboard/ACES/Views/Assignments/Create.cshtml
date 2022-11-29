@@ -5,6 +5,7 @@
     <meta http-equiv="refresh" content="0; url=../Login/" />
 }
 
+
 @{
     ViewData["Title"] = "Create";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -14,14 +15,6 @@
 </head>
 
 <h2>Create Assignment</h2>
-
-<img id="imageGuide" src="~/images/WatermarkGuide.PNG" alt="Watermark Guide" width="300" height="200" hidden="hidden">
-<input type="button" value="Watermark Guide" onclick="ShowGuide()" />
-<div id="myModal" class="modal">
-    <span class="close" onclick="document.getElementById('myModal').style.display='none'">&times;</span>
-    <img class="modal-content" id="img01">
-    <div id="caption"></div>
-</div>
 
 <hr />
 <div class="row">
@@ -42,16 +35,11 @@
                 <label asp-for="DueDate" class="control-label"></label>
                 <input asp-for="DueDate" class="form-control" />
                 <span asp-validation-for="DueDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="JSONCode" class="control-label"></label>
-                <textarea asp-for="JSONCode" class="form-control" rows="15"></textarea>
-                <span asp-validation-for="JSONCode" class="text-danger"></span>
-            </div>
+            </div>                        
             <input name="CourseId" value="@ViewBag.CourseId" type="hidden" />
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
+            </div>            
         </form>
     </div>
 </div>
@@ -60,7 +48,6 @@
     <a asp-controller="Courses" asp-action="CourseAssignments" asp-route-id="@ViewBag.CourseId">Back to List</a>
 </div>
 
-@section Scripts {
-    <script src="~/js/watermark.js"></script>
+@section Scripts {    
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }

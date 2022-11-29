@@ -14,6 +14,7 @@ namespace ACES.Data
         }
 
         public DbSet<Assignment> Assignment { get; set; }
+        public DbSet<JSON> JSON { get; set; }
         public DbSet<Course> Course { get; set; }
         public DbSet<Student> Student { get; set; }
         public DbSet<Instructor> Instructor { get; set; }

@@ -6,6 +6,44 @@
   </PropertyGroup>
 
   <ItemGroup>
+
+    <Compile Remove="Views\NewFolder1\**" />
+    <Compile Remove="Views\NewFolder2\**" />
+    <Compile Remove="Views\NewFolder3\**" />
+    <Compile Remove="Views\NewFolder\**" />
+    <Content Remove="Views\NewFolder1\**" />
+    <Content Remove="Views\NewFolder2\**" />
+    <Content Remove="Views\NewFolder3\**" />
+    <Content Remove="Views\NewFolder\**" />
+    <EmbeddedResource Remove="Views\NewFolder1\**" />
+    <EmbeddedResource Remove="Views\NewFolder2\**" />
+    <EmbeddedResource Remove="Views\NewFolder3\**" />
+    <EmbeddedResource Remove="Views\NewFolder\**" />
+    <None Remove="Views\NewFolder1\**" />
+    <None Remove="Views\NewFolder2\**" />
+    <None Remove="Views\NewFolder3\**" />
+    <None Remove="Views\NewFolder\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Migrations\20221115025737_addJSONFiles.cs" />
+    <Compile Remove="Migrations\20221115025737_addJSONFiles.Designer.cs" />
+    <Compile Remove="Migrations\20221116021124_JSONFileAdd.cs" />
+    <Compile Remove="Migrations\20221116021124_JSONFileAdd.Designer.cs" />
+    <Compile Remove="Migrations\20221121195758_MyName.cs" />
+    <Compile Remove="Migrations\20221121195758_MyName.Designer.cs" />
+    <Compile Remove="Migrations\20221121200804_temporary.cs" />
+    <Compile Remove="Migrations\20221121200804_temporary.Designer.cs" />
+    <Compile Remove="Migrations\20221121201109_temporary.cs" />
+    <Compile Remove="Migrations\20221121201109_temporary.Designer.cs" />
+    <Compile Remove="Migrations\20221121201516_temporary.cs" />
+    <Compile Remove="Migrations\20221121201516_temporary.Designer.cs" />
+    <Compile Remove="Migrations\20221121203417_temporary.cs" />
+    <Compile Remove="Migrations\20221121203417_temporary.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="Views\Json\Edit.cshtml" />
     <Compile Remove="Migrations\20221122044735_Course.cs" />
     <Compile Remove="Migrations\20221122044735_Course.Designer.cs" />
     <Compile Remove="Migrations\20221122050057_Course2.cs" />

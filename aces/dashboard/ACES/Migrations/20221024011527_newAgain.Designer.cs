@@ -4,14 +4,16 @@ using ACES.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ACES.Migrations
 {
     [DbContext(typeof(ACESContext))]
-    partial class ACESContextModelSnapshot : ModelSnapshot
+    [Migration("20221024011527_newAgain")]
+    partial class newAgain
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -38,9 +40,6 @@ namespace ACES.Migrations
                     b.Property<string>("JSONCode")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("JSONFiles")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
@@ -61,15 +60,6 @@ namespace ACES.Migrations
 
                     b.Property<string>("CourseName")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CourseNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("AcademicYear")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("CRN")
-                        .HasColumnType("int");
 
                     b.Property<int>("InstructorId")
                         .HasColumnType("int");
@@ -136,9 +126,6 @@ namespace ACES.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("AssignmentId")
-                        .HasColumnType("int");
 
                     b.Property<string>("Comment")
                         .HasColumnType("nvarchar(max)");

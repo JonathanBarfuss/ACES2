@@ -15,6 +15,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.Configuration;
 using System.Net.Http;
+using System.Text;
 
 namespace ACES.Controllers
 {
@@ -33,6 +34,37 @@ namespace ACES.Controllers
         public async Task<IActionResult> Index()
         {
             return View(await _context.Assignment.ToListAsync());
+        }
+
+        public async Task<IActionResult> AssignmentsJson(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var assignment = await _context.Assignment.FirstOrDefaultAsync(m => m.Id == id);
+            if (assignment == null)
+            {
+                return NotFound();
+            }
+
+            var assignmentName = _context.Assignment.FirstOrDefault(m => m.Id == id).Name;
+            if (string.IsNullOrEmpty(assignmentName))
+            {
+                return NotFound();
+            }
+                        
+            var jsons = await _context.JSON.Where(x => x.AssignmentId == id).ToListAsync();            
+            var vm = new AssignmentJsonVM()
+            {
+                CourseId = assignment.CourseId,
+                AssignmentId = id.Value,
+                AssignmentName = assignmentName,
+                Json = jsons                
+            };
+
+            return View(vm);
         }
 
         // GET: Assignments/AssignmentStudents/5
@@ -276,8 +308,8 @@ namespace ACES.Controllers
 
         // GET: Assignments/Create
         public IActionResult Create(int? courseId)
-        {
-            ViewBag.CourseId = courseId;
+        {            
+            ViewBag.CourseId = courseId;            
             return View();
         }
 
@@ -289,13 +321,16 @@ namespace ACES.Controllers
         public async Task<IActionResult> Create([Bind("Id,Name,RepositoryUrl,CourseId,JSONCode,DueDate,CanvasLink")] Assignment assignment)
         {
             if (ModelState.IsValid)
-            {
+            {                
                 _context.Add(assignment);
-                await _context.SaveChangesAsync(); var newId = (from x in _context.Assignment //get the generated assignmentId
-                                                                select x.Id).Max();
+                await _context.SaveChangesAsync(); 
+                var newId = (from x in _context.Assignment select x.Id).Max(); //get the generated assignmentId
+
 
                 string canvasLink = String.Format(@"http://{0}/?aID={1}", Request.Host, newId);
                 assignment.CanvasLink = canvasLink;
+              
+                               
                 _context.Update(assignment);
                 await _context.SaveChangesAsync();
                 return RedirectToAction("CourseAssignments", "Courses", new { id = assignment.CourseId });
@@ -316,9 +351,7 @@ namespace ACES.Controllers
             {
                 return NotFound();
             }
-
-
-            assignment.JSONCode = JValue.Parse(assignment.JSONCode).ToString(Formatting.Indented);
+                        
             ViewBag.CourseId = assignment.CourseId;
             ViewBag.From = from; // This helps take us back to CourseAssignments if that's where we came from
             return View(assignment);

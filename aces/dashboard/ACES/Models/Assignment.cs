@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
+
 
 namespace ACES.Models
 {
@@ -13,10 +13,11 @@ namespace ACES.Models
         public string Name { get; set; }
 
         [DisplayName("Repository URL")]
-        public string RepositoryUrl { get; set; }
+        public string RepositoryUrl { get; set; }        
 
         [DisplayName("JSON Criteria")]
-        public string JSONCode { get; set; }
+        public string JSONCode { get; set; }       
+        public string JSONFiles { get; set; }
 
         public int CourseId { get; set; }
 
@@ -26,4 +27,5 @@ namespace ACES.Models
         public string CanvasLink { get; set; }
 
     }
+     
 }

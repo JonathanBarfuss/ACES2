@@ -10,6 +10,7 @@ using System.Net.Http;
 using Newtonsoft.Json;
 using System.Text;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json.Linq;
 
 namespace ACES.Controllers
 {
@@ -204,8 +205,11 @@ namespace ACES.Controllers
             string assignmentName = $"{assignment.Name.Replace(" ", "_")}_";
             string token = _configuration["GithubToken"];
             bool isRemake = false;
-            dynamic objAssignmentJson = Newtonsoft.Json.JsonConvert.DeserializeObject(assignment.JSONCode);
-       
+            JObject jsonObject = new JObject(
+                new JProperty("files",
+                new JArray(from j in assignment.JSONCode select j)));
+            dynamic objAssignmentJson = jsonObject;
+
             // Get student's email and Id:
             Request.Cookies.TryGetValue("StudentEmail", out string studentEmail);
             Request.Cookies.TryGetValue("StudentId", out string strStudentId);

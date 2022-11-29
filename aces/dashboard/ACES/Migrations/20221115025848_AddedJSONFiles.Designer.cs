@@ -4,14 +4,16 @@ using ACES.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ACES.Migrations
 {
     [DbContext(typeof(ACESContext))]
-    partial class ACESContextModelSnapshot : ModelSnapshot
+    [Migration("20221115025848_AddedJSONFiles")]
+    partial class AddedJSONFiles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -61,15 +63,6 @@ namespace ACES.Migrations
 
                     b.Property<string>("CourseName")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CourseNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("AcademicYear")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("CRN")
-                        .HasColumnType("int");
 
                     b.Property<int>("InstructorId")
                         .HasColumnType("int");
