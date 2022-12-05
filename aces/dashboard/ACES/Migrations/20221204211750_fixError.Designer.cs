@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ACES.Migrations
 {
     [DbContext(typeof(ACESContext))]
-    [Migration("20221202154843_Add2FAAndAdmin")]
-    partial class Add2FAAndAdmin
+    [Migration("20221204211750_fixError")]
+    partial class fixError
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

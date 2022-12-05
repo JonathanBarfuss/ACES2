@@ -60,11 +60,11 @@ namespace ACES.Controllers
             var cRN = _context.Course.FirstOrDefault(a => a.Id == id).CRN;
             var vm = new CourseAssignmentsVM()
             {
-                CourseId = id.Value,
+                CourseId = id,
                 CouseName = courseName,
                 CourseNumber = courseNumber,
-                AcademicYear = academicYear,
-                CRN = cRN,
+                AcademicYear = academicYear,                                
+                CRN = cRN,                               
                 Assignments = assignments
             };
 

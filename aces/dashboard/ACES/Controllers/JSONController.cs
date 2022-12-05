@@ -53,6 +53,7 @@ namespace ACES.Controllers
                 var whitespaceLines = json.WhitespaceLines;
                 var randomStringLines = json.RandomStringLines;
 
+                // make the random whiteLines string into list
                 List<String> whiteLines = new List<String>();
                 var builder = new StringBuilder();
                 for (var i = 0; i <= whitespaceLines.Length; i++)
@@ -72,6 +73,7 @@ namespace ACES.Controllers
 
                 builder.Remove(0, builder.Length);
 
+                // make the random stringLines string into list
                 List<String> randomLines = new List<String>();
                 for (var i = 0; i <= randomStringLines.Length; i++)
                 {
@@ -89,6 +91,7 @@ namespace ACES.Controllers
 
                 }
 
+                // create json file from the form data
                 JObject fileJson = new JObject(
                     new JProperty("name", fileName),
                     new JProperty("lines", Int32.Parse(lineNumbers)),
@@ -100,12 +103,22 @@ namespace ACES.Controllers
                         new JArray(from r in randomLines select Int32.Parse(r))));   
                 Console.WriteLine("fileJson {0}", fileJson);
                 
-                assignment.JSONFiles = assignment.JSONFiles + fileJson;               
-
+                // save fileJson to JSONFiles add comma if more than one file
+                if (assignment.JSONFiles == null)
+                {
+                    assignment.JSONFiles = assignment.JSONFiles + fileJson;
+                } else
+                {
+                    string temp = assignment.JSONFiles + fileJson;
+                    assignment.JSONFiles = temp.Replace("}{", "}, {");
+                }
+                                           
+                // create the json object of all the watermark jsons
                 JObject jsonObjects = new JObject(
                     new JProperty("files",
                     new JArray(assignment.JSONFiles)));
 
+                // finalize JSONCode
                 assignment.JSONCode = (string)JsonConvert.SerializeObject(jsonObjects);               
 
                 await _context.SaveChangesAsync();
