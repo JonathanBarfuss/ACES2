@@ -30,6 +30,7 @@
         }
     </tbody>
 </table>
+<a asp-action="Create" asp-route-courseId="@ViewBag.Id">Add Course</a>
 @if (ViewBag.IsMessage == "true")
 {
     <div class="alert alert-primary alert-dismissible hide" id="statusBox">

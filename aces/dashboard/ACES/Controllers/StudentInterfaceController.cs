@@ -97,6 +97,10 @@ namespace ACES.Controllers
         {
             if (ModelState.IsValid)
             {
+                if (course.IsCourseActive == null)
+                {
+                    course.IsCourseActive = true;
+                }                
                 _context.Add(course);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
